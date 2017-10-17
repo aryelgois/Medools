@@ -34,6 +34,8 @@ abstract class Person extends MedooWrapper\DatabaseObject
         if ($person = $this->database->get(static::DATABASE_TABLE, '*', $where)) {
             $this->data = $person;
             $this->valid = true;
+        } else {
+            $this->valid = false;
         }
     }
 
