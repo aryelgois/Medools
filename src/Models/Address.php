@@ -23,7 +23,7 @@ use aryelgois\MedooWrapper;
  */
 abstract class Address extends MedooWrapper\DatabaseObject
 {
-    /**
+    /*
      * This class does not define the const DATABASE_TABLE because it uses more
      * than one table
      */
