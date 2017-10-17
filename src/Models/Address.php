@@ -29,30 +29,37 @@ abstract class Address extends MedooWrapper\DatabaseObject
      */
 
     /**
-     * Rows fetched from Counties
+     * Rows fetched from `counties`
      *
      * @const string[]
      */
     const ROWS_COUNTY = ['id', 'state', 'name'];
 
     /**
-     * Rows fetched from States
+     * Rows fetched from `states`
      *
      * @const string[]
      */
     const ROWS_STATE = ['id', 'country', 'code', 'name'];
 
     /**
-     * Rows fetched from Countries
+     * Rows fetched from `countries`
      *
      * @const string[]
      */
-    const ROWS_COUNTRY = ['id', 'code_a2', 'code_a3', 'code_number', 'name_en', 'name_local'];
+    const ROWS_COUNTRY = [
+        'id',
+        'code_a2',
+        'code_a3',
+        'code_number',
+        'name_en',
+        'name_local'
+    ];
 
     /**
      * Creates a new Address object
      *
-     * @param mixed[] $where_county Medoo where clause for `counties` table
+     * @param mixed[] $where_county Medoo where clause for `counties`
      */
     public function __construct($where_county)
     {
