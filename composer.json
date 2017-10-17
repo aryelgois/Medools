@@ -1,0 +1,21 @@
+{
+    "name": "aryelgois/medoo-wrapper",
+    "description": "Wrapper on catfan/medoo",
+    "keywords": ["database", "Medoo"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aryel Mota Góis",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "catfan/medoo": "^1.4"
+    },
+	"autoload": {
+		"psr-4": {
+			"aryelgois\\MedooWrapper\\": "src/"
+		}
+	}
+}
