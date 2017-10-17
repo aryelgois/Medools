@@ -19,11 +19,20 @@ use Medoo\Medoo;
 abstract class DatabaseObject
 {
     /**
-     * Medoo object
+     * Database table the object is from
+     *
+     * Defined by children
+     *
+     * @const string
+     */
+    const DATABASE_TABLE = '';
+
+    /**
+     * Database connection in a Medoo object
      *
      * @var Medoo\Medoo
      */
-    protected $medoo;
+    protected $database;
 
     /**
      * Used by children classes to keep fetched data
@@ -45,7 +54,7 @@ abstract class DatabaseObject
     public function __construct()
     {
         $options = static::loadConfig();
-        $this->medoo = new Medoo($options);
+        $this->database = new Medoo($options);
     }
 
     /**

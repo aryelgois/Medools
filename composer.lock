@@ -4,8 +4,47 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5eca58e607864ae329d479e76c030eb0",
+    "content-hash": "9c7988e8b51ef613c521a7f15da95477",
     "packages": [
+        {
+            "name": "aryelgois/utils",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aryelgois/utils.git",
+                "reference": "1a963b42242d885180778f27108ac44f990421fc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aryelgois/utils/zipball/1a963b42242d885180778f27108ac44f990421fc",
+                "reference": "1a963b42242d885180778f27108ac44f990421fc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "aryelgois\\Utils\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aryel Mota Góis",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Useful methods for not repeating myself",
+            "keywords": [
+                "utils"
+            ],
+            "time": "2017-10-17T16:18:22+00:00"
+        },
         {
             "name": "catfan/medoo",
             "version": "v1.4.5",
@@ -69,7 +108,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "aryelgois/utils": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

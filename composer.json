@@ -11,6 +11,7 @@
     ],
     "require": {
         "php": "^7.0",
+        "aryelgois/utils": "dev-master",
         "catfan/medoo": "^1.4"
     },
 	"autoload": {
