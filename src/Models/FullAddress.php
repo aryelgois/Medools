@@ -27,7 +27,7 @@ abstract class FullAddress extends MedooWrapper\DatabaseObject
     const DATABASE_TABLE = 'full_addresses';
 
     /**
-     * Rows fetched from `full_address`
+     * Rows fetched from `full_addresses`
      *
      * @const string[]
      */
