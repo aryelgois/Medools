@@ -1,6 +1,6 @@
 {
     "name": "aryelgois/medools",
-    "description": "Wrapper on catfan/medoo",
+    "description": "Wrapper on catfan/Medoo",
     "keywords": ["database", "Medoo"],
     "license": "MIT",
     "authors": [
