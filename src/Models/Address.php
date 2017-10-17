@@ -29,6 +29,27 @@ abstract class Address extends MedooWrapper\DatabaseObject
      */
 
     /**
+     * Rows fetched from Counties
+     *
+     * @const string[]
+     */
+    const ROWS_COUNTY = ['id', 'state', 'name'];
+
+    /**
+     * Rows fetched from States
+     *
+     * @const string[]
+     */
+    const ROWS_STATE = ['id', 'country', 'code', 'name'];
+
+    /**
+     * Rows fetched from Countries
+     *
+     * @const string[]
+     */
+    const ROWS_COUNTRY = ['id', 'code_a2', 'code_a3', 'code_number', 'name_en', 'name_local'];
+
+    /**
      * Creates a new Address object
      *
      * @param mixed[] $where_county Medoo where clause for `counties` table
@@ -91,23 +112,28 @@ abstract class Address extends MedooWrapper\DatabaseObject
      */
     protected function loadAddress($where_county)
     {
-        $rows_county = ['id', 'state', 'name'];
-        $county = $this->database->get('counties', $rows_county, $where_county);
+        $county = $this->database->get(
+            'counties',
+            self::ROWS_COUNTY,
+            $where_county
+        );
 
-        $rows_state = ['country', 'code', 'name'];
-        $where_state = ['id' => $county['state']];
-        $state = $this->database->get('states', $rows_state, $where_state);
+        $state = $this->database->get(
+            'states',
+            self::ROWS_STATE,
+            ['id' => $county['state']]
+        );
 
-        $rows_country = ['code_a2', 'code_a3', 'code_number', 'name_en', 'name_local'];
-        $where_country = ['id' => $state['country']];
-        $country = $this->database->get('countries', $rows_country, $where_country);
+        $country = $this->database->get(
+            'countries',
+            self::ROWS_COUNTRY,
+            ['id' => $state['country']]
+        );
 
         if (!($county && $state && $country)) {
             return false;
         }
 
-        $state['id'] = $county['state'];
-        $country['id'] = $state['country'];
         unset($county['state'], $state['country']);
 
         return [
