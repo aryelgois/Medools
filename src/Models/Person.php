@@ -23,6 +23,13 @@ abstract class Person extends MedooWrapper\DatabaseObject
     const DATABASE_TABLE = 'people';
 
     /**
+     * Rows fetched from `people`
+     *
+     * @const string[]
+     */
+    const ROWS_PERSON = ['id', 'name', 'document', 'birthday', 'update'];
+
+    /**
      * Creates a new Person object
      *
      * @param mixed[] $where Medoo where clause
@@ -31,7 +38,13 @@ abstract class Person extends MedooWrapper\DatabaseObject
     {
         parent::__construct();
 
-        if ($person = $this->database->get(static::DATABASE_TABLE, '*', $where)) {
+        $person = $this->database->get(
+            static::DATABASE_TABLE,
+            static::ROWS_PERSON,
+            $where
+        );
+
+        if ($person) {
             $this->data = $person;
             $this->valid = true;
         } else {
