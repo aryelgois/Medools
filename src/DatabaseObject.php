@@ -1,4 +1,9 @@
 <?php
+/**
+ * This Software is part of aryelgois\MedooWrapper and is provided "as is".
+ *
+ * @see LICENSE
+ */
 
 namespace aryelgois\MedooWrapper;
 
