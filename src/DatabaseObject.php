@@ -88,7 +88,7 @@ abstract class DatabaseObject
     /**
      * Returns object's Id
      *
-     * @return boolean If object was created successfuly or not
+     * @return integer If object was created successfuly and has an Id
      * @return null    If Id is not found
      */
     public function getId()
