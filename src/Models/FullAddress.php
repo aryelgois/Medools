@@ -1,13 +1,13 @@
 <?php
 /**
- * This Software is part of aryelgois\MedooWrapper and is provided "as is".
+ * This Software is part of aryelgois\Medools and is provided "as is".
  *
  * @see LICENSE
  */
 
-namespace aryelgois\MedooWrapper\Models;
+namespace aryelgois\Medools\Models;
 
-use aryelgois\MedooWrapper;
+use aryelgois\Medools;
 
 /**
  * A Full Address object to reference a specific place in the world
@@ -22,7 +22,7 @@ use aryelgois\MedooWrapper;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class FullAddress extends MedooWrapper\DatabaseObject
+abstract class FullAddress extends Medools\DatabaseObject
 {
     const DATABASE_TABLE = 'full_addresses';
 

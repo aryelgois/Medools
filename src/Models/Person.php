@@ -1,14 +1,14 @@
 <?php
 /**
- * This Software is part of aryelgois\MedooWrapper and is provided "as is".
+ * This Software is part of aryelgois\Medools and is provided "as is".
  *
  * @see LICENSE
  */
 
-namespace aryelgois\MedooWrapper\Models;
+namespace aryelgois\Medools\Models;
 
 use aryelgois\Utils;
-use aryelgois\MedooWrapper;
+use aryelgois\Medools;
 
 /**
  * A Person object defines someone in the real world. It is a basic setup and
@@ -18,7 +18,7 @@ use aryelgois\MedooWrapper;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class Person extends MedooWrapper\DatabaseObject
+abstract class Person extends Medools\DatabaseObject
 {
     const DATABASE_TABLE = 'people';
 

@@ -1,5 +1,5 @@
 {
-    "name": "aryelgois/medoo-wrapper",
+    "name": "aryelgois/medools",
     "description": "Wrapper on catfan/medoo",
     "keywords": ["database", "Medoo"],
     "license": "MIT",
@@ -16,7 +16,7 @@
     },
 	"autoload": {
 		"psr-4": {
-			"aryelgois\\MedooWrapper\\": "src/"
+			"aryelgois\\Medools\\": "src/"
 		}
 	}
 }

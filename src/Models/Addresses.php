@@ -1,13 +1,13 @@
 <?php
 /**
- * This Software is part of aryelgois\MedooWrapper and is provided "as is".
+ * This Software is part of aryelgois\Medools and is provided "as is".
  *
  * @see LICENSE
  */
 
-namespace aryelgois\MedooWrapper\Models;
+namespace aryelgois\Medools\Models;
 
-use aryelgois\MedooWrapper;
+use aryelgois\Medools;
 
 /**
  * Get every Address entry from the Database
@@ -23,7 +23,7 @@ use aryelgois\MedooWrapper;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class Addresses extends MedooWrapper\DatabaseObject
+abstract class Addresses extends Medools\DatabaseObject
 {
     /*
      * This class does not define the const DATABASE_TABLE because it uses more
