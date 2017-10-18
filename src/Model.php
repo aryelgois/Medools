@@ -82,6 +82,40 @@ abstract class Model
     }
 
     /**
+     * Creates a new entry in the Database
+     *
+     * @param mixed $data Any required data for the new entry
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function create($data = null);
+
+    /**
+     * Reads an entry from the Database into the object
+     *
+     * It MAY remove data from previous read()
+     *
+     * @param mixed[] $where \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function read($where);
+
+    /**
+     * Updates an entry in the Database with object's data
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function update();
+
+    /**
+     * Removes object's entry in the Database
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function delete();
+
+    /**
      * Returns the stored data
      *
      * @return mixed[]
