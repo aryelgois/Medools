@@ -25,6 +25,8 @@ use aryelgois\Medools;
  */
 abstract class Addresses extends Medools\Model
 {
+    const DATABASE_NAME_KEY = 'address';
+
     /*
      * This class does not define the const DATABASE_TABLE because it uses more
      * than one table

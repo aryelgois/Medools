@@ -19,6 +19,15 @@ use Medoo\Medoo;
 abstract class Model
 {
     /**
+     * Database name key in the config file
+     *
+     * Defined by children
+     *
+     * @const string
+     */
+    const DATABASE_NAME_KEY = '';
+
+    /**
      * Database table the object is from
      *
      * Defined by children
@@ -49,12 +58,11 @@ abstract class Model
     protected $valid;
 
     /**
-     * Creates a new Database object
+     * Creates a new Model object
      */
     public function __construct()
     {
-        $options = static::loadConfig();
-        $this->database = new Medoo($options);
+        $this->database = MedooFactory::getInstance(static::DATABASE_NAME_KEY);
     }
 
     /**
@@ -106,11 +114,4 @@ abstract class Model
     {
         return $this->valid;
     }
-
-    /**
-     * Load the configuration for Medoo from somewhere (a config file?)
-     *
-     * @return mixed[] The options ready to be passed to Medoo
-     */
-    abstract protected static function loadConfig();
 }

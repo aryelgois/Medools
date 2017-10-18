@@ -24,6 +24,8 @@ use aryelgois\Medools;
  */
 abstract class FullAddress extends Medools\Model
 {
+    const DATABASE_NAME_KEY = 'my_app'; // example
+    
     const DATABASE_TABLE = 'full_addresses';
 
     /**

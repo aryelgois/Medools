@@ -20,6 +20,8 @@ use aryelgois\Medools;
  */
 abstract class Person extends Medools\Model
 {
+    const DATABASE_NAME_KEY = 'my_app'; // example
+    
     const DATABASE_TABLE = 'people';
 
     /**
