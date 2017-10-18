@@ -21,7 +21,7 @@ use aryelgois\Medools;
 abstract class Person extends Medools\Model
 {
     const DATABASE_NAME_KEY = 'my_app'; // example
-    
+
     const DATABASE_TABLE = 'people';
 
     /**
@@ -32,13 +32,17 @@ abstract class Person extends Medools\Model
     const ROWS_PERSON = ['id', 'name', 'document', 'birthday', 'update'];
 
     /**
-     * Creates a new Person object
+     * Reads a Person data from the Database
      *
-     * @param mixed[] $where Medoo where clause
+     * @param mixed[] $where \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
      */
-    public function __construct($where)
+    public function read($where)
     {
-        parent::__construct();
+        $this->data = null;
+        $this->valid = false;
+        $this->changes = null;
 
         $person = $this->database->get(
             static::DATABASE_TABLE,
@@ -49,9 +53,9 @@ abstract class Person extends Medools\Model
         if ($person) {
             $this->data = $person;
             $this->valid = true;
-        } else {
-            $this->valid = false;
         }
+
+        return $this->valid;
     }
 
     /**
