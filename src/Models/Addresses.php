@@ -38,7 +38,21 @@ abstract class Addresses extends Medools\Model
     public function __construct()
     {
         parent::__construct();
-        $this->data = [];
+        $this->reset();
+    }
+
+    /**
+     * Fulfills parent class requirement about this method
+     *
+     * @param mixed $where Unused
+     *
+     * @throws BadMethodCallException
+     */
+    public function read($where)
+    {
+        $msg = 'Invalid method. Use readCountries(), readStates() or '
+             . 'readCounties() instead';
+        throw new \BadMethodCallException($msg);
     }
 
     /**
@@ -48,7 +62,7 @@ abstract class Addresses extends Medools\Model
      *
      * @return array[] With fetched rows
      */
-    public function loadCountries($reload = false)
+    public function readCountries($reload = false)
     {
         if ($reload || !isset($this->data['countries'])) {
             $this->data['countries'] = $this->database->select(
@@ -67,7 +81,7 @@ abstract class Addresses extends Medools\Model
      *
      * @return array[] With fetched rows
      */
-    public function loadStates($country_id, $reload = false)
+    public function readStates($country_id, $reload = false)
     {
         if ($reload || !isset($this->data['states'][$country_id])) {
             $this->data['states'][$country_id] = $this->database->select(
@@ -87,7 +101,7 @@ abstract class Addresses extends Medools\Model
      *
      * @return array[] With fetched rows
      */
-    public function loadCounties($state_id, $reload = false)
+    public function readCounties($state_id, $reload = false)
     {
         if ($reload || !isset($this->data['counties'][$state_id])) {
             $this->data['counties'][$state_id] = $this->database->select(
@@ -98,4 +112,12 @@ abstract class Addresses extends Medools\Model
         }
         return $this->data['counties'][$state_id];
     }
+
+   /**
+    * Clears Addresses cache
+    */
+   protected function reset()
+   {
+       $this->data = [];
+   }
 }
