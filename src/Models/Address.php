@@ -59,20 +59,24 @@ abstract class Address extends Medools\Model
     ];
 
     /**
-     * Creates a new Address object
+     * Reads an Address from the Database
      *
-     * @param mixed[] $where_county Medoo where clause for `counties`
+     * @param mixed[] $where \Medoo\Medoo where clause for `counties`
+     *
+     * @return boolean For success or failure
      */
-    public function __construct($where_county)
+    public function read($where)
     {
-        parent::__construct();
+        $this->reset();
 
-        if ($address = $this->loadAddress($where_county)) {
+        if ($address = $this->readAddress($where)) {
             $this->data = $address;
             $this->valid = true;
         } else {
             $this->valid = false;
         }
+
+        return $this->valid;
     }
 
     /**
@@ -107,7 +111,7 @@ abstract class Address extends Medools\Model
     }
 
     /**
-     * Fetches an Address from the Database
+     * Reads an Address data from the Database
      *
      * It will ask for the county, state and country entries, based on the
      * county index, because it's table is in the tip of the tables chain in the
@@ -119,7 +123,7 @@ abstract class Address extends Medools\Model
      * @return array[] With fetched data
      * @return false   On failure
      */
-    protected function loadAddress($where_county)
+    protected function readAddress($where_county)
     {
         $county = $this->database->get(
             'counties',
