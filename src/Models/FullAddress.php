@@ -25,7 +25,7 @@ use aryelgois\Medools;
 abstract class FullAddress extends Medools\Model
 {
     const DATABASE_NAME_KEY = 'my_app'; // example
-    
+
     const DATABASE_TABLE = 'full_addresses';
 
     /**
@@ -45,13 +45,15 @@ abstract class FullAddress extends Medools\Model
     ];
 
     /**
-     * Creates a new FullAddress object
+     * Reads a FullAddress data from the Database
      *
-     * @param mixed[] $where Medoo where clause
+     * @param mixed[] $where \Medoo\Medoo where clause for `counties`
+     *
+     * @return boolean For success or failure
      */
-    public function __construct($where)
+    public function read($where)
     {
-        parent::__construct();
+        $this->reset();
 
         $full_address = $this->database->get(
             static::DATABASE_TABLE,
@@ -64,7 +66,8 @@ abstract class FullAddress extends Medools\Model
             $address_class = array_slice(explode('\\', static::class), 0, -1);
             $address_class = implode('\\', $address_class) . '\Address';
 
-            $address = new $address_class(['id' => $full_address['county']]);
+            $address = new $address_class();
+            $address->read(['id' => $full_address['county']]);
             unset($full_address['county']);
 
             if ($address->isValid()) {
@@ -73,5 +76,6 @@ abstract class FullAddress extends Medools\Model
                 $this->valid = true;
             }
         }
+        return $this->valid;
     }
 }
