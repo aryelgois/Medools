@@ -14,7 +14,7 @@ use Medoo\Medoo;
  *
  * @author Aryel Mota Góis
  * @license MIT
- * @link https://www.github.com/aryelgois/medoo-wrapper
+ * @link https://www.github.com/aryelgois/Medools
  */
 abstract class Model
 {
