@@ -7,8 +7,6 @@
 
 namespace aryelgois\Medools;
 
-use Medoo\Medoo;
-
 /**
  * Wrapper on catfan/Medoo
  *
@@ -39,7 +37,7 @@ abstract class Model
     /**
      * Database connection in a Medoo object
      *
-     * @var Medoo\Medoo
+     * @var \Medoo\Medoo
      */
     protected $database;
 
