@@ -146,4 +146,12 @@ abstract class Model
     {
         return $this->valid;
     }
+
+    /**
+     * Clears object data
+     */
+    protected function reset()
+    {
+        $this->data = $this->valid = null;
+    }
 }
