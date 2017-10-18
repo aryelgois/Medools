@@ -18,7 +18,7 @@ use aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class Person extends Medools\DatabaseObject
+abstract class Person extends Medools\Model
 {
     const DATABASE_TABLE = 'people';
 

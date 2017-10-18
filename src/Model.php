@@ -16,7 +16,7 @@ use Medoo\Medoo;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class DatabaseObject
+abstract class Model
 {
     /**
      * Database table the object is from

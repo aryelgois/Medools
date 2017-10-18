@@ -23,7 +23,7 @@ use aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class Addresses extends Medools\DatabaseObject
+abstract class Addresses extends Medools\Model
 {
     /*
      * This class does not define the const DATABASE_TABLE because it uses more

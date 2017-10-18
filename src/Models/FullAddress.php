@@ -22,7 +22,7 @@ use aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/medoo-wrapper
  */
-abstract class FullAddress extends Medools\DatabaseObject
+abstract class FullAddress extends Medools\Model
 {
     const DATABASE_TABLE = 'full_addresses';
 
