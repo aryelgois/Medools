@@ -10,7 +10,7 @@ namespace aryelgois\Medools;
 use Medoo\Medoo;
 
 /**
- * Wrapper on catfan/medoo
+ * Wrapper on catfan/Medoo
  *
  * @author Aryel Mota Góis
  * @license MIT

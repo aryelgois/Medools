@@ -55,7 +55,10 @@ class MedooFactory
     /**
      * Loads the Medools config file in a spefic file
      *
-     * You must call this method before using getInstance().
+     * NOTES:
+     * - You must call this method before using getInstance().
+     * - If you want to store a Model in the SESSION, you need to call this
+     *   method before session_start().
      *
      * @see config/example.php
      *
