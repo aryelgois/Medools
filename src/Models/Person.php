@@ -40,9 +40,7 @@ abstract class Person extends Medools\Model
      */
     public function read($where)
     {
-        $this->data = null;
-        $this->valid = false;
-        $this->changes = null;
+        $this->reset();
 
         $person = $this->database->get(
             static::DATABASE_TABLE,
@@ -50,11 +48,11 @@ abstract class Person extends Medools\Model
             $where
         );
 
+        $this->valid = false;
         if ($person) {
             $this->data = $person;
             $this->valid = true;
         }
-
         return $this->valid;
     }
 
