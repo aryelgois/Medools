@@ -21,8 +21,11 @@ use aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-abstract class Address extends Medools\Model
+class Address extends Medools\Model
 {
+    /* This model is supposed to be read-only */
+    use Medools\ModelReadOnly;
+
     const DATABASE_NAME_KEY = 'address';
 
     /*
