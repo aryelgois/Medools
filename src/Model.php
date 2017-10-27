@@ -16,52 +16,45 @@ namespace aryelgois\Medools;
  */
 abstract class Model
 {
+    /*
+     * Children data
+     * =========================================================================
+     */
+
     /**
      * Database name key in the config file
-     *
-     * Defined by children
      *
      * @const string
      */
     const DATABASE_NAME_KEY = '';
 
     /**
-     * Database table the object is from
+     * Tables the model expects to exist
      *
-     * Defined by children
+     * Each item is 'table' => 'columns'[]
      *
-     * @const string
+     * @const array[]
      */
-    const DATABASE_TABLE = '';
+    const TABLES = [];
 
     /**
-     * Database connection in a Medoo object
-     *
-     * @var \Medoo\Medoo
-     */
-    protected $database;
-
-    /**
-     * Used by children classes to keep fetched data
+     * Keeps fetched data
      *
      * @var mixed[]
      */
     protected $data;
 
     /**
-     * Used by children classes to tell if they are valid
+     * Tells if they are valid
      *
      * @var boolean
      */
     protected $valid;
 
-    /**
-     * Creates a new Model object
+    /*
+     * Basic methods
+     * =========================================================================
      */
-    public function __construct()
-    {
-        $this->database = MedooFactory::getInstance(static::DATABASE_NAME_KEY);
-    }
 
     /**
      * Returns which properties should be serialized
@@ -74,46 +67,14 @@ abstract class Model
     }
 
     /**
-     * Recreates Medoo object after unserialization
+     * Returns a database connection
+     *
+     * @return \Medoo\Medoo
      */
-    public function __wakeup()
+    public static function getDatabase()
     {
-        self::__construct();
+        return MedooFactory::getInstance(static::DATABASE_NAME_KEY);
     }
-
-    /**
-     * Creates a new entry in the Database
-     *
-     * @param mixed $data Any required data for the new entry
-     *
-     * @return boolean For success or failure
-     */
-    abstract public function create($data = null);
-
-    /**
-     * Reads an entry from the Database into the object
-     *
-     * It MAY remove data from previous read()
-     *
-     * @param mixed[] $where \Medoo\Medoo where clause
-     *
-     * @return boolean For success or failure
-     */
-    abstract public function read($where);
-
-    /**
-     * Updates an entry in the Database with object's data
-     *
-     * @return boolean For success or failure
-     */
-    abstract public function update();
-
-    /**
-     * Removes object's entry in the Database
-     *
-     * @return boolean For success or failure
-     */
-    abstract public function delete();
 
     /**
      * Returns the stored data
@@ -126,9 +87,9 @@ abstract class Model
     }
 
     /**
-     * Returns object's Id
+     * Returns model's Id
      *
-     * @return integer If object was created successfuly and has an Id
+     * @return integer If model has an Id
      * @return null    If Id is not found
      */
     public function getId()
@@ -137,9 +98,9 @@ abstract class Model
     }
 
     /**
-     * Tells if the object is valid
+     * Tells if the model is valid
      *
-     * @return boolean If object was created successfuly or not
+     * @return boolean If model has valid data
      * @return null    If validation is not implemented
      */
     public function isValid()
@@ -148,10 +109,64 @@ abstract class Model
     }
 
     /**
-     * Clears object data
+     * Clears model data
      */
     protected function reset()
     {
         $this->data = $this->valid = null;
     }
+
+    /**
+     * Reads an entry from the Database
+     *
+     * @param string  $table Key for TABLES
+     * @param mixed[] $where \Medoo\Medoo where clause
+     *
+     * @return mixed[] Fetched data
+     */
+    protected function readEntry($table, $where)
+    {
+        $database = $this->getDatabase();
+        return $database->get($table, static::TABLES[$table], $where);
+    }
+
+    /*
+     * CRUD methods
+     * =========================================================================
+     */
+
+    /**
+     * Creates a new entry in the Database
+     *
+     * @param mixed[] $data Any required data for the new entry. Keys should
+     *                      match COLUMNS_CREATE values
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function create($data = null);
+
+    /**
+     * Reads from Database into the model
+     *
+     * It MAY remove data from previous read()
+     *
+     * @param mixed[] $where \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function read($where);
+
+    /**
+     * Updates an entry in the Database with model's data
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function update();
+
+    /**
+     * Removes model's entry in the Database
+     *
+     * @return boolean For success or failure
+     */
+    abstract public function delete();
 }
