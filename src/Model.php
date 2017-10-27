@@ -139,7 +139,7 @@ abstract class Model
      * Creates a new entry in the Database
      *
      * @param mixed[] $data Any required data for the new entry. Keys should
-     *                      match COLUMNS_CREATE values
+     *                      match values in a TABLES table
      *
      * @return boolean For success or failure
      */
@@ -164,7 +164,7 @@ abstract class Model
     abstract public function update();
 
     /**
-     * Removes model's entry in the Database
+     * Removes model's entry from the Database
      *
      * @return boolean For success or failure
      */

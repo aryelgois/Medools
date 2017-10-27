@@ -10,7 +10,7 @@ namespace aryelgois\Medools;
 use Medoo\Medoo;
 
 /**
- * A Multiton creator of Medoo\Medoo objects
+ * A Multiton creator of \Medoo\Medoo objects
  *
  * It avoids recreate a Medoo for the same database, while implements an
  * abstraction for the Medoo configuration
@@ -34,9 +34,9 @@ class MedooFactory
     private static $config;
 
     /**
-     * Store instances of Medoo\Medoo
+     * Store instances of \Medoo\Medoo
      *
-     * @var Medoo\Medoo[]
+     * @var \Medoo\Medoo[]
      */
     private static $instances = [];
 
@@ -55,10 +55,8 @@ class MedooFactory
     /**
      * Loads the Medools config file in a spefic file
      *
-     * NOTES:
-     * - You must call this method before using getInstance().
-     * - If you want to store a Model in the SESSION, you need to call this
-     *   method before session_start().
+     * NOTE:
+     * - You must call this method before using getInstance()
      *
      * @see config/example.php
      *
@@ -70,7 +68,7 @@ class MedooFactory
     }
 
     /**
-     * Returns an instance of Medoo\Medoo connected to a specific database
+     * Returns an instance of \Medoo\Medoo connected to a specific database
      *
      * You can use the anonymous mode to get a fresh instance for advanced Medoo
      * commands, already connected to one of your Databases
@@ -78,7 +76,7 @@ class MedooFactory
      * @param string  $database  Key for a database_name in the config file
      * @param boolean $anonymous If an anonymous instance should be created
      *
-     * @return Medoo\Medoo
+     * @return \Medoo\Medoo
      *
      * @throws \BadMethodCallException If called before loadConfig()
      * @throws \RuntimeException       If database is not in config file

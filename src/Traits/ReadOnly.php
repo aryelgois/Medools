@@ -1,9 +1,16 @@
 <?php
+/**
+ * This Software is part of aryelgois\Medools and is provided "as is".
+ *
+ * @see LICENSE
+ */
 
 namespace aryelgois\Medools\Traits;
 
 /**
  * Fills some Model's abstract methods, so it behaves as read-only
+ *
+ * @todo if strict mode is active, these methods should throw an error
  *
  * @author Aryel Mota Góis
  * @license MIT
