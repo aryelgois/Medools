@@ -25,11 +25,11 @@ abstract class Person extends Medools\Model
     const DATABASE_TABLE = 'people';
 
     /**
-     * Rows fetched from `people`
+     * Columns fetched from `people`
      *
      * @const string[]
      */
-    const ROWS_PERSON = ['id', 'name', 'document', 'birthday', 'update'];
+    const COLUMNS_PERSON = ['id', 'name', 'document', 'birthday', 'update'];
 
     /**
      * Reads a Person data from the Database
@@ -44,7 +44,7 @@ abstract class Person extends Medools\Model
 
         $person = $this->database->get(
             static::DATABASE_TABLE,
-            static::ROWS_PERSON,
+            static::COLUMNS_PERSON,
             $where
         );
 

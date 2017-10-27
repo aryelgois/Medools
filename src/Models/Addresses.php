@@ -63,14 +63,14 @@ class Addresses extends Medools\Model
      *
      * @param boolean $reload If should reload the cache
      *
-     * @return array[] With fetched rows
+     * @return array[] With fetched columns
      */
     public function readCountries($reload = false)
     {
         if ($reload || !isset($this->data['countries'])) {
             $this->data['countries'] = $this->database->select(
                 'countries',
-                Address::ROWS_COUNTRY
+                Address::COLUMNS_COUNTRY
             );
         }
         return $this->data['countries'];
@@ -82,14 +82,14 @@ class Addresses extends Medools\Model
      * @param integer $country_id Country Id to reduce the query
      * @param boolean $reload     If should reload the cache
      *
-     * @return array[] With fetched rows
+     * @return array[] With fetched columns
      */
     public function readStates($country_id, $reload = false)
     {
         if ($reload || !isset($this->data['states'][$country_id])) {
             $this->data['states'][$country_id] = $this->database->select(
                 'states',
-                Address::ROWS_STATE,
+                Address::COLUMNS_STATE,
                 ['country' => $country_id]
             );
         }
@@ -102,14 +102,14 @@ class Addresses extends Medools\Model
      * @param integer $state_id State Id to reduce the query
      * @param boolean $reload   If should reload the cache
      *
-     * @return array[] With fetched rows
+     * @return array[] With fetched columns
      */
     public function readCounties($state_id, $reload = false)
     {
         if ($reload || !isset($this->data['counties'][$state_id])) {
             $this->data['counties'][$state_id] = $this->database->select(
                 'counties',
-                Address::ROWS_COUNTY,
+                Address::COLUMNS_COUNTY,
                 ['state' => $state_id]
             );
         }

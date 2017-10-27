@@ -34,25 +34,25 @@ class Address extends Medools\Model
      */
 
     /**
-     * Rows fetched from `counties`
+     * Columns fetched from `counties`
      *
      * @const string[]
      */
-    const ROWS_COUNTY = ['id', 'state', 'name'];
+    const COLUMNS_COUNTY = ['id', 'state', 'name'];
 
     /**
-     * Rows fetched from `states`
+     * Columns fetched from `states`
      *
      * @const string[]
      */
-    const ROWS_STATE = ['id', 'country', 'code', 'name'];
+    const COLUMNS_STATE = ['id', 'country', 'code', 'name'];
 
     /**
-     * Rows fetched from `countries`
+     * Columns fetched from `countries`
      *
      * @const string[]
      */
-    const ROWS_COUNTRY = [
+    const COLUMNS_COUNTRY = [
         'id',
         'code_a2',
         'code_a3',
@@ -130,19 +130,19 @@ class Address extends Medools\Model
     {
         $county = $this->database->get(
             'counties',
-            self::ROWS_COUNTY,
+            self::COLUMNS_COUNTY,
             $where_county
         );
 
         $state = $this->database->get(
             'states',
-            self::ROWS_STATE,
+            self::COLUMNS_STATE,
             ['id' => $county['state']]
         );
 
         $country = $this->database->get(
             'countries',
-            self::ROWS_COUNTRY,
+            self::COLUMNS_COUNTRY,
             ['id' => $state['country']]
         );
 

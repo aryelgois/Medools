@@ -29,11 +29,11 @@ abstract class FullAddress extends Medools\Model
     const DATABASE_TABLE = 'full_addresses';
 
     /**
-     * Rows fetched from `full_addresses`
+     * Columns fetched from `full_addresses`
      *
      * @const string[]
      */
-    const ROWS_FULL_ADDRESS = [
+    const COLUMNS_FULL_ADDRESS = [
         'id',
         'county',
         'neighborhood',
@@ -57,7 +57,7 @@ abstract class FullAddress extends Medools\Model
 
         $full_address = $this->database->get(
             static::DATABASE_TABLE,
-            static::ROWS_FULL_ADDRESS,
+            static::COLUMNS_FULL_ADDRESS,
             $where
         );
 
