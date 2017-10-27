@@ -1,6 +1,6 @@
 <?php
 
-namespace aryelgois\Medools;
+namespace aryelgois\Medools\Traits;
 
 /**
  * Fills some Model's abstract methods, so it behaves as read-only
@@ -9,7 +9,7 @@ namespace aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-trait ModelReadOnly
+trait ReadOnly
 {
     /**
      * Ignores create
