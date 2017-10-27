@@ -11,7 +11,7 @@ use aryelgois\Utils;
 use aryelgois\Medools;
 
 /**
- * A Person object defines someone in the real world. It is a basic setup and
+ * A Person model defines someone in the real world. It is a basic setup and
  * you must to extend for your use case.
  *
  * @author Aryel Mota Góis
@@ -22,17 +22,12 @@ abstract class Person extends Medools\Model
 {
     const DATABASE_NAME_KEY = 'my_app'; // example
 
-    const DATABASE_TABLE = 'people';
+    const TABLES = [
+        'people' => ['id', 'name', 'document'],
+    ];
 
     /**
-     * Columns fetched from `people`
-     *
-     * @const string[]
-     */
-    const COLUMNS_PERSON = ['id', 'name', 'document', 'birthday', 'update'];
-
-    /**
-     * Reads a Person data from the Database
+     * Reads Person data from the Database
      *
      * @param mixed[] $where \Medoo\Medoo where clause
      *
@@ -41,18 +36,13 @@ abstract class Person extends Medools\Model
     public function read($where)
     {
         $this->reset();
-
-        $person = $this->database->get(
-            static::DATABASE_TABLE,
-            static::COLUMNS_PERSON,
-            $where
-        );
-
         $this->valid = false;
-        if ($person) {
+
+        if ($person = $this->readEntry('people', $where)) {
             $this->data = $person;
             $this->valid = true;
         }
+
         return $this->valid;
     }
 

@@ -31,18 +31,8 @@ class Addresses extends Medools\Model
     const DATABASE_NAME_KEY = 'address';
 
     /*
-     * This class does not define the const DATABASE_TABLE because it uses more
-     * than one table
+     * This class does not define the const TABLES because it uses Address'
      */
-
-    /**
-     * Creates a new Addresses object
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->reset();
-    }
 
     /**
      * Fulfills parent class requirement about this method
@@ -59,7 +49,7 @@ class Addresses extends Medools\Model
     }
 
     /**
-     * Fetches all countries from the Database and caches it in the object
+     * Fetches every Country from the Database and caches it in the model
      *
      * @param boolean $reload If should reload the cache
      *
@@ -67,17 +57,20 @@ class Addresses extends Medools\Model
      */
     public function readCountries($reload = false)
     {
+        $database = $this->getDatabase();
+
         if ($reload || !isset($this->data['countries'])) {
-            $this->data['countries'] = $this->database->select(
+            $this->data['countries'] = $database->select(
                 'countries',
-                Address::COLUMNS_COUNTRY
+                Address::TABLES['countries']
             );
         }
+
         return $this->data['countries'];
     }
 
     /**
-     * Fetches all countries from a Country and caches it in the object
+     * Fetches every State from a Country and caches it in the model
      *
      * @param integer $country_id Country Id to reduce the query
      * @param boolean $reload     If should reload the cache
@@ -86,18 +79,21 @@ class Addresses extends Medools\Model
      */
     public function readStates($country_id, $reload = false)
     {
+        $database = $this->getDatabase();
+
         if ($reload || !isset($this->data['states'][$country_id])) {
-            $this->data['states'][$country_id] = $this->database->select(
+            $this->data['states'][$country_id] = $database->select(
                 'states',
-                Address::COLUMNS_STATE,
+                Address::TABLES['states'],
                 ['country' => $country_id]
             );
         }
+
         return $this->data['states'][$country_id];
     }
 
     /**
-     * Fetches all counties from a State and caches it in the object
+     * Fetches every County from a State and caches it in the model
      *
      * @param integer $state_id State Id to reduce the query
      * @param boolean $reload   If should reload the cache
@@ -106,18 +102,21 @@ class Addresses extends Medools\Model
      */
     public function readCounties($state_id, $reload = false)
     {
+        $database = $this->getDatabase();
+
         if ($reload || !isset($this->data['counties'][$state_id])) {
-            $this->data['counties'][$state_id] = $this->database->select(
+            $this->data['counties'][$state_id] = $database->select(
                 'counties',
-                Address::COLUMNS_COUNTY,
+                Address::TABLES['counties'],
                 ['state' => $state_id]
             );
         }
+
         return $this->data['counties'][$state_id];
     }
 
    /**
-    * Clears Addresses cache
+    * Clears model cache
     */
    protected function reset()
    {

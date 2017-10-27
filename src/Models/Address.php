@@ -10,7 +10,7 @@ namespace aryelgois\Medools\Models;
 use aryelgois\Medools;
 
 /**
- * An Address object to reference a place in the world
+ * An Address model to reference a place in the world
  *
  * It is built on top of aryelgois\databases\Address, which means it expects
  * you have a database following that scheme in your server.
@@ -28,67 +28,25 @@ class Address extends Medools\Model
 
     const DATABASE_NAME_KEY = 'address';
 
-    /*
-     * This class does not define the const DATABASE_TABLE because it uses more
-     * than one table
-     */
-
-    /**
-     * Columns fetched from `counties`
-     *
-     * @const string[]
-     */
-    const COLUMNS_COUNTY = ['id', 'state', 'name'];
-
-    /**
-     * Columns fetched from `states`
-     *
-     * @const string[]
-     */
-    const COLUMNS_STATE = ['id', 'country', 'code', 'name'];
-
-    /**
-     * Columns fetched from `countries`
-     *
-     * @const string[]
-     */
-    const COLUMNS_COUNTRY = [
-        'id',
-        'code_a2',
-        'code_a3',
-        'code_number',
-        'name_en',
-        'name_local'
+    const TABLES = [
+        'counties' => ['id', 'state', 'name'],
+        'states' => ['id', 'country', 'code', 'name'],
+        'countries' => [
+            'id',
+            'code_a2',
+            'code_a3',
+            'code_number',
+            'name_en',
+            'name_local'
+        ],
     ];
-
-    /**
-     * Reads an Address from the Database
-     *
-     * @param mixed[] $where \Medoo\Medoo where clause for `counties`
-     *
-     * @return boolean For success or failure
-     */
-    public function read($where)
-    {
-        $this->reset();
-
-        if ($address = $this->readAddress($where)) {
-            $this->data = $address;
-            $this->valid = true;
-        } else {
-            $this->valid = false;
-        }
-
-        return $this->valid;
-    }
 
     /**
      * Returns Address' Id
      *
      * @param string $from Specifies where is to get the id from
      *
-     * @return integer[] If object was created successfuly
-     *                   keys: 'country', 'state', 'county'
+     * @return integer[] If model is valid. keys: 'country', 'state', 'county'
      * @return integer   If the parameter matched a key
      * @return null      If any Id is not found
      */
@@ -114,37 +72,43 @@ class Address extends Medools\Model
     }
 
     /**
-     * Reads an Address data from the Database
+     * Reads an Address from the Database
+     *
+     * @param mixed[] $where \Medoo\Medoo where clause for `counties`
+     *
+     * @return boolean For success or failure
+     */
+    public function read($where)
+    {
+        $this->reset();
+        $this->valid = false;
+
+        if ($address = $this->readAddress($where)) {
+            $this->data = $address;
+            $this->valid = true;
+        }
+
+        return $this->valid;
+    }
+
+    /**
+     * Reads Address' data from the Database
      *
      * It will ask for the county, state and country entries, based on the
      * county index, because it's table is in the tip of the tables chain in the
      * Database.
      *
-     * @param mixed[] $where_county Medoo where clause for `counties` table
-     *                              Everything will be fetched from this
+     * @param mixed[] $where_county Medoo where clause for `counties`
+     *                              Everything will be fetched from this table
      *
      * @return array[] With fetched data
      * @return false   On failure
      */
     protected function readAddress($where_county)
     {
-        $county = $this->database->get(
-            'counties',
-            self::COLUMNS_COUNTY,
-            $where_county
-        );
-
-        $state = $this->database->get(
-            'states',
-            self::COLUMNS_STATE,
-            ['id' => $county['state']]
-        );
-
-        $country = $this->database->get(
-            'countries',
-            self::COLUMNS_COUNTRY,
-            ['id' => $state['country']]
-        );
+        $county  = $this->readEntry('counties',  $where_county);
+        $state   = $this->readEntry('states',    ['id' => $county['state']]);
+        $country = $this->readEntry('countries', ['id' => $state['country']]);
 
         if (!($county && $state && $country)) {
             return false;
