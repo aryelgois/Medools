@@ -8,7 +8,8 @@
 
 return [
     'databases' => [
-        'database_name_used_by_the_models' => 'database_name_in_the_server',
+    //  'database_name_used_by_the_models' => 'database_name_in_the_server',
+        'default'       => 'my_database',
     ],
     'options' => [
         // required

@@ -7,8 +7,13 @@
 
 namespace aryelgois\Medools;
 
+use aryelgois\Utils\Utils;
+
 /**
  * Wrapper on catfan/Medoo
+ *
+ * Each model class maps to one Table in the Database, and each model object
+ * maps to one row.
  *
  * @author Aryel Mota Góis
  * @license MIT
@@ -17,7 +22,7 @@ namespace aryelgois\Medools;
 abstract class Model
 {
     /*
-     * Children data
+     * Model configuration
      * =========================================================================
      */
 
@@ -26,16 +31,71 @@ abstract class Model
      *
      * @const string
      */
-    const DATABASE_NAME_KEY = '';
+    const DATABASE_NAME_KEY = 'default';
 
     /**
-     * Tables the model expects to exist
+     * Database Table the model works with
      *
-     * Each item is 'table' => 'columns'[]
+     * The recomended is to use a plural name for the table and it's singular in
+     * the model name
      *
-     * @const array[]
+     * @const string
      */
-    const TABLES = [];
+    const TABLE = '';
+
+    /**
+     * Columns the model expects to exist
+     *
+     * @const string[]
+     */
+    const COLUMNS = ['id'];
+
+    /**
+     * Primary Key column
+     *
+     * @const string|string[]
+     */
+    const PRIMARY_KEY = 'id';
+
+    /**
+     * Auto Increment column
+     *
+     * This column is ignored by update()
+     *
+     * @const string|null
+     */
+    const AUTO_INCREMENT = 'id';
+
+    /**
+     * If create(), update() and delete() are disabled
+     *
+     * @const boolean
+     */
+    const READ_ONLY = false;
+
+    /**
+     * If delete() actually removes the row or if it changes a column
+     *
+     * @const string|null Column affected by the soft delete
+     */
+    const SOFT_DELETE = null;
+
+    /**
+     * How the soft delete works
+     *
+     * Possible values:
+     * - deleted: 0 or 1
+     * - active:  1 or 0
+     * - stamp:   null or current timestamp
+     *
+     * @const string
+     */
+    const SOFT_DELETE_MODE = 'deleted';
+
+    /*
+     * Model data
+     * =========================================================================
+     */
 
     /**
      * Keeps fetched data
@@ -67,13 +127,49 @@ abstract class Model
     }
 
     /**
-     * Returns a database connection
+     * Cleans data keys, removing unwanted columns
      *
-     * @return \Medoo\Medoo
+     * @todo Ignore auto timestamp column
+     * @todo Option to tell custom ignored columns
+     *
+     * @param string[] $data Data to be cleaned
+     * @param string   $data Which method will use the result
+     *
+     * @return string[]
      */
-    public static function getDatabase()
+    protected static function dataCleanup($data)
     {
-        return MedooFactory::getInstance(static::DATABASE_NAME_KEY);
+        $whitelist = static::COLUMNS;
+        $blacklist = [static::AUTO_INCREMENT];
+
+        $data = Utils::arrayWhitelist($data, $whitelist);
+        $data = Utils::arrayBlacklist($data, $blacklist);
+        return $data;
+    }
+
+    /**
+     * Tells if the model is valid
+     *
+     * @return boolean If model has valid data
+     * @return null    If validation is not implemented or the model is empty
+     */
+    public function isValid()
+    {
+        return $this->valid;
+    }
+
+    /**
+     * Selects Current Timestamp from Database
+     *
+     * Useful to keep timezone consistent
+     *
+     * @return string
+     */
+    public function getCurrentTimestamp()
+    {
+        $database = $this->getDatabase();
+        $sql = 'SELECT CURRENT_TIMESTAMP';
+        return $database->query($sql)->fetch(\PDO::FETCH_NUM)[0];
     }
 
     /**
@@ -87,47 +183,43 @@ abstract class Model
     }
 
     /**
-     * Returns model's Id
+     * Returns a database connection
      *
-     * @return integer If model has an Id
-     * @return null    If Id is not found
+     * @return \Medoo\Medoo
      */
-    public function getId()
+    public static function getDatabase()
     {
-        return $this->data['id'] ?? null;
+        return MedooFactory::getInstance(static::DATABASE_NAME_KEY);
     }
 
     /**
-     * Tells if the model is valid
+     * Returns model's Primary Key
      *
-     * @return boolean If model has valid data
-     * @return null    If validation is not implemented
+     * @param boolean $wrap If result should be wrapped in an array
+     *                      Always true for composite primary key
+     *
+     * @return mixed   Usually it will be an integer
+     * @return mixed[] When there is a composite primary key
      */
-    public function isValid()
+    public function getPk($wrap = false)
     {
-        return $this->valid;
+        $pk = static::PRIMARY_KEY;
+        if (is_array($pk)) {
+            return Utils::arrayWhitelist($this->data, $pk);
+        }
+        $result = $this->data[$pk];
+        return ($wrap ? [$pk => $result] : $result);
     }
 
     /**
-     * Clears model data
-     */
-    protected function reset()
-    {
-        $this->data = $this->valid = null;
-    }
-
-    /**
-     * Reads an entry from the Database
+     * Cleans model data
      *
-     * @param string  $table Key for TABLES
-     * @param mixed[] $where \Medoo\Medoo where clause
-     *
-     * @return mixed[] Fetched data
+     * @param boolean $validity Value to set into $this->valid
      */
-    protected function readEntry($table, $where)
+    protected function reset($validity = null)
     {
-        $database = $this->getDatabase();
-        return $database->get($table, static::TABLES[$table], $where);
+        $this->data = null;
+        $this->valid = $validity;
     }
 
     /*
@@ -136,17 +228,42 @@ abstract class Model
      */
 
     /**
-     * Creates a new entry in the Database
+     * Creates a new row in the Table
      *
-     * @param mixed[] $data Any required data for the new entry. Keys should
-     *                      match values in a TABLES table
+     * NOTE:
+     * - You should validate the data before calling this method
+     * - Unused columns are ignored
+     *
+     * @param mixed[] $data Any required data for the new row. Keys should match
+     *                      values in COLUMNS
      *
      * @return boolean For success or failure
      */
-    abstract public function create($data = null);
+    public function create($data)
+    {
+        if (static::READ_ONLY) {
+            return false;
+        }
+
+        $this->reset(false);
+        $data = static::dataCleanup($data);
+
+        $database = $this->getDatabase();
+        $stmt = $database->insert(static::TABLE, $data);
+        if ($stmt->errorCode() == '00000') {
+            $column = static::AUTO_INCREMENT;
+            if ($column !== null) {
+                $data[$column] = $database->id();
+            }
+            $this->data = $data;
+            $this->valid = true;
+        }
+
+        return $this->valid;
+    }
 
     /**
-     * Reads from Database into the model
+     * Reads a row from Table into the model
      *
      * It MAY remove data from previous read()
      *
@@ -154,19 +271,83 @@ abstract class Model
      *
      * @return boolean For success or failure
      */
-    abstract public function read($where);
+    public function read($where)
+    {
+        $this->reset(false);
+
+        $database = $this->getDatabase();
+        $data = $database->get(static::TABLE, static::COLUMNS, $where);
+        if ($data) {
+            $this->data = $data;
+            $this->valid = true;
+        }
+
+        return $this->valid;
+    }
 
     /**
-     * Updates an entry in the Database with model's data
+     * Updates a row in the Table with model's data
+     *
+     * @param string|string[] $columns Specify which columns to update
      *
      * @return boolean For success or failure
      */
-    abstract public function update();
+    public function update($columns = [])
+    {
+        if (static::READ_ONLY) {
+            return false;
+        }
+
+        if (!is_array($columns)) {
+            $columns = [$columns];
+        }
+        $data = (empty($columns))
+            ? static::dataCleanup($this->data)
+            : Utils::arrayWhitelist($this->data, $columns);
+
+        $database = $this->getDatabase();
+        $stmt = $database->update(static::TABLE, $data, $this->getPk(true));
+        return ($stmt->errorCode() == '00000');
+    }
 
     /**
-     * Removes model's entry from the Database
+     * Removes model's row from the Table
      *
      * @return boolean For success or failure
+     *
+     * @throws \UnexpectedValueException If SOFT_DELETE_MODE is unknown
      */
-    abstract public function delete();
+    public function delete()
+    {
+        if (static::READ_ONLY) {
+            return false;
+        }
+
+        $database = $this->getDatabase();
+        $column = static::SOFT_DELETE;
+        if ($column) {
+            switch (static::SOFT_DELETE_MODE) {
+                case 'deleted':
+                    $this->data[$column] = 1;
+                    break;
+
+                case 'active':
+                    $this->data[$column] = 0;
+                    break;
+
+                case 'stamp':
+                    $this->data[$column] = $this->getCurrentTimestamp();
+                    break;
+
+                default:
+                    throw new \UnexpectedValueException('Unknown mode');
+                    break;
+            }
+            return $this->update($column);
+        } else {
+            $stmt = $database->delete(static::TABLE, $this->getPk(true));
+            $this->reset();
+            return ($stmt->rowCount() > 0);
+        }
+    }
 }
