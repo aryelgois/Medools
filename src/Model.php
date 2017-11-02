@@ -117,6 +117,20 @@ abstract class Model
      */
 
     /**
+     * Creates a new Model object
+     *
+     * @param mixed $where @see read(). If null, a fresh model is created
+     *
+     * @throws \InvalidArgumentException @see read()
+     */
+    public function __construct($where = null)
+    {
+        if ($where !== null) {
+            $this->read($where);
+        }
+    }
+
+    /**
      * Returns which properties should be serialized
      *
      * @return string[]
