@@ -98,6 +98,13 @@ abstract class Model
      */
 
     /**
+     * Changes done by set() to be saved by update()
+     *
+     * @var mixed[]
+     */
+    protected $changes = [];
+
+    /**
      * Keeps fetched data
      *
      * @var mixed[]
@@ -119,25 +126,15 @@ abstract class Model
     /**
      * Creates a new Model object
      *
-     * @param mixed $where @see read(). If null, a fresh model is created
+     * @param mixed $where @see load(). If null, a fresh model is created
      *
-     * @throws \InvalidArgumentException @see read()
+     * @throws \InvalidArgumentException @see load()
      */
     public function __construct($where = null)
     {
         if ($where !== null) {
-            $this->read($where);
+            $this->load($where);
         }
-    }
-
-    /**
-     * Returns which properties should be serialized
-     *
-     * @return string[]
-     */
-    public function __sleep()
-    {
-        return ['data', 'valid'];
     }
 
     /**
@@ -173,6 +170,23 @@ abstract class Model
     }
 
     /**
+     * Returns the stored data in a column
+     *
+     * @param string $column A known column
+     *
+     * @return mixed
+     *
+     * @throws \InvalidArgumentException If $column is unknown
+     */
+    public function get($column)
+    {
+        if (!in_array($column, static::COLUMNS)) {
+            throw new \InvalidArgumentException('Unknown column');
+        }
+        return $this->changes[$column] ?? $this->data[$column];
+    }
+
+    /**
      * Selects Current Timestamp from Database
      *
      * Useful to keep timezone consistent
@@ -193,7 +207,7 @@ abstract class Model
      */
     public function getData()
     {
-        return $this->data;
+        return array_replace($this->data, $this->changes);
     }
 
     /**
@@ -208,6 +222,9 @@ abstract class Model
 
     /**
      * Returns model's Primary Key
+     *
+     * NOTE:
+     * - It returns the data saved in Database, changes by set() are ignored
      *
      * @param boolean $wrap If result should be wrapped in an array
      *                      Always true for composite primary key
@@ -232,8 +249,36 @@ abstract class Model
      */
     protected function reset($validity = null)
     {
+        $this->changes = [];
         $this->data = null;
         $this->valid = $validity;
+    }
+
+    /**
+     * Changes the value in a column
+     *
+     * NOTE:
+     * - Changes need to be saved in the Database with save() or update($column)
+     *
+     * @param string $column A known column
+     * @param string $value  The new value
+     *
+     * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException If $column is unknown
+     */
+    public function set($column, $value)
+    {
+        if (static::READ_ONLY) {
+            return false;
+        }
+
+        if (!in_array($column, static::COLUMNS)) {
+            throw new \InvalidArgumentException('Unknown column');
+        }
+        $this->changes[$column] = $value;
+
+        return true;
     }
 
     /*
@@ -242,42 +287,57 @@ abstract class Model
      */
 
     /**
-     * Creates a new row in the Table
+     * Creates a new row in the Table or updates it with new data
      *
      * NOTE:
      * - You should validate the data before calling this method
-     * - Unused columns are ignored
-     *
-     * @param mixed[] $data Any required data for the new row. Keys should match
-     *                      values in COLUMNS
      *
      * @return boolean For success or failure
      */
-    public function create($data)
+    public function save()
     {
-        if (static::READ_ONLY) {
+        if (static::READ_ONLY || empty($this->changes)) {
             return false;
         }
 
-        $this->reset(false);
-        $data = static::dataCleanup($data);
-
+        $data = $this->changes;
         $database = $this->getDatabase();
-        $stmt = $database->insert(static::TABLE, $data);
+        $stmt = ($this->data === null)
+              ? $database->insert(static::TABLE, $data)
+              : $database->update(static::TABLE, $data, $this->getPk(true));
+
         if ($stmt->errorCode() == '00000') {
-            $column = static::AUTO_INCREMENT;
-            if ($column !== null) {
-                $data[$column] = $database->id();
+            if ($this->data === null) {
+                /*
+                 * It is prefered to load back because the Database may apply
+                 * default values or alter some columns
+                 *
+                 * First, get the AUTO_INCREMENT
+                 * Then, extract the PRIMARY_KEY
+                 * Finally, load from Database
+                 */
+                $column = static::AUTO_INCREMENT;
+                if ($column !== null) {
+                    $data[$column] = $database->id();
+                }
+
+                $pk = static::PRIMARY_KEY;
+                $where = (is_array($pk))
+                       ? Utils::arrayWhitelist($data, $pk)
+                       : [$pk => $data[$pk]];
+
+                return $this->load($where);
             }
+            $this->changes = [];
             $this->data = $data;
             $this->valid = true;
+            return true;
         }
-
-        return $this->valid;
+        return false;
     }
 
     /**
-     * Reads a row from Table into the model
+     * Loads a row from Table into the model
      *
      * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
      *
@@ -286,7 +346,7 @@ abstract class Model
      * @throws \InvalidArgumentException If $where does not specify columns and
      *                                   does not match PRIMARY_KEY length
      */
-    public function read($where)
+    public function load($where)
     {
         /*
          * Preprocess $where
@@ -323,13 +383,13 @@ abstract class Model
     }
 
     /**
-     * Updates a row in the Table with model's data
+     * Selectively updates the model's row in the Database
      *
      * @param string|string[] $columns Specify which columns to update
      *
      * @return boolean For success or failure
      */
-    public function update($columns = [])
+    public function update($columns)
     {
         if (static::READ_ONLY) {
             return false;
@@ -338,9 +398,10 @@ abstract class Model
         if (!is_array($columns)) {
             $columns = [$columns];
         }
-        $data = (empty($columns))
-            ? static::dataCleanup($this->data)
-            : Utils::arrayWhitelist($this->data, $columns);
+        if (empty($columns)) {
+            return false;
+        }
+        $data = Utils::arrayWhitelist($this->changes, $columns);
 
         $database = $this->getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPk(true));
@@ -365,15 +426,15 @@ abstract class Model
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->data[$column] = 1;
+                    $this->set($column, 1);
                     break;
 
                 case 'active':
-                    $this->data[$column] = 0;
+                    $this->set($column, 0);
                     break;
 
                 case 'stamp':
-                    $this->data[$column] = $this->getCurrentTimestamp();
+                    $this->set($column, $this->getCurrentTimestamp());
                     break;
 
                 default:
