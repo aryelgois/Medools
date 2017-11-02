@@ -311,12 +311,10 @@ abstract class Model
                 if ($column !== null) {
                     $data[$column] = $database->id();
                 }
-
-                $pk = static::PRIMARY_KEY;
-                $where = (is_array($pk))
-                       ? Utils::arrayWhitelist($data, $pk)
-                       : [$pk => $data[$pk]];
-
+                $where = Utils::arrayWhitelist(
+                    $data,
+                    (array) static::PRIMARY_KEY
+                );
                 return $this->load($where);
             }
             $this->changes = [];
@@ -345,15 +343,9 @@ abstract class Model
          * It allows the use of a simple value (e.g. string or integer) or a
          * simple array without specifing the PRIMARY_KEY column(s)
          */
-        if (!is_array($where)) {
-            $where = [$where];
-        }
+        $where = (array) $where;
         if (!Utils::arrayIsAssoc($where)) {
-            $pk = static::PRIMARY_KEY;
-            if (!is_array($pk)) {
-                $pk = [$pk];
-            }
-            $where = @array_combine($pk, $where);
+            $where = @array_combine((array) static::PRIMARY_KEY, $where);
             if ($where === false) {
                 throw new \InvalidArgumentException(
                     'Could not solve Primary Key'
@@ -386,12 +378,7 @@ abstract class Model
             return false;
         }
 
-        if (!is_array($columns)) {
-            $columns = [$columns];
-        }
-        if (empty($columns)) {
-            return false;
-        }
+        $columns = (array) $columns;
         $data = Utils::arrayWhitelist($this->changes, $columns);
 
         $database = self::getDatabase();
