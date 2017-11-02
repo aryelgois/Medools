@@ -18,33 +18,11 @@ use aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-abstract class Person extends Medools\Model
+class Person extends Medools\Model
 {
-    const DATABASE_NAME_KEY = 'my_app'; // example
+    const TABLE = 'people';
 
-    const TABLES = [
-        'people' => ['id', 'name', 'document'],
-    ];
-
-    /**
-     * Reads Person data from the Database
-     *
-     * @param mixed[] $where \Medoo\Medoo where clause
-     *
-     * @return boolean For success or failure
-     */
-    public function read($where)
-    {
-        $this->reset();
-        $this->valid = false;
-
-        if ($person = $this->readEntry('people', $where)) {
-            $this->data = $person;
-            $this->valid = true;
-        }
-
-        return $this->valid;
-    }
+    const COLUMNS = ['id', 'name', 'document'];
 
     /**
      * Validates Person's document as Brazilian CPF or CNPJ
