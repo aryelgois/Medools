@@ -25,10 +25,9 @@ use aryelgois\Medools;
  */
 class Addresses extends Medools\Model
 {
-    /* This model is supposed to be read-only */
-    use Medools\Traits\ReadOnly;
-
     const DATABASE_NAME_KEY = 'address';
+
+    const READ_ONLY = true;
 
     /*
      * This class does not define the const TABLES because it uses Address'

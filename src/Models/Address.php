@@ -23,9 +23,6 @@ use aryelgois\Medools;
  */
 class Address extends Medools\Model
 {
-    /* This model is supposed to be read-only */
-    use Medools\Traits\ReadOnly;
-
     const DATABASE_NAME_KEY = 'address';
 
     const TABLES = [
@@ -40,6 +37,8 @@ class Address extends Medools\Model
             'name_local'
         ],
     ];
+
+   const READ_ONLY = true;
 
     /**
      * Returns Address' Id
