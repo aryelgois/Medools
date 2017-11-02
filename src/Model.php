@@ -294,7 +294,7 @@ abstract class Model
         $data = $this->changes;
         $database = self::getDatabase();
         $stmt = ($this->data === null)
-              ? $database->insert(static::TABLE, $data)
+              ? $database->insert(static::TABLE, static::dataCleanup($data))
               : $database->update(static::TABLE, $data, $this->getPk());
 
         if ($stmt->errorCode() == '00000') {
@@ -320,7 +320,7 @@ abstract class Model
                 return $this->load($where);
             }
             $this->changes = [];
-            $this->data = $data;
+            $this->data = array_replace($this->data, $data);
             $this->valid = true;
             return true;
         }
@@ -396,7 +396,12 @@ abstract class Model
 
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPk());
-        return ($stmt->errorCode() == '00000');
+        if ($stmt->errorCode() == '00000') {
+            $this->changes = Utils::arrayBlacklist($this->changes, $columns);
+            $this->data = array_replace($this->data, $data);
+            return true;
+        }
+        return false;
     }
 
     /**
