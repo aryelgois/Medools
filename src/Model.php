@@ -265,14 +265,37 @@ abstract class Model
     /**
      * Reads a row from Table into the model
      *
-     * It MAY remove data from previous read()
-     *
-     * @param mixed[] $where \Medoo\Medoo where clause
+     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
      *
      * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException If $where does not specify columns and
+     *                                   does not match PRIMARY_KEY length
      */
     public function read($where)
     {
+        /*
+         * Preprocess $where
+         *
+         * It allows the use of a simple value (e.g. string or integer) or a
+         * simple array without specifing the PRIMARY_KEY column(s)
+         */
+        if (!is_array($where)) {
+            $where = [$where];
+        }
+        if (!Utils::arrayIsAssoc($where)) {
+            $pk = static::PRIMARY_KEY;
+            if (!is_array($pk)) {
+                $pk = [$pk];
+            }
+            $where = @array_combine($pk, $where);
+            if ($where === false) {
+                throw new \InvalidArgumentException(
+                    'Could not solve Primary Key'
+                );
+            }
+        }
+
         $this->reset(false);
 
         $database = $this->getDatabase();
