@@ -24,7 +24,7 @@ use Medoo\Medoo;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-class MedooFactory
+class MedooConnection
 {
     /**
      * Store the configurations for a new instance
@@ -64,7 +64,7 @@ class MedooFactory
      */
     public static function loadConfig($config_path)
     {
-        self::$config = require_once $config_path;
+        self::$config = require $config_path;
     }
 
     /**

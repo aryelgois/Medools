@@ -189,7 +189,7 @@ abstract class Model
      */
     public static function getDatabase()
     {
-        return MedooFactory::getInstance(static::DATABASE_NAME_KEY);
+        return MedooConnection::getInstance(static::DATABASE_NAME_KEY);
     }
 
     /**
