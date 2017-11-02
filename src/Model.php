@@ -193,9 +193,9 @@ abstract class Model
      *
      * @return string
      */
-    public function getCurrentTimestamp()
+    public static function getCurrentTimestamp()
     {
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $sql = 'SELECT CURRENT_TIMESTAMP';
         return $database->query($sql)->fetch(\PDO::FETCH_NUM)[0];
     }
@@ -215,7 +215,7 @@ abstract class Model
      *
      * @return \Medoo\Medoo
      */
-    public static function getDatabase()
+    final public static function getDatabase()
     {
         return MedooConnection::getInstance(static::DATABASE_NAME_KEY);
     }
@@ -301,7 +301,7 @@ abstract class Model
         }
 
         $data = $this->changes;
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, $data)
               : $database->update(static::TABLE, $data, $this->getPk(true));
@@ -372,7 +372,7 @@ abstract class Model
 
         $this->reset(false);
 
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
         if ($data) {
             $this->data = $data;
@@ -403,7 +403,7 @@ abstract class Model
         }
         $data = Utils::arrayWhitelist($this->changes, $columns);
 
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPk(true));
         return ($stmt->errorCode() == '00000');
     }
@@ -421,7 +421,7 @@ abstract class Model
             return false;
         }
 
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $column = static::SOFT_DELETE;
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
@@ -434,7 +434,7 @@ abstract class Model
                     break;
 
                 case 'stamp':
-                    $this->set($column, $this->getCurrentTimestamp());
+                    $this->set($column, static::getCurrentTimestamp());
                     break;
 
                 default:
