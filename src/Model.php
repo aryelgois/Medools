@@ -226,20 +226,11 @@ abstract class Model
      * NOTE:
      * - It returns the data saved in Database, changes by set() are ignored
      *
-     * @param boolean $wrap If result should be wrapped in an array
-     *                      Always true for composite primary key
-     *
-     * @return mixed   Usually it will be an integer
-     * @return mixed[] When there is a composite primary key
+     * @return mixed[] Usually it will contain an integer key
      */
-    public function getPk($wrap = false)
+    public function getPk()
     {
-        $pk = static::PRIMARY_KEY;
-        if (is_array($pk)) {
-            return Utils::arrayWhitelist($this->data, $pk);
-        }
-        $result = $this->data[$pk];
-        return ($wrap ? [$pk => $result] : $result);
+        return Utils::arrayWhitelist($this->data, (array) static::PRIMARY_KEY);
     }
 
     /**
@@ -304,7 +295,7 @@ abstract class Model
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, $data)
-              : $database->update(static::TABLE, $data, $this->getPk(true));
+              : $database->update(static::TABLE, $data, $this->getPk());
 
         if ($stmt->errorCode() == '00000') {
             if ($this->data === null) {
@@ -404,7 +395,7 @@ abstract class Model
         $data = Utils::arrayWhitelist($this->changes, $columns);
 
         $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $this->getPk(true));
+        $stmt = $database->update(static::TABLE, $data, $this->getPk());
         return ($stmt->errorCode() == '00000');
     }
 
@@ -443,7 +434,7 @@ abstract class Model
             }
             return $this->update($column);
         } else {
-            $stmt = $database->delete(static::TABLE, $this->getPk(true));
+            $stmt = $database->delete(static::TABLE, $this->getPk());
             $this->reset();
             return ($stmt->rowCount() > 0);
         }
