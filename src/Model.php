@@ -320,9 +320,11 @@ abstract class Model
             $this->changes = [];
             $this->data = array_replace($this->data, $data);
             $this->valid = true;
-            return true;
+        } else {
+            $this->valid = false;
         }
-        return false;
+
+        return $this->valid;
     }
 
     /**
@@ -386,9 +388,12 @@ abstract class Model
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
-            return true;
+            $this->valid = true;
+        } else {
+            $this->valid = false;
         }
-        return false;
+
+        return $this->valid;
     }
 
     /**
