@@ -259,10 +259,11 @@ abstract class Model
      * Changes the value in a column
      *
      * NOTE:
+     * - You should validate the data before calling this method
      * - Changes need to be saved in the Database with save() or update($column)
      *
      * @param string $column A known column
-     * @param string $value  The new value
+     * @param mixed  $value  The new value
      *
      * @return boolean For success or failure
      *
@@ -289,9 +290,6 @@ abstract class Model
 
     /**
      * Creates a new row in the Table or updates it with new data
-     *
-     * NOTE:
-     * - You should validate the data before calling this method
      *
      * @return boolean For success or failure
      */
