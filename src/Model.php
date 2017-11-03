@@ -234,6 +234,16 @@ abstract class Model
     }
 
     /**
+     * Reloads model data
+     *
+     * @return boolean For success or failure
+     */
+    public function reload()
+    {
+        return $this->load($this->getPk());
+    }
+
+    /**
      * Cleans model data
      *
      * @param boolean $validity Value to set into $this->valid
