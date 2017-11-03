@@ -98,6 +98,13 @@ abstract class Model
      */
 
     /**
+     * Changes done by set() to be saved by update()
+     *
+     * @var mixed[]
+     */
+    protected $changes = [];
+
+    /**
      * Keeps fetched data
      *
      * @var mixed[]
@@ -117,13 +124,17 @@ abstract class Model
      */
 
     /**
-     * Returns which properties should be serialized
+     * Creates a new Model object
      *
-     * @return string[]
+     * @param mixed $where @see load(). If null, a fresh model is created
+     *
+     * @throws \InvalidArgumentException @see load()
      */
-    public function __sleep()
+    public function __construct($where = null)
     {
-        return ['data', 'valid'];
+        if ($where !== null) {
+            $this->load($where);
+        }
     }
 
     /**
@@ -159,15 +170,32 @@ abstract class Model
     }
 
     /**
+     * Returns the stored data in a column
+     *
+     * @param string $column A known column
+     *
+     * @return mixed
+     *
+     * @throws \InvalidArgumentException If $column is unknown
+     */
+    public function get($column)
+    {
+        if (!in_array($column, static::COLUMNS)) {
+            throw new \InvalidArgumentException('Unknown column');
+        }
+        return $this->changes[$column] ?? $this->data[$column];
+    }
+
+    /**
      * Selects Current Timestamp from Database
      *
      * Useful to keep timezone consistent
      *
      * @return string
      */
-    public function getCurrentTimestamp()
+    public static function getCurrentTimestamp()
     {
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $sql = 'SELECT CURRENT_TIMESTAMP';
         return $database->query($sql)->fetch(\PDO::FETCH_NUM)[0];
     }
@@ -179,7 +207,7 @@ abstract class Model
      */
     public function getData()
     {
-        return $this->data;
+        return array_replace($this->data, $this->changes);
     }
 
     /**
@@ -187,7 +215,7 @@ abstract class Model
      *
      * @return \Medoo\Medoo
      */
-    public static function getDatabase()
+    final public static function getDatabase()
     {
         return MedooConnection::getInstance(static::DATABASE_NAME_KEY);
     }
@@ -195,20 +223,24 @@ abstract class Model
     /**
      * Returns model's Primary Key
      *
-     * @param boolean $wrap If result should be wrapped in an array
-     *                      Always true for composite primary key
+     * NOTE:
+     * - It returns the data saved in Database, changes by set() are ignored
      *
-     * @return mixed   Usually it will be an integer
-     * @return mixed[] When there is a composite primary key
+     * @return mixed[] Usually it will contain an integer key
      */
-    public function getPk($wrap = false)
+    public function getPk()
     {
-        $pk = static::PRIMARY_KEY;
-        if (is_array($pk)) {
-            return Utils::arrayWhitelist($this->data, $pk);
-        }
-        $result = $this->data[$pk];
-        return ($wrap ? [$pk => $result] : $result);
+        return Utils::arrayWhitelist($this->data, (array) static::PRIMARY_KEY);
+    }
+
+    /**
+     * Reloads model data
+     *
+     * @return boolean For success or failure
+     */
+    public function reload()
+    {
+        return $this->load($this->getPk());
     }
 
     /**
@@ -218,8 +250,36 @@ abstract class Model
      */
     protected function reset($validity = null)
     {
+        $this->changes = [];
         $this->data = null;
         $this->valid = $validity;
+    }
+
+    /**
+     * Changes the value in a column
+     *
+     * NOTE:
+     * - Changes need to be saved in the Database with save() or update($column)
+     *
+     * @param string $column A known column
+     * @param string $value  The new value
+     *
+     * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException If $column is unknown
+     */
+    public function set($column, $value)
+    {
+        if (static::READ_ONLY) {
+            return false;
+        }
+
+        if (!in_array($column, static::COLUMNS)) {
+            throw new \InvalidArgumentException('Unknown column');
+        }
+        $this->changes[$column] = $value;
+
+        return true;
     }
 
     /*
@@ -228,54 +288,86 @@ abstract class Model
      */
 
     /**
-     * Creates a new row in the Table
+     * Creates a new row in the Table or updates it with new data
      *
      * NOTE:
      * - You should validate the data before calling this method
-     * - Unused columns are ignored
-     *
-     * @param mixed[] $data Any required data for the new row. Keys should match
-     *                      values in COLUMNS
      *
      * @return boolean For success or failure
      */
-    public function create($data)
+    public function save()
     {
-        if (static::READ_ONLY) {
+        if (static::READ_ONLY || empty($this->changes)) {
             return false;
         }
 
-        $this->reset(false);
-        $data = static::dataCleanup($data);
+        $data = $this->changes;
+        $database = self::getDatabase();
+        $stmt = ($this->data === null)
+              ? $database->insert(static::TABLE, static::dataCleanup($data))
+              : $database->update(static::TABLE, $data, $this->getPk());
 
-        $database = $this->getDatabase();
-        $stmt = $database->insert(static::TABLE, $data);
         if ($stmt->errorCode() == '00000') {
-            $column = static::AUTO_INCREMENT;
-            if ($column !== null) {
-                $data[$column] = $database->id();
+            if ($this->data === null) {
+                /*
+                 * It is prefered to load back because the Database may apply
+                 * default values or alter some columns
+                 *
+                 * First, get the AUTO_INCREMENT
+                 * Then, extract the PRIMARY_KEY
+                 * Finally, load from Database
+                 */
+                $column = static::AUTO_INCREMENT;
+                if ($column !== null) {
+                    $data[$column] = $database->id();
+                }
+                $where = Utils::arrayWhitelist(
+                    $data,
+                    (array) static::PRIMARY_KEY
+                );
+                return $this->load($where);
             }
-            $this->data = $data;
+            $this->changes = [];
+            $this->data = array_replace($this->data, $data);
             $this->valid = true;
+        } else {
+            $this->valid = false;
         }
 
         return $this->valid;
     }
 
     /**
-     * Reads a row from Table into the model
+     * Loads a row from Table into the model
      *
-     * It MAY remove data from previous read()
-     *
-     * @param mixed[] $where \Medoo\Medoo where clause
+     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
      *
      * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException If $where does not specify columns and
+     *                                   does not match PRIMARY_KEY length
      */
-    public function read($where)
+    public function load($where)
     {
+        /*
+         * Preprocess $where
+         *
+         * It allows the use of a simple value (e.g. string or integer) or a
+         * simple array without specifing the PRIMARY_KEY column(s)
+         */
+        $where = (array) $where;
+        if (!Utils::arrayIsAssoc($where)) {
+            $where = @array_combine((array) static::PRIMARY_KEY, $where);
+            if ($where === false) {
+                throw new \InvalidArgumentException(
+                    'Could not solve Primary Key'
+                );
+            }
+        }
+
         $this->reset(false);
 
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
         if ($data) {
             $this->data = $data;
@@ -286,28 +378,32 @@ abstract class Model
     }
 
     /**
-     * Updates a row in the Table with model's data
+     * Selectively updates the model's row in the Database
      *
      * @param string|string[] $columns Specify which columns to update
      *
      * @return boolean For success or failure
      */
-    public function update($columns = [])
+    public function update($columns)
     {
         if (static::READ_ONLY) {
             return false;
         }
 
-        if (!is_array($columns)) {
-            $columns = [$columns];
-        }
-        $data = (empty($columns))
-            ? static::dataCleanup($this->data)
-            : Utils::arrayWhitelist($this->data, $columns);
+        $columns = (array) $columns;
+        $data = Utils::arrayWhitelist($this->changes, $columns);
 
-        $database = $this->getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $this->getPk(true));
-        return ($stmt->errorCode() == '00000');
+        $database = self::getDatabase();
+        $stmt = $database->update(static::TABLE, $data, $this->getPk());
+        if ($stmt->errorCode() == '00000') {
+            $this->changes = Utils::arrayBlacklist($this->changes, $columns);
+            $this->data = array_replace($this->data, $data);
+            $this->valid = true;
+        } else {
+            $this->valid = false;
+        }
+
+        return $this->valid;
     }
 
     /**
@@ -323,20 +419,20 @@ abstract class Model
             return false;
         }
 
-        $database = $this->getDatabase();
+        $database = self::getDatabase();
         $column = static::SOFT_DELETE;
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->data[$column] = 1;
+                    $this->set($column, 1);
                     break;
 
                 case 'active':
-                    $this->data[$column] = 0;
+                    $this->set($column, 0);
                     break;
 
                 case 'stamp':
-                    $this->data[$column] = $this->getCurrentTimestamp();
+                    $this->set($column, static::getCurrentTimestamp());
                     break;
 
                 default:
@@ -345,7 +441,7 @@ abstract class Model
             }
             return $this->update($column);
         } else {
-            $stmt = $database->delete(static::TABLE, $this->getPk(true));
+            $stmt = $database->delete(static::TABLE, $this->getPk());
             $this->reset();
             return ($stmt->rowCount() > 0);
         }
