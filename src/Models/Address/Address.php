@@ -56,7 +56,7 @@ class Address
         $this->country = new Country($this->state->get('country'));
 
         if (!$this->country->isValid()) {
-            throw new RuntimeException('Could not load submodels');
+            throw new \RuntimeException('Could not load submodels');
         }
     }
 }
