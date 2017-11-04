@@ -8,6 +8,12 @@
 namespace aryelgois\Medools;
 
 use aryelgois\Utils\Utils;
+use aryelgois\Medools\Exceptions\{
+    ForeignConstraintException,
+    NotForeignColumnException,
+    ReadOnlyModelException,
+    UnknownColumnException
+};
 
 /**
  * Wrapper on catfan/Medoo
@@ -153,8 +159,8 @@ abstract class Model
      *
      * @param mixed $where @see load(). If null, a fresh model is created
      *
-     * @throws \InvalidArgumentException @see load()
-     * @throws \RuntimeException         @see load()
+     * @throws \InvalidArgumentException  @see load() 2 cases
+     * @throws ForeignConstraintException @see load()
      */
     public function __construct($where = null)
     {
@@ -205,12 +211,12 @@ abstract class Model
      *
      * @return mixed
      *
-     * @throws \InvalidArgumentException If $column is unknown
+     * @throws UnknownColumnException
      */
     public function get($column)
     {
         if (!in_array($column, static::COLUMNS)) {
-            throw new \InvalidArgumentException('Unknown column');
+            throw new UnknownColumnException();
         }
         return $this->changes[$column] ?? $this->data[$column];
     }
@@ -265,17 +271,12 @@ abstract class Model
      *
      * @return Model
      *
-     * @throws \InvalidArgumentException If $column is unknown
-     * @throws \InvalidArgumentException If $column is not foreign
+     * @throws UnknownColumnException    @see testForeign()
+     * @throws NotForeignColumnException @see testForeign()
      */
     public function getForeign($column)
     {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new \InvalidArgumentException('Unknown column');
-        }
-        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
-            throw new \InvalidArgumentException('Not a foreign column');
-        }
+        static::testForeign($column);
         return $this->foreign[$column];
     }
 
@@ -324,31 +325,64 @@ abstract class Model
      * @param string $column A known column
      * @param mixed  $value  The new value
      *
-     * @return boolean For success or failure
-     *
-     * @throws \InvalidArgumentException If $column is unknown
-     * @throws \RuntimeException         If foreign key constraint fails
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException @see updateForeign()
      */
     public function set($column, $value)
     {
         if (static::READ_ONLY) {
-            return false;
+            throw new ReadOnlyModelException();
         }
-
         if (!in_array($column, static::COLUMNS)) {
-            throw new \InvalidArgumentException('Unknown column');
+            throw new UnknownColumnException();
         }
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            $foreign = static::FOREIGN_KEYS[$column][1];
-            if ($value === null) {
-                /** @todo reset foreign model */
-            } elseif (!$this->foreign[$column]->load([$foreign => $value])) {
-                throw new \RuntimeException('Foreign key constraint fails');
-            }
+            $this->updateForeign($column, $value);
         }
-        $this->changes[$column] = $value;
 
-        return true;
+        $this->changes[$column] = $value;
+    }
+
+    /**
+     * Tests if a column is foreign
+     *
+     * @param string $column A column possibly in FOREIGN_KEYS keys
+     *
+     * @throws UnknownColumnException
+     * @throws NotForeignColumnException
+     */
+    protected static function testForeign($column)
+    {
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
+            throw new NotForeignColumnException();
+        }
+    }
+
+    /**
+     * Updates a foreign model to a new row
+     *
+     * @param string $column A column in FOREIGN_KEYS keys
+     * @param mixed  $value  A value in the foreign table
+     *
+     * @throws UnknownColumnException     @see testForeign()
+     * @throws NotForeignColumnException  @see testForeign()
+     * @throws ForeignConstraintException
+     */
+    protected function updateForeign($column, $value)
+    {
+        static::testForeign($column);
+        $foreign = static::FOREIGN_KEYS[$column][1];
+        if ($value === null) {
+            /** @todo reset foreign model */
+            return;
+        }
+        if (!$this->foreign[$column]->load([$foreign => $value])) {
+            throw new ForeignConstraintException(static::class, $column);
+        }
     }
 
     /*
@@ -360,10 +394,16 @@ abstract class Model
      * Creates a new row in the Table or updates it with new data
      *
      * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
      */
     public function save()
     {
-        if (static::READ_ONLY || empty($this->changes)) {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+
+        if (empty($this->changes)) {
             return false;
         }
 
@@ -377,7 +417,8 @@ abstract class Model
             if ($this->data === null) {
                 /*
                  * It is prefered to load back because the Database may apply
-                 * default values or alter some columns
+                 * default values or alter some columns. Also, it updates
+                 * foreign models.
                  *
                  * First, get the AUTO_INCREMENT
                  * Then, extract the PRIMARY_KEY
@@ -407,10 +448,11 @@ abstract class Model
      *
      * @return boolean For success or failure
      *
-     * @throws \InvalidArgumentException If could not solve Primary Key:
-     *                                   - $where does not specify columns and
-     *                                     does not match PRIMARY_KEY length
-     * @throws \RuntimeException         If foreign key constraint fails
+     * @throws \InvalidArgumentException  If could not solve Primary Key:
+     *                                    - $where does not specify columns and
+     *                                      does not match PRIMARY_KEY length
+     * @throws \InvalidArgumentException  If $where is null
+     * @throws ForeignConstraintException @see updateForeign()
      */
     public function load($where)
     {
@@ -420,6 +462,9 @@ abstract class Model
          * It allows the use of a simple value (e.g. string or integer) or a
          * simple array without specifing the PRIMARY_KEY column(s)
          */
+        if ($where === null) {
+            throw new \InvalidArgumentException('Primary Key can not be null');
+        }
         $where = (array) $where;
         if (!Utils::arrayIsAssoc($where)) {
             $where = @array_combine(static::PRIMARY_KEY, $where);
@@ -435,15 +480,10 @@ abstract class Model
         $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
         if ($data) {
-            $this->data = $data;
-            foreach (static::FOREIGN_KEYS as $column => $map) {
-                $value = $this->get($column);
-                if ($value === null) {
-                    /** @todo reset foreign model */
-                } elseif (!$this->foreign[$column]->load([$map[1] => $value])) {
-                    throw new \RuntimeException('Foreign key constraint fails');
-                }
+            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+                $this->updateForeign($column, $data[$column]);
             }
+            $this->data = $data;
             $this->valid = true;
         }
 
@@ -456,11 +496,13 @@ abstract class Model
      * @param string|string[] $columns Specify which columns to update
      *
      * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
      */
     public function update($columns)
     {
         if (static::READ_ONLY) {
-            return false;
+            throw new ReadOnlyModelException();
         }
 
         $columns = (array) $columns;
@@ -484,12 +526,13 @@ abstract class Model
      *
      * @return boolean For success or failure
      *
-     * @throws \UnexpectedValueException If SOFT_DELETE_MODE is unknown
+     * @throws ReadOnlyModelException
+     * @throws \LogicException If SOFT_DELETE_MODE is unknown
      */
     public function delete()
     {
         if (static::READ_ONLY) {
-            return false;
+            throw new ReadOnlyModelException();
         }
 
         $database = self::getDatabase();
@@ -509,7 +552,9 @@ abstract class Model
                     break;
 
                 default:
-                    throw new \UnexpectedValueException('Unknown mode');
+                    throw new \LogicException(
+                        "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
+                    );
                     break;
             }
             return $this->update($column);
