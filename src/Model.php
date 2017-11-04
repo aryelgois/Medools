@@ -232,11 +232,20 @@ abstract class Model
     /**
      * Returns the stored data
      *
+     * @param boolean $foreign If should include foreign data
+     *                         They replace the foreign column
+     *
      * @return mixed[]
      */
-    public function getData()
+    public function getData($foreign = false)
     {
-        return array_replace($this->data, $this->changes);
+        $data = array_replace($this->data, $this->changes);
+        if ($foreign) {
+            foreach ($this->foreign as $column => $model) {
+                $data[$column] = $model->getData($foreign);
+            }
+        }
+        return $data;
     }
 
     /**
