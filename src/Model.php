@@ -53,9 +53,9 @@ abstract class Model
     /**
      * Primary Key column
      *
-     * @const string|string[]
+     * @const string[]
      */
-    const PRIMARY_KEY = 'id';
+    const PRIMARY_KEY = ['id'];
 
     /**
      * Auto Increment column
@@ -230,7 +230,7 @@ abstract class Model
      */
     public function getPk()
     {
-        return Utils::arrayWhitelist($this->data, (array) static::PRIMARY_KEY);
+        return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
     }
 
     /**
@@ -319,10 +319,7 @@ abstract class Model
                 if ($column !== null) {
                     $data[$column] = $database->id();
                 }
-                $where = Utils::arrayWhitelist(
-                    $data,
-                    (array) static::PRIMARY_KEY
-                );
+                $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
                 return $this->load($where);
             }
             $this->changes = [];
@@ -355,7 +352,7 @@ abstract class Model
          */
         $where = (array) $where;
         if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine((array) static::PRIMARY_KEY, $where);
+            $where = @array_combine(static::PRIMARY_KEY, $where);
             if ($where === false) {
                 throw new \InvalidArgumentException(
                     'Could not solve Primary Key'
