@@ -339,8 +339,9 @@ abstract class Model
      *
      * @return boolean For success or failure
      *
-     * @throws \InvalidArgumentException If $where does not specify columns and
-     *                                   does not match PRIMARY_KEY length
+     * @throws \InvalidArgumentException If could not solve Primary Key:
+     *                                   - $where does not specify columns and
+     *                                     does not match PRIMARY_KEY length
      */
     public function load($where)
     {
