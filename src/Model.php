@@ -228,7 +228,7 @@ abstract class Model
      *
      * @return mixed[] Usually it will contain an integer key
      */
-    public function getPk()
+    public function getPrimaryKey()
     {
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
     }
@@ -240,7 +240,7 @@ abstract class Model
      */
     public function reload()
     {
-        return $this->load($this->getPk());
+        return $this->load($this->getPrimaryKey());
     }
 
     /**
@@ -303,7 +303,7 @@ abstract class Model
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, static::dataCleanup($data))
-              : $database->update(static::TABLE, $data, $this->getPk());
+              : $database->update(static::TABLE, $data, $this->getPrimaryKey());
 
         if ($stmt->errorCode() == '00000') {
             if ($this->data === null) {
@@ -389,7 +389,7 @@ abstract class Model
         $data = Utils::arrayWhitelist($this->changes, $columns);
 
         $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $this->getPk());
+        $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
@@ -436,7 +436,7 @@ abstract class Model
             }
             return $this->update($column);
         } else {
-            $stmt = $database->delete(static::TABLE, $this->getPk());
+            $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
             $this->reset();
             return ($stmt->rowCount() > 0);
         }
