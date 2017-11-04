@@ -29,5 +29,12 @@ class State extends Medools\Model
 
     const COLUMNS = ['id', 'country', 'code', 'name'];
 
+    const FOREIGN_KEYS = [
+        'country' => [
+            __NAMESPACE__ . '\Country',
+            'id'
+        ],
+    ];
+
     const READ_ONLY = true;
 }

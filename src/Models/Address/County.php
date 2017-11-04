@@ -29,5 +29,12 @@ class County extends Medools\Model
 
     const COLUMNS = ['id', 'state', 'name'];
 
+    const FOREIGN_KEYS = [
+        'state' => [
+            __NAMESPACE__ . '\State',
+            'id'
+        ],
+    ];
+
     const READ_ONLY = true;
 }
