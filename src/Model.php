@@ -67,6 +67,24 @@ abstract class Model
     const AUTO_INCREMENT = 'id';
 
     /**
+     * Foreign Keys map
+     *
+     * A map of zero or more columns in this model, each pointing to a column in
+     * another model
+     *
+     * EXAMPLE:
+     *     [
+     *         'local_column' => [
+     *             'Fully\Qualified\ClassName',
+     *             'foreign_column'
+     *         ],
+     *     ];
+     *
+     * @const array[]
+     */
+    const FOREIGN_KEYS = [];
+
+    /**
      * If create(), update() and delete() are disabled
      *
      * @const boolean
@@ -112,6 +130,13 @@ abstract class Model
     protected $data;
 
     /**
+     * List of foreign models
+     *
+     * @var Model[]
+     */
+    protected $foreign = [];
+
+    /**
      * Tells if they are valid
      *
      * @var boolean
@@ -129,9 +154,13 @@ abstract class Model
      * @param mixed $where @see load(). If null, a fresh model is created
      *
      * @throws \InvalidArgumentException @see load()
+     * @throws \RuntimeException         @see load()
      */
     public function __construct($where = null)
     {
+        foreach (static::FOREIGN_KEYS as $column => $map) {
+            $this->foreign[$column] = new $map[0];
+        }
         if ($where !== null) {
             $this->load($where);
         }
@@ -221,6 +250,27 @@ abstract class Model
     }
 
     /**
+     * Returns a foreign model
+     *
+     * @param string $column A column in FOREIGN_KEYS keys
+     *
+     * @return Model
+     *
+     * @throws \InvalidArgumentException If $column is unknown
+     * @throws \InvalidArgumentException If $column is not foreign
+     */
+    public function getForeign($column)
+    {
+        if (!in_array($column, static::COLUMNS)) {
+            throw new \InvalidArgumentException('Unknown column');
+        }
+        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
+            throw new \InvalidArgumentException('Not a foreign column');
+        }
+        return $this->foreign[$column];
+    }
+
+    /**
      * Returns model's Primary Key
      *
      * NOTE:
@@ -268,6 +318,7 @@ abstract class Model
      * @return boolean For success or failure
      *
      * @throws \InvalidArgumentException If $column is unknown
+     * @throws \RuntimeException         If foreign key constraint fails
      */
     public function set($column, $value)
     {
@@ -277,6 +328,14 @@ abstract class Model
 
         if (!in_array($column, static::COLUMNS)) {
             throw new \InvalidArgumentException('Unknown column');
+        }
+        if (array_key_exists($column, static::FOREIGN_KEYS)) {
+            $foreign = static::FOREIGN_KEYS[$column][1];
+            if ($value === null) {
+                /** @todo reset foreign model */
+            } elseif (!$this->foreign[$column]->load([$foreign => $value])) {
+                throw new \RuntimeException('Foreign key constraint fails');
+            }
         }
         $this->changes[$column] = $value;
 
@@ -342,6 +401,7 @@ abstract class Model
      * @throws \InvalidArgumentException If could not solve Primary Key:
      *                                   - $where does not specify columns and
      *                                     does not match PRIMARY_KEY length
+     * @throws \RuntimeException         If foreign key constraint fails
      */
     public function load($where)
     {
@@ -367,6 +427,14 @@ abstract class Model
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
         if ($data) {
             $this->data = $data;
+            foreach (static::FOREIGN_KEYS as $column => $map) {
+                $value = $this->get($column);
+                if ($value === null) {
+                    /** @todo reset foreign model */
+                } elseif (!$this->foreign[$column]->load([$map[1] => $value])) {
+                    throw new \RuntimeException('Foreign key constraint fails');
+                }
+            }
             $this->valid = true;
         }
 
