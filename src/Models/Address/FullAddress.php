@@ -19,7 +19,7 @@ use aryelgois\Medools;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-abstract class FullAddress extends Medools\Model
+class FullAddress extends Medools\Model
 {
     const TABLE = 'full_addresses';
 
