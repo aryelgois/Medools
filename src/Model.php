@@ -387,13 +387,13 @@ abstract class Model
      */
     protected function updateForeign($column, $value)
     {
-        static::testForeign($column);
-        $foreign = static::FOREIGN_KEYS[$column][1];
+        $foreign = $this->getForeign($column);
+        $foreign_column = static::FOREIGN_KEYS[$column][1];
         if ($value === null) {
-            /** @todo reset foreign model */
+            $foreign->reset();
             return;
         }
-        if (!$this->foreign[$column]->load([$foreign => $value])) {
+        if (!$foreign->load([$foreign_column => $value])) {
             throw new ForeignConstraintException(static::class, $column);
         }
     }
