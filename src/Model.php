@@ -280,16 +280,23 @@ abstract class Model
     /**
      * Returns a foreign model
      *
+     * It tests if $column is a valid foreign column
+     *
      * @param string $column A column in FOREIGN_KEYS keys
      *
      * @return Model
      *
-     * @throws UnknownColumnException    @see testForeign()
-     * @throws NotForeignColumnException @see testForeign()
+     * @throws UnknownColumnException
+     * @throws NotForeignColumnException
      */
     public function getForeign($column)
     {
-        static::testForeign($column);
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
+            throw new NotForeignColumnException();
+        }
         return $this->foreign[$column];
     }
 
@@ -355,24 +362,6 @@ abstract class Model
         }
 
         $this->changes[$column] = $value;
-    }
-
-    /**
-     * Tests if a column is foreign
-     *
-     * @param string $column A column possibly in FOREIGN_KEYS keys
-     *
-     * @throws UnknownColumnException
-     * @throws NotForeignColumnException
-     */
-    protected static function testForeign($column)
-    {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
-        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
-            throw new NotForeignColumnException();
-        }
     }
 
     /**
