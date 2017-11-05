@@ -194,6 +194,19 @@ abstract class Model
     }
 
     /**
+     * Returns all the data in model's Table
+     *
+     * @param mixed[] $where \Medoo\Medoo where clause
+     *
+     * @return array[]
+     */
+    public static function dump($where = [])
+    {
+        $database = self::getDatabase();
+        return $database->select(static::TABLE, static::COLUMNS, $where);
+    }
+
+    /**
      * Tells if the model is valid
      *
      * @return boolean If model has valid data
