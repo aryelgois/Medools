@@ -20,7 +20,7 @@ To interact with the Database, it is used [catfan/Medoo].
 
 # TODO
 
-- [ ] Add a way to write into the database (insert and update)
+- [x] Add a way to write into the database
 - [ ] Add more Models
 
 

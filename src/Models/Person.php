@@ -11,50 +11,18 @@ use aryelgois\Utils;
 use aryelgois\Medools;
 
 /**
- * A Person object defines someone in the real world. It is a basic setup and
+ * A Person model defines someone in the real world. It is a basic setup and
  * you must to extend for your use case.
  *
  * @author Aryel Mota Góis
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-abstract class Person extends Medools\Model
+class Person extends Medools\Model
 {
-    const DATABASE_NAME_KEY = 'my_app'; // example
+    const TABLE = 'people';
 
-    const DATABASE_TABLE = 'people';
-
-    /**
-     * Rows fetched from `people`
-     *
-     * @const string[]
-     */
-    const ROWS_PERSON = ['id', 'name', 'document', 'birthday', 'update'];
-
-    /**
-     * Reads a Person data from the Database
-     *
-     * @param mixed[] $where \Medoo\Medoo where clause
-     *
-     * @return boolean For success or failure
-     */
-    public function read($where)
-    {
-        $this->reset();
-
-        $person = $this->database->get(
-            static::DATABASE_TABLE,
-            static::ROWS_PERSON,
-            $where
-        );
-
-        $this->valid = false;
-        if ($person) {
-            $this->data = $person;
-            $this->valid = true;
-        }
-        return $this->valid;
-    }
+    const COLUMNS = ['id', 'name', 'document'];
 
     /**
      * Validates Person's document as Brazilian CPF or CNPJ
@@ -65,10 +33,7 @@ abstract class Person extends Medools\Model
      */
     public function documentValidate()
     {
-        if (!isset($this->data['document'])) {
-            return null;
-        }
-        return Utils\Validation::document($this->data['document']);
+        return Utils\Validation::document($this->get('document'));
     }
 
     /**
@@ -82,9 +47,6 @@ abstract class Person extends Medools\Model
      */
     public function documentFormat($prepend = false)
     {
-        if (!isset($this->data['document'])) {
-            return null;
-        }
-        return Utils\Format::document($this->data['document'], $prepend);
+        return Utils\Format::document($this->get('document'), $prepend);
     }
 }
