@@ -207,17 +207,6 @@ abstract class Model
     }
 
     /**
-     * Tells if the model is valid
-     *
-     * @return boolean If model has valid data
-     * @return null    If validation is not implemented or the model is empty
-     */
-    public function isValid()
-    {
-        return $this->valid;
-    }
-
-    /**
      * Returns the stored data in a column
      *
      * @param string $column A known column
@@ -385,6 +374,22 @@ abstract class Model
         if (!$foreign->load([$foreign_column => $value])) {
             throw new ForeignConstraintException(static::class, $column);
         }
+    }
+
+    /**
+     * Tells if the model has valid data
+     *
+     * It may change the data to remove unwanted content
+     *
+     * @param mixed[] $data Data to be validated
+     * @param boolean $full If $data is supposed to contain all columns
+     *
+     * @return boolean For success or failure
+     */
+    protected static function validate($data, $full)
+    {
+        /** @todo */
+        return true;
     }
 
     /*
