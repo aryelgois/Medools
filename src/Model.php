@@ -142,13 +142,6 @@ abstract class Model
      */
     protected $foreign = [];
 
-    /**
-     * Tells if they are valid
-     *
-     * @var boolean
-     */
-    protected $valid;
-
     /*
      * Basic methods
      * =========================================================================
@@ -314,14 +307,11 @@ abstract class Model
 
     /**
      * Cleans model data
-     *
-     * @param boolean $validity Value to set into $this->valid
      */
-    protected function reset($validity = null)
+    protected function reset()
     {
         $this->changes = [];
         $this->data = null;
-        $this->valid = $validity;
     }
 
     /**
@@ -440,12 +430,9 @@ abstract class Model
             }
             $this->changes = [];
             $this->data = array_replace($this->data, $data);
-            $this->valid = true;
-        } else {
-            $this->valid = false;
+            return true;
         }
-
-        return $this->valid;
+        return false;
     }
 
     /**
@@ -482,7 +469,7 @@ abstract class Model
             }
         }
 
-        $this->reset(false);
+        $this->reset();
 
         $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
@@ -491,10 +478,10 @@ abstract class Model
                 $this->updateForeign($column, $data[$column]);
             }
             $this->data = $data;
-            $this->valid = true;
+            return true;
         }
 
-        return $this->valid;
+        return false;
     }
 
     /**
@@ -520,12 +507,10 @@ abstract class Model
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
-            $this->valid = true;
-        } else {
-            $this->valid = false;
+            return true;
         }
 
-        return $this->valid;
+        return false;
     }
 
     /**
