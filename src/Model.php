@@ -10,6 +10,7 @@ namespace aryelgois\Medools;
 use aryelgois\Utils\Utils;
 use aryelgois\Medools\Exceptions\{
     ForeignConstraintException,
+    MissingColumnException,
     NotForeignColumnException,
     ReadOnlyModelException,
     UnknownColumnException
@@ -71,6 +72,16 @@ abstract class Model
      * @const string|null
      */
     const AUTO_INCREMENT = 'id';
+
+    /**
+     * List of optional columns
+     *
+     * List here all columns which have a default value (e.g. timestamp) or are
+     * nullable. AUTO_INCREMENT is always optional and does not need to be here.
+     *
+     * @const string[]
+     */
+    const OPTIONAL_COLUMNS = [];
 
     /**
      * Foreign Keys map
@@ -373,12 +384,40 @@ abstract class Model
      *
      * @param mixed[] $data Data to be validated
      * @param boolean $full If $data is supposed to contain all columns
+     *                      (optional columns not required) :D
      *
      * @return boolean For success or failure
+     *
+     * @throws MissingColumnException
+     * @throws UnknownColumnException
      */
     protected static function validate($data, $full)
     {
-        /** @todo */
+        $columns = array_keys($data);
+
+        /*
+         * Check missing columns
+         */
+        if ($full) {
+            $required = array_diff(
+                static::COLUMNS,
+                static::OPTIONAL_COLUMNS,
+                (array) static::AUTO_INCREMENT
+            );
+            $missing = array_diff($required, $columns);
+            if (!empty($missing)) {
+                throw new MissingColumnException($missing);
+            }
+        }
+
+        /*
+         * Check unknown columns
+         */
+        $unknown = array_diff($columns, static::COLUMNS);
+        if (!empty($unknown)) {
+            throw new UnknownColumnException($unknown);
+        }
+
         return true;
     }
 
@@ -393,6 +432,7 @@ abstract class Model
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
+     * @throws \UnexpectedValueException If an invalid data is found
      */
     public function save()
     {
@@ -405,6 +445,10 @@ abstract class Model
         }
 
         $data = $this->changes;
+        if (!static::validate($data, true)) {
+            throw new \UnexpectedValueException('Invalid data');
+        }
+
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, static::dataCleanup($data))
@@ -492,6 +536,7 @@ abstract class Model
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
+     * @throws \UnexpectedValueException If an invalid data is found
      */
     public function update($columns)
     {
@@ -501,6 +546,9 @@ abstract class Model
 
         $columns = (array) $columns;
         $data = Utils::arrayWhitelist($this->changes, $columns);
+        if (!static::validate($data, false)) {
+            throw new \UnexpectedValueException('Invalid data');
+        }
 
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
