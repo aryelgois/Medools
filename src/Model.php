@@ -102,7 +102,8 @@ abstract class Model
     const FOREIGN_KEYS = [];
 
     /**
-     * If create(), update() and delete() are disabled
+     * If set(), save(), update() and delete() are
+     * disabled
      *
      * @const boolean
      */

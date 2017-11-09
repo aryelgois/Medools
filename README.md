@@ -242,7 +242,7 @@ const FOREIGN_KEYS = [
 
 #### READ_ONLY
 
-If `create()`, `update()` and `delete()` are disabled
+If `set()`, `save()`, `update()` and `delete()` are disabled
 
 - Type: `boolean`
 - Default: `false`
