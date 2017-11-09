@@ -359,8 +359,8 @@ abstract class Model
      * @param string $column A column in FOREIGN_KEYS keys
      * @param mixed  $value  A value in the foreign table
      *
-     * @throws UnknownColumnException     @see testForeign()
-     * @throws NotForeignColumnException  @see testForeign()
+     * @throws UnknownColumnException     @see getForeign()
+     * @throws NotForeignColumnException  @see getForeign()
      * @throws ForeignConstraintException
      */
     protected function updateForeign($column, $value)
