@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "59f52a0619464c1e7b8f9b45bdff47dd",
+    "content-hash": "2e4fef00e91e4917b6b04b05c6c8ed6e",
     "packages": [
         {
             "name": "aryelgois/utils",
-            "version": "dev-master",
+            "version": "v0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aryelgois/utils.git",
-                "reference": "950908e423891267c793eb9309d44d09f49db948"
+                "reference": "2f1b1ecdf2416c494483edffc2c6ad556e671399"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aryelgois/utils/zipball/950908e423891267c793eb9309d44d09f49db948",
-                "reference": "950908e423891267c793eb9309d44d09f49db948",
+                "url": "https://api.github.com/repos/aryelgois/utils/zipball/2f1b1ecdf2416c494483edffc2c6ad556e671399",
+                "reference": "2f1b1ecdf2416c494483edffc2c6ad556e671399",
                 "shasum": ""
             },
             "require": {
@@ -43,7 +43,7 @@
             "keywords": [
                 "utils"
             ],
-            "time": "2017-11-02T17:36:58+00:00"
+            "time": "2017-11-09T11:04:58+00:00"
         },
         {
             "name": "catfan/medoo",
@@ -108,9 +108,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "aryelgois/utils": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
