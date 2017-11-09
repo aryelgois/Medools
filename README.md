@@ -30,7 +30,7 @@ class and define some settings.
 
 Open a terminal in your project directory and run:
 
-`composer require aryelgois/medools:dev-master`
+`composer require aryelgois/medools:^1.0`
 
 
 # Setup
