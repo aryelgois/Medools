@@ -8,13 +8,13 @@
 namespace aryelgois\Medools\Exceptions;
 
 /**
- * When the model is requested for a column it does not have
+ * There are missing columns when trying to save the model
  *
  * @author Aryel Mota Góis
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-class UnknownColumnException extends \InvalidArgumentException
+class MissingColumnException extends \RuntimeException
 {
     use \aryelgois\Medools\Traits\ColumnsException;
 }

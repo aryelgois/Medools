@@ -10,6 +10,7 @@ namespace aryelgois\Medools;
 use aryelgois\Utils\Utils;
 use aryelgois\Medools\Exceptions\{
     ForeignConstraintException,
+    MissingColumnException,
     NotForeignColumnException,
     ReadOnlyModelException,
     UnknownColumnException
@@ -71,6 +72,16 @@ abstract class Model
      * @const string|null
      */
     const AUTO_INCREMENT = 'id';
+
+    /**
+     * List of optional columns
+     *
+     * List here all columns which have a default value (e.g. timestamp) or are
+     * nullable. AUTO_INCREMENT is always optional and does not need to be here.
+     *
+     * @const string[]
+     */
+    const OPTIONAL_COLUMNS = [];
 
     /**
      * Foreign Keys map
@@ -142,13 +153,6 @@ abstract class Model
      */
     protected $foreign = [];
 
-    /**
-     * Tells if they are valid
-     *
-     * @var boolean
-     */
-    protected $valid;
-
     /*
      * Basic methods
      * =========================================================================
@@ -204,17 +208,6 @@ abstract class Model
     {
         $database = self::getDatabase();
         return $database->select(static::TABLE, static::COLUMNS, $where);
-    }
-
-    /**
-     * Tells if the model is valid
-     *
-     * @return boolean If model has valid data
-     * @return null    If validation is not implemented or the model is empty
-     */
-    public function isValid()
-    {
-        return $this->valid;
     }
 
     /**
@@ -325,21 +318,17 @@ abstract class Model
 
     /**
      * Cleans model data
-     *
-     * @param boolean $validity Value to set into $this->valid
      */
-    protected function reset($validity = null)
+    protected function reset()
     {
         $this->changes = [];
         $this->data = null;
-        $this->valid = $validity;
     }
 
     /**
      * Changes the value in a column
      *
      * NOTE:
-     * - You should validate the data before calling this method
      * - Changes need to be saved in the Database with save() or update($column)
      *
      * @param string $column A known column
@@ -387,6 +376,63 @@ abstract class Model
         }
     }
 
+    /**
+     * Tells if the model has valid data
+     *
+     * It may change the data to remove unwanted content
+     *
+     * @param mixed[] $data Data to be validated
+     * @param boolean $full If $data is supposed to contain all columns
+     *                      (optional columns not required) :D
+     *
+     * @return mixed[] Valid data
+     *
+     * @throws MissingColumnException
+     * @throws UnknownColumnException
+     * @throws \UnexpectedValueException If Invalid data is found
+     */
+    protected static function validate($data, $full)
+    {
+        $columns = array_keys($data);
+
+        /*
+         * Check missing columns
+         */
+        if ($full) {
+            $required = array_diff(
+                static::COLUMNS,
+                static::OPTIONAL_COLUMNS,
+                (array) static::AUTO_INCREMENT
+            );
+            $missing = array_diff($required, $columns);
+            if (!empty($missing)) {
+                throw new MissingColumnException($missing);
+            }
+        }
+
+        /*
+         * Check unknown columns
+         */
+        $unknown = array_diff($columns, static::COLUMNS);
+        if (!empty($unknown)) {
+            throw new UnknownColumnException($unknown);
+        }
+
+        /*
+         * Expanded validation
+         */
+        $hook = static::validateHook($data, $full);
+        if ($hook === false) {
+            throw new \UnexpectedValueException('Invalid data');
+        } elseif (is_array($hook)) {
+            $data = (count($data) == count($hook))
+                  ? $hook
+                  : array_replace($data, $hook);
+        }
+
+        return $data;
+    }
+
     /*
      * CRUD methods
      * =========================================================================
@@ -394,6 +440,8 @@ abstract class Model
 
     /**
      * Creates a new row in the Table or updates it with new data
+     *
+     * @see validate() Throws
      *
      * @return boolean For success or failure
      *
@@ -410,6 +458,8 @@ abstract class Model
         }
 
         $data = $this->changes;
+        $data = static::validate($data, true);
+
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, static::dataCleanup($data))
@@ -435,12 +485,9 @@ abstract class Model
             }
             $this->changes = [];
             $this->data = array_replace($this->data, $data);
-            $this->valid = true;
-        } else {
-            $this->valid = false;
+            return true;
         }
-
-        return $this->valid;
+        return false;
     }
 
     /**
@@ -477,7 +524,7 @@ abstract class Model
             }
         }
 
-        $this->reset(false);
+        $this->reset();
 
         $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
@@ -486,14 +533,16 @@ abstract class Model
                 $this->updateForeign($column, $data[$column]);
             }
             $this->data = $data;
-            $this->valid = true;
+            return true;
         }
 
-        return $this->valid;
+        return false;
     }
 
     /**
      * Selectively updates the model's row in the Database
+     *
+     * @see validate() Throws
      *
      * @param string|string[] $columns Specify which columns to update
      *
@@ -509,18 +558,17 @@ abstract class Model
 
         $columns = (array) $columns;
         $data = Utils::arrayWhitelist($this->changes, $columns);
+        $data = static::validate($data, false);
 
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
-            $this->valid = true;
-        } else {
-            $this->valid = false;
+            return true;
         }
 
-        return $this->valid;
+        return false;
     }
 
     /**
@@ -565,5 +613,27 @@ abstract class Model
             $this->reset();
             return ($stmt->rowCount() > 0);
         }
+    }
+
+    /*
+     * Hook methods
+     * =========================================================================
+     */
+
+    /**
+     * Expanded validation
+     *
+     * Override this method to do specific validation for your model.
+     * You may return an array of some $data keys with patched/validated data.
+     *
+     * @param mixed[] $data Data to be validated
+     * @param boolean $full @see validate()
+     *
+     * @return mixed[] For success with a validation patch to $data
+     * @return boolean For success or failure
+     */
+    protected static function validateHook($data, $full)
+    {
+        return true;
     }
 }

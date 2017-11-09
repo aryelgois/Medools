@@ -7,8 +7,6 @@
 
 namespace aryelgois\Medools\Exceptions;
 
-use aryelgois\Medools;
-
 /**
  * A model's foreign can not load due to invalid data in the table
  *
