@@ -39,16 +39,14 @@ Before using this framework, you need a config file somewhere in your
 application. This file setups some data for [catfan/Medoo]. Use this
 [example][config_example].
 
-Also, you need to include this line in the begining of your code:
+Also, you need to include this line in the beginning of your code:
 
 ```php
 <?php
 
 // set $root to your application root directory.
 
-aryelgois\Medools\MedooConnection::loadConfig(
-    $root . '/config/example.php'
-);
+aryelgois\Medools\MedooConnection::loadConfig($root . '/config/medools.php');
 ```
 
 It is because this framework uses a multiton technique to reuse the Database
