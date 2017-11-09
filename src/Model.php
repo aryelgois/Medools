@@ -329,7 +329,6 @@ abstract class Model
      * Changes the value in a column
      *
      * NOTE:
-     * - You should validate the data before calling this method
      * - Changes need to be saved in the Database with save() or update($column)
      *
      * @param string $column A known column
@@ -386,10 +385,11 @@ abstract class Model
      * @param boolean $full If $data is supposed to contain all columns
      *                      (optional columns not required) :D
      *
-     * @return boolean For success or failure
+     * @return mixed[] Valid data
      *
      * @throws MissingColumnException
      * @throws UnknownColumnException
+     * @throws \UnexpectedValueException If Invalid data is found
      */
     protected static function validate($data, $full)
     {
@@ -418,7 +418,19 @@ abstract class Model
             throw new UnknownColumnException($unknown);
         }
 
-        return true;
+        /*
+         * Expanded validation
+         */
+        $hook = static::validateHook($data, $full);
+        if ($hook === false) {
+            throw new \UnexpectedValueException('Invalid data');
+        } elseif (is_array($hook)) {
+            $data = (count($data) == count($hook))
+                  ? $hook
+                  : array_replace($data, $hook);
+        }
+
+        return $data;
     }
 
     /*
@@ -429,10 +441,11 @@ abstract class Model
     /**
      * Creates a new row in the Table or updates it with new data
      *
+     * @see validate() Throws
+     *
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
-     * @throws \UnexpectedValueException If an invalid data is found
      */
     public function save()
     {
@@ -445,9 +458,7 @@ abstract class Model
         }
 
         $data = $this->changes;
-        if (!static::validate($data, true)) {
-            throw new \UnexpectedValueException('Invalid data');
-        }
+        $data = static::validate($data, true);
 
         $database = self::getDatabase();
         $stmt = ($this->data === null)
@@ -531,12 +542,13 @@ abstract class Model
     /**
      * Selectively updates the model's row in the Database
      *
+     * @see validate() Throws
+     *
      * @param string|string[] $columns Specify which columns to update
      *
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
-     * @throws \UnexpectedValueException If an invalid data is found
      */
     public function update($columns)
     {
@@ -546,9 +558,7 @@ abstract class Model
 
         $columns = (array) $columns;
         $data = Utils::arrayWhitelist($this->changes, $columns);
-        if (!static::validate($data, false)) {
-            throw new \UnexpectedValueException('Invalid data');
-        }
+        $data = static::validate($data, false);
 
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
@@ -603,5 +613,27 @@ abstract class Model
             $this->reset();
             return ($stmt->rowCount() > 0);
         }
+    }
+
+    /*
+     * Hook methods
+     * =========================================================================
+     */
+
+    /**
+     * Expanded validation
+     *
+     * Override this method to do specific validation for your model.
+     * You may return an array of some $data keys with patched/validated data.
+     *
+     * @param mixed[] $data Data to be validated
+     * @param boolean $full @see validate()
+     *
+     * @return mixed[] For success with a validation patch to $data
+     * @return boolean For success or failure
+     */
+    protected static function validateHook($data, $full)
+    {
+        return true;
     }
 }
