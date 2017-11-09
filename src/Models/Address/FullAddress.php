@@ -34,6 +34,11 @@ class FullAddress extends Medools\Model
         'update'
     ];
 
+    const OPTIONAL_COLUMNS = [
+        'detail',
+        'update',
+    ];
+
     const FOREIGN_KEYS = [
         'county' => [
             __NAMESPACE__ . '\County',
