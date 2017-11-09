@@ -41,7 +41,7 @@ abstract class Model
     const DATABASE_NAME_KEY = 'default';
 
     /**
-     * Database Table the model works with
+     * Database's Table the model works with
      *
      * The recomended is to use a plural name for the table and it's singular in
      * the model name
@@ -58,7 +58,7 @@ abstract class Model
     const COLUMNS = ['id'];
 
     /**
-     * Primary Key column
+     * Primary Key column or columns
      *
      * @const string[]
      */
@@ -300,9 +300,13 @@ abstract class Model
      * - It returns the data saved in Database, changes by set() are ignored
      *
      * @return mixed[] Usually it will contain an integer key
+     * @return null    If the model was not saved yet
      */
     public function getPrimaryKey()
     {
+        if ($this->data == null) {
+            return null;
+        }
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
     }
 
@@ -425,7 +429,7 @@ abstract class Model
         if ($hook === false) {
             throw new \UnexpectedValueException('Invalid data');
         } elseif (is_array($hook)) {
-            $data = (count($data) == count($hook))
+            $data = (empty(Utils::arrayUniqueDiffKey($data, $hook)))
                   ? $hook
                   : array_replace($data, $hook);
         }
