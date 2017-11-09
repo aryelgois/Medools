@@ -30,10 +30,7 @@ class and define some settings.
 
 Open a terminal in your project directory and run:
 
-```
-composer require aryelgois/utils:dev-master
-composer require aryelgois/medools:dev-master
-```
+`composer require aryelgois/medools:dev-master`
 
 # Using a Model
 
