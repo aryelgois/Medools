@@ -33,6 +33,28 @@ Open a terminal in your project directory and run:
 `composer require aryelgois/medools:dev-master`
 
 
+# Setup
+
+Before using this framework, you need a config file somewhere in your
+application. This file setups some data for [catfan/Medoo]. Use this
+[example][config_example].
+
+Also, you need to include this line in the begining of your code:
+
+```php
+<?php
+
+// set $root to your application root directory.
+
+aryelgois\Medools\MedooConnection::loadConfig(
+    $root . '/config/example.php'
+);
+```
+
+It is because this framework uses a multiton technique to reuse the Database
+connections.
+
+
 # Using a Model
 
 ## Creating a new Entry
@@ -258,6 +280,7 @@ Possible value | When not deleted | When deleted
 - [ ] Add more Models
 
 
+[config_example]: config/example.php
 [Model]: src/Model.php
 [ModelIterator]: src/ModelIterator.php
 
