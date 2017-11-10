@@ -249,11 +249,15 @@ abstract class Model
      *                         They replace the foreign column
      *
      * @return mixed[]
+     * @return null    If $foreign is true and the model is fresh
      */
     public function getData($foreign = false)
     {
-        $data = array_replace($this->data, $this->changes);
+        $data = array_replace($this->data ?? [], $this->changes);
         if ($foreign) {
+            if ($this->data === null) {
+                return null;
+            }
             foreach ($this->foreign as $column => $model) {
                 $data[$column] = $model->getData($foreign);
             }
