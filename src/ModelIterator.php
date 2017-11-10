@@ -56,7 +56,7 @@ class ModelIterator implements \Iterator
      * @param Model   $model A model to iterate
      * @param mixed[] $where \Medoo\Medoo where clause
      */
-    public function __construct(Model $model, $where)
+    public function __construct(Model $model, $where = [])
     {
         $this->model = $model;
 
