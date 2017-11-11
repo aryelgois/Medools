@@ -366,29 +366,6 @@ abstract class Model
     }
 
     /**
-     * Returns a foreign model
-     *
-     * It tests if $column is a valid foreign column
-     *
-     * @param string $column A column in FOREIGN_KEYS keys
-     *
-     * @return Model
-     *
-     * @throws UnknownColumnException
-     * @throws NotForeignColumnException
-     */
-    public function getForeign($column)
-    {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
-        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
-            throw new NotForeignColumnException();
-        }
-        return $this->foreign[$column];
-    }
-
-    /**
      * Returns model's Primary Key
      *
      * NOTE:
@@ -445,17 +422,27 @@ abstract class Model
     /**
      * Updates a foreign model to a new row
      *
+     * It tests if $column is a valid foreign column
+     *
      * @param string $column A column in FOREIGN_KEYS keys
      * @param mixed  $value  A value in the foreign table
      *
-     * @throws UnknownColumnException     @see getForeign()
-     * @throws NotForeignColumnException  @see getForeign()
+     * @throws UnknownColumnException
+     * @throws NotForeignColumnException
      * @throws ForeignConstraintException
      */
     protected function updateForeign($column, $value)
     {
-        $foreign = $this->getForeign($column);
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
+            throw new NotForeignColumnException();
+        }
+
+        $foreign = $this->foreign[$column];
         $foreign_column = static::FOREIGN_KEYS[$column][1];
+
         if ($value === null) {
             $foreign->reset();
             return;
