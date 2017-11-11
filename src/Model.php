@@ -363,6 +363,24 @@ abstract class Model
     }
 
     /**
+     * Changes the value in multiple columns
+     *
+     * @see set()
+     *
+     * @param mixed[] $data An array of known columns => value
+     *
+     * @throws ReadOnlyModelException     @see set()
+     * @throws UnknownColumnException     @see set()
+     * @throws ForeignConstraintException @see set()
+     */
+    public function setMultiple($data)
+    {
+        foreach ($data as $column => $value) {
+            $this->set($column, $value);
+        }
+    }
+
+    /**
      * Updates a foreign model to a new row
      *
      * @param string $column A column in FOREIGN_KEYS keys
