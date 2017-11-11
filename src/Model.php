@@ -26,7 +26,7 @@ use aryelgois\Medools\Exceptions\{
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-abstract class Model
+abstract class Model implements \JsonSerializable
 {
     /*
      * Model configuration
@@ -307,29 +307,6 @@ abstract class Model
     }
 
     /**
-     * Returns the stored data
-     *
-     * @param boolean $foreign If should include foreign data
-     *                         They replace the foreign column
-     *
-     * @return mixed[]
-     * @return null    If $foreign is true and the model is fresh
-     */
-    public function getData($foreign = false)
-    {
-        $data = array_replace($this->data ?? [], $this->changes);
-        if ($foreign) {
-            if ($this->data === null) {
-                return null;
-            }
-            foreach ($this->foreign as $column => $model) {
-                $data[$column] = $model->getData($foreign);
-            }
-        }
-        return $data;
-    }
-
-    /**
      * Returns a database connection
      *
      * @return \Medoo\Medoo
@@ -364,6 +341,23 @@ abstract class Model
     public function reload()
     {
         return $this->load($this->getPrimaryKey());
+    }
+
+    /**
+     * Returns the stored data in an array
+     *
+     * @return mixed[]
+     */
+    public function jsonSerialize()
+    {
+        $data = array_replace($this->data ?? [], $this->changes);
+        if (empty($data)) {
+            return null;
+        }
+        foreach ($this->foreign as $column => $model) {
+            $data[$column] = $model;
+        }
+        return $data;
     }
 
     /**
