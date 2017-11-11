@@ -212,6 +212,32 @@ abstract class Model
     }
 
     /**
+     * Recursively gets Foreigns and returns them in a flat array
+     *
+     * Foreign of Foreign is separated with a dot
+     *
+     * EXAMPLE:
+     *     [
+     *         'foreign_a' => Model,
+     *         'foreign_a.foreign_b' => Model,
+     *     ]
+     *
+     * @param string $prefix Used by the recursion
+     *
+     * @return Model[]
+     */
+    public function findForeigns($prefix = '')
+    {
+        $result = [];
+        foreach ($this->foreign as $column => $model) {
+            $current = ($prefix == '' ? '' : $prefix . '.') . $column;
+            $result[$current] = $model;
+            $result = array_merge($result, $model->findForeigns($current));
+        }
+        return $result;
+    }
+
+    /**
      * Returns the stored data in a column
      *
      * @param string $column A known column
