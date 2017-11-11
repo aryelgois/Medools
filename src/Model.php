@@ -367,6 +367,9 @@ abstract class Model implements \JsonSerializable
     {
         $this->changes = [];
         $this->data = null;
+        foreach ($this->foreign as $model) {
+            $model->reset();
+        }
     }
 
     /**
