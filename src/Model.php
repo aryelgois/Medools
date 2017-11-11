@@ -178,6 +178,81 @@ abstract class Model
     }
 
     /**
+     * Returns the stored data in a column
+     *
+     * @param string $column A known column
+     *
+     * @return mixed
+     *
+     * @throws UnknownColumnException
+     */
+    public function __get($column)
+    {
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+        return $this->changes[$column] ?? $this->data[$column];
+    }
+
+    /**
+     * Checks if a column has some value
+     *
+     * @param string  $column A known column
+     *
+     * @return boolean
+     *
+     * @throws UnknownColumnException @see __get()
+     */
+    public function __isset($column)
+    {
+        return null !== $this->__get($column);
+    }
+
+    /**
+     * Changes the value in a column
+     *
+     * NOTE:
+     * - Changes need to be saved in the Database with save() or update($column)
+     *
+     * @param string $column A known column
+     * @param mixed  $value  The new value
+     *
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException @see updateForeign()
+     */
+    public function __set($column, $value)
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+
+        if (array_key_exists($column, static::FOREIGN_KEYS)) {
+            $this->updateForeign($column, $value);
+        }
+        $this->changes[$column] = $value;
+    }
+
+    /**
+     * Sets a column to NULL
+     *
+     * @see __set()
+     *
+     * @param [type] $column A known column
+     *
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException
+     */
+    public function __unset($column)
+    {
+        $this->__set($column, null);
+    }
+
+    /**
      * Cleans data keys, removing unwanted columns
      *
      * @todo Ignore auto timestamp column
@@ -235,53 +310,6 @@ abstract class Model
             $result = array_merge($result, $model->findForeigns($current));
         }
         return $result;
-    }
-
-    /**
-     * Returns the stored data in a column
-     *
-     * @param string $column A known column
-     *
-     * @return mixed
-     *
-     * @throws UnknownColumnException
-     */
-    public function __get($column)
-    {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
-        return $this->changes[$column] ?? $this->data[$column];
-    }
-
-    /**
-     * Checks if a column has some value
-     *
-     * @param string  $column A known column
-     *
-     * @return boolean
-     *
-     * @throws UnknownColumnException @see __get()
-     */
-    public function __isset($column)
-    {
-        return null !== $this->__get($column);
-    }
-
-    /**
-     * Sets a column to NULL
-     *
-     * @see __set()
-     *
-     * @param [type] $column A known column
-     *
-     * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
-     * @throws ForeignConstraintException
-     */
-    public function __unset($column)
-    {
-        $this->__set($column, null);
     }
 
     /**
@@ -388,34 +416,6 @@ abstract class Model
     {
         $this->changes = [];
         $this->data = null;
-    }
-
-    /**
-     * Changes the value in a column
-     *
-     * NOTE:
-     * - Changes need to be saved in the Database with save() or update($column)
-     *
-     * @param string $column A known column
-     * @param mixed  $value  The new value
-     *
-     * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
-     * @throws ForeignConstraintException @see updateForeign()
-     */
-    public function __set($column, $value)
-    {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
-
-        if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            $this->updateForeign($column, $value);
-        }
-        $this->changes[$column] = $value;
     }
 
     /**
