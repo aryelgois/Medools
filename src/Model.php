@@ -102,7 +102,7 @@ abstract class Model
     const FOREIGN_KEYS = [];
 
     /**
-     * If set(), save(), update() and delete() are
+     * If __set(), save(), update() and delete() are
      * disabled
      *
      * @const boolean
@@ -134,7 +134,7 @@ abstract class Model
      */
 
     /**
-     * Changes done by set() to be saved by update()
+     * Changes done by __set() to be saved by save() or update()
      *
      * @var mixed[]
      */
@@ -246,12 +246,42 @@ abstract class Model
      *
      * @throws UnknownColumnException
      */
-    public function get($column)
+    public function __get($column)
     {
         if (!in_array($column, static::COLUMNS)) {
             throw new UnknownColumnException();
         }
         return $this->changes[$column] ?? $this->data[$column];
+    }
+
+    /**
+     * Checks if a column has some value
+     *
+     * @param string  $column A known column
+     *
+     * @return boolean
+     *
+     * @throws UnknownColumnException @see __get()
+     */
+    public function __isset($column)
+    {
+        return null !== $this->__get($column);
+    }
+
+    /**
+     * Sets a column to NULL
+     *
+     * @see __set()
+     *
+     * @param [type] $column A known column
+     *
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException
+     */
+    public function __unset($column)
+    {
+        $this->__set($column, null);
     }
 
     /**
@@ -328,7 +358,7 @@ abstract class Model
      * Returns model's Primary Key
      *
      * NOTE:
-     * - It returns the data saved in Database, changes by set() are ignored
+     * - It returns the data saved in Database, changes by __set() are ignored
      *
      * @return mixed[] Usually it will contain an integer key
      * @return null    If the model was not saved yet
@@ -373,7 +403,7 @@ abstract class Model
      * @throws UnknownColumnException
      * @throws ForeignConstraintException @see updateForeign()
      */
-    public function set($column, $value)
+    public function __set($column, $value)
     {
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException();
@@ -381,28 +411,28 @@ abstract class Model
         if (!in_array($column, static::COLUMNS)) {
             throw new UnknownColumnException();
         }
+
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
             $this->updateForeign($column, $value);
         }
-
         $this->changes[$column] = $value;
     }
 
     /**
      * Changes the value in multiple columns
      *
-     * @see set()
+     * @see __set()
      *
      * @param mixed[] $data An array of known columns => value
      *
-     * @throws ReadOnlyModelException     @see set()
-     * @throws UnknownColumnException     @see set()
-     * @throws ForeignConstraintException @see set()
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException
      */
     public function setMultiple($data)
     {
         foreach ($data as $column => $value) {
-            $this->set($column, $value);
+            $this->__set($column, $value);
         }
     }
 
@@ -643,15 +673,15 @@ abstract class Model
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->set($column, 1);
+                    $this->__set($column, 1);
                     break;
 
                 case 'active':
-                    $this->set($column, 0);
+                    $this->__set($column, 0);
                     break;
 
                 case 'stamp':
-                    $this->set($column, static::getCurrentTimestamp());
+                    $this->__set($column, static::getCurrentTimestamp());
                     break;
 
                 default:
