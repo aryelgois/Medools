@@ -180,6 +180,8 @@ abstract class Model
     /**
      * Returns the stored data in a column
      *
+     * If a Foreign column is requested, returns the corresponding Model instead
+     *
      * @param string $column A known column
      *
      * @return mixed
@@ -190,6 +192,10 @@ abstract class Model
     {
         if (!in_array($column, static::COLUMNS)) {
             throw new UnknownColumnException();
+        }
+
+        if (array_key_exists($column, static::FOREIGN_KEYS)) {
+            return $this->foreign[$column];
         }
         return $this->changes[$column] ?? $this->data[$column];
     }
