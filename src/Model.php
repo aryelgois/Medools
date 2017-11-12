@@ -280,16 +280,25 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Returns all the data in model's Table
+     * Returns data in model's Table
      *
-     * @param mixed[] $where \Medoo\Medoo where clause
+     * @param mixed[]  $where   \Medoo\Medoo where clause
+     * @param string[] $columns Specify which columns you want
      *
      * @return array[]
+     *
+     * @throws UnknownColumnException If any item in $columns is invalid
      */
-    public static function dump($where = [])
+    public static function dump($where = [], $columns = [])
     {
+        if (empty($columns)) {
+            $columns = static::COLUMNS;
+        } elseif (!empty($invalid = array_diff($columns, static::COLUMNS))) {
+            throw new UnknownColumnException($invalid);
+        }
+
         $database = self::getDatabase();
-        return $database->select(static::TABLE, static::COLUMNS, $where);
+        return $database->select(static::TABLE, $columns, $where);
     }
 
     /**
