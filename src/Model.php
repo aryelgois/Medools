@@ -343,16 +343,6 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Reloads model data
-     *
-     * @return boolean For success or failure
-     */
-    public function reload()
-    {
-        return $this->load($this->getPrimaryKey());
-    }
-
-    /**
      * Returns the stored data in an array
      *
      * @return mixed[]
@@ -367,6 +357,16 @@ abstract class Model implements \JsonSerializable
             $data[$column] = $model;
         }
         return $data;
+    }
+
+    /**
+     * Reloads model data
+     *
+     * @return boolean For success or failure
+     */
+    public function reload()
+    {
+        return $this->load($this->getPrimaryKey());
     }
 
     /**
