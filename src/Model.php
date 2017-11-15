@@ -360,6 +360,38 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Process $where, adding the PRIMARY_KEY if needed
+     *
+     * It allows the use of a simple value (e.g. string or integer) or a
+     * simple array without specifing the PRIMARY_KEY column(s)
+     *
+     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException  If $where is null
+     * @throws \InvalidArgumentException  If could not solve Primary Key:
+     *                                    - $where does not specify columns and
+     *                                      does not match PRIMARY_KEY length
+     */
+    final public static function processWhere($where)
+    {
+        if ($where === null) {
+            throw new \InvalidArgumentException('Primary Key can not be null');
+        }
+        $where = (array) $where;
+        if (!Utils::arrayIsAssoc($where)) {
+            $where = @array_combine(static::PRIMARY_KEY, $where);
+            if ($where === false) {
+                throw new \InvalidArgumentException(
+                    'Could not solve Primary Key'
+                );
+            }
+        }
+        return $where;
+    }
+
+    /**
      * Reloads model data
      *
      * @return boolean For success or failure
@@ -553,32 +585,12 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws \InvalidArgumentException  If could not solve Primary Key:
-     *                                    - $where does not specify columns and
-     *                                      does not match PRIMARY_KEY length
-     * @throws \InvalidArgumentException  If $where is null
+     * @throws \InvalidArgumentException  @see processWhere()
      * @throws ForeignConstraintException @see updateForeign()
      */
     public function load($where)
     {
-        /*
-         * Preprocess $where
-         *
-         * It allows the use of a simple value (e.g. string or integer) or a
-         * simple array without specifing the PRIMARY_KEY column(s)
-         */
-        if ($where === null) {
-            throw new \InvalidArgumentException('Primary Key can not be null');
-        }
-        $where = (array) $where;
-        if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine(static::PRIMARY_KEY, $where);
-            if ($where === false) {
-                throw new \InvalidArgumentException(
-                    'Could not solve Primary Key'
-                );
-            }
-        }
+        $where = self::processWhere($where);
 
         $this->reset();
 
