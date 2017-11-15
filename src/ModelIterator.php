@@ -59,14 +59,7 @@ class ModelIterator implements \Iterator
     public function __construct(Model $model, $where = [])
     {
         $this->model = $model;
-
-        $database = $model::getDatabase();
-
-        $this->list = $database->select(
-            $model::TABLE,
-            $model::PRIMARY_KEY,
-            $where
-        );
+        $this->list = $model->dump($where, $model::PRIMARY_KEY);
     }
 
     /**
