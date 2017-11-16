@@ -360,6 +360,27 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Exports this Model to ModelManager
+     *
+     * @return boolean For success or failure
+     */
+    public function managerExport()
+    {
+        ModelManager::import($this);
+    }
+
+    /**
+     * Updates this Model in the ModelManager
+     *
+     * @param string[] $old_primary_key
+     */
+    protected function managerUpdate($old_primary_key)
+    {
+        ModelManager::remove(array_merge([get_class($this)], $old_primary_key));
+        $this->managerExport();
+    }
+
+    /**
      * Process $where, adding the PRIMARY_KEY if needed
      *
      * It allows the use of a simple value (e.g. string or integer) or a
@@ -548,6 +569,16 @@ abstract class Model implements \JsonSerializable
         $data = $this->changes;
         $data = static::validate($data, true);
 
+        if ($this->data !== null) {
+            $update_manager = !empty(array_intersect(
+                array_keys($data),
+                static::PRIMARY_KEY
+            ));
+            if ($update_manager) {
+                $old_primary_key = $this->getPrimaryKey();
+            }
+        }
+
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, static::dataCleanup($data))
@@ -573,6 +604,9 @@ abstract class Model implements \JsonSerializable
             }
             $this->changes = [];
             $this->data = array_replace($this->data, $data);
+            if ($update_manager) {
+                $this->managerUpdate($old_primary_key);
+            }
             return true;
         }
         return false;
@@ -592,6 +626,8 @@ abstract class Model implements \JsonSerializable
     {
         $where = self::processWhere($where);
 
+        $old_primary_key = $this->getPrimaryKey();
+
         $this->reset();
 
         $database = self::getDatabase();
@@ -601,6 +637,11 @@ abstract class Model implements \JsonSerializable
                 $this->updateForeign($column, $data[$column]);
             }
             $this->data = $data;
+            if ($old_primary_key) {
+                $this->managerUpdate($old_primary_key);
+            } else {
+                $this->managerExport();
+            }
             return true;
         }
 
@@ -628,11 +669,22 @@ abstract class Model implements \JsonSerializable
         $data = Utils::arrayWhitelist($this->changes, $columns);
         $data = static::validate($data, false);
 
+        $update_manager = !empty(array_intersect(
+            $columns,
+            static::PRIMARY_KEY
+        ));
+        if ($update_manager) {
+            $old_primary_key = $this->getPrimaryKey();
+        }
+
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
+            if ($update_manager) {
+                $this->managerUpdate($old_primary_key);
+            }
             return true;
         }
 
@@ -678,6 +730,7 @@ abstract class Model implements \JsonSerializable
             return $this->update($column);
         } else {
             $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
+            ModelManager::remove($this);
             $this->reset();
             return ($stmt->rowCount() > 0);
         }
