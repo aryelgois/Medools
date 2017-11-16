@@ -509,13 +509,13 @@ abstract class Model implements \JsonSerializable
         /*
          * Expanded validation
          */
-        $hook = static::validateHook($data, $full);
-        if ($hook === false) {
+        $result = static::validateHook($data, $full);
+        if ($result === false) {
             throw new \UnexpectedValueException('Invalid data');
-        } elseif (is_array($hook)) {
-            $data = (empty(Utils::arrayUniqueDiffKey($data, $hook)))
-                  ? $hook
-                  : array_replace($data, $hook);
+        } elseif (is_array($result)) {
+            $data = (empty(Utils::arrayUniqueDiffKey($data, $result)))
+                  ? $result
+                  : array_replace($data, $result);
         }
 
         return $data;
