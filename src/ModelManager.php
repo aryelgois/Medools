@@ -16,7 +16,7 @@ use aryelgois\Utils;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-class ModelManager
+abstract class ModelManager
 {
     /**
      * Nested list of Models
