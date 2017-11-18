@@ -234,10 +234,10 @@ abstract class Model implements \JsonSerializable
         }
 
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            $foreign = static::FOREIGN_KEYS[$column];
-            if ($value instanceof $foreign[0]) {
+            $foreign_map = static::FOREIGN_KEYS[$column];
+            if ($value instanceof $foreign_map[0]) {
                 $this->foreign[$column] = $value;
-                $this->changes[$column] = $value->data[$foreign[1]];
+                $this->changes[$column] = $value->data[$foreign_map[1]];
                 return;
             } else {
                 $this->updateForeign($column, $value);
