@@ -164,13 +164,18 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed $where @see load(). If null, a fresh model is created
      *
-     * @throws \InvalidArgumentException  @see load() 2 cases
+     * @throws \InvalidArgumentException  @see load()
      * @throws ForeignConstraintException @see load()
+     * @throws \InvalidArgumentException  If could not load from Database
      */
     public function __construct($where = null)
     {
         if ($where !== null) {
-            $this->load($where);
+            if (!$this->load($where)) {
+                throw new \InvalidArgumentException(
+                    'Could not load from Database'
+                );
+            }
         }
     }
 
