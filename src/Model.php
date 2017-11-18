@@ -222,7 +222,7 @@ abstract class Model implements \JsonSerializable
      *
      * @throws ReadOnlyModelException
      * @throws UnknownColumnException
-     * @throws ForeignConstraintException @see updateForeign()
+     * @throws ForeignConstraintException @see loadForeign()
      */
     public function __set($column, $value)
     {
@@ -240,7 +240,7 @@ abstract class Model implements \JsonSerializable
                 $this->changes[$column] = $value->data[$foreign_map[1]];
                 return;
             } else {
-                $this->updateForeign($column, $value);
+                $this->loadForeign($column, $value);
             }
         }
         $this->changes[$column] = $value;
@@ -466,7 +466,7 @@ abstract class Model implements \JsonSerializable
      * @throws NotForeignColumnException
      * @throws ForeignConstraintException
      */
-    protected function updateForeign($column, $value)
+    protected function loadForeign($column, $value)
     {
         if (!in_array($column, static::COLUMNS)) {
             throw new UnknownColumnException();
@@ -624,7 +624,7 @@ abstract class Model implements \JsonSerializable
      * @return boolean For success or failure
      *
      * @throws \InvalidArgumentException  @see processWhere()
-     * @throws ForeignConstraintException @see updateForeign()
+     * @throws ForeignConstraintException @see loadForeign()
      */
     public function load($where)
     {
@@ -643,7 +643,7 @@ abstract class Model implements \JsonSerializable
                 $this->managerExport();
             }
             foreach (array_keys(static::FOREIGN_KEYS) as $column) {
-                $this->updateForeign($column, $data[$column]);
+                $this->loadForeign($column, $data[$column]);
             }
             return true;
         }
