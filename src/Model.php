@@ -577,20 +577,16 @@ abstract class Model implements \JsonSerializable
         $data = $this->changes;
         $data = static::validate($data, true);
 
-        if ($this->data !== null) {
-            $update_manager = !empty(array_intersect(
-                array_keys($data),
-                static::PRIMARY_KEY
-            ));
-            if ($update_manager) {
-                $old_primary_key = $this->getPrimaryKey();
-            }
-        }
+        $old_primary_key = $this->getPrimaryKey();
+        $update_manager = $this->data !== null && !empty(array_intersect(
+            array_keys($data),
+            static::PRIMARY_KEY
+        ));
 
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, static::dataCleanup($data))
-              : $database->update(static::TABLE, $data, $this->getPrimaryKey());
+              : $database->update(static::TABLE, $data, $old_primary_key);
 
         if ($stmt->errorCode() == '00000') {
             if ($this->data === null) {
@@ -676,16 +672,14 @@ abstract class Model implements \JsonSerializable
         $data = Utils::arrayWhitelist($this->changes, $columns);
         $data = static::validate($data, false);
 
+        $old_primary_key = $this->getPrimaryKey();
         $update_manager = !empty(array_intersect(
             $columns,
             static::PRIMARY_KEY
         ));
-        if ($update_manager) {
-            $old_primary_key = $this->getPrimaryKey();
-        }
 
         $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
+        $stmt = $database->update(static::TABLE, $data, $old_primary_key);
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
