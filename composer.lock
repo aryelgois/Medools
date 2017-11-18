@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e4fef00e91e4917b6b04b05c6c8ed6e",
+    "content-hash": "49231227386aac1e13e6d92f33113996",
     "packages": [
         {
             "name": "aryelgois/utils",
-            "version": "v0.1",
+            "version": "v0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aryelgois/utils.git",
-                "reference": "2f1b1ecdf2416c494483edffc2c6ad556e671399"
+                "reference": "98bc8e02758eb461135a7831dd65353b20129952"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aryelgois/utils/zipball/2f1b1ecdf2416c494483edffc2c6ad556e671399",
-                "reference": "2f1b1ecdf2416c494483edffc2c6ad556e671399",
+                "url": "https://api.github.com/repos/aryelgois/utils/zipball/98bc8e02758eb461135a7831dd65353b20129952",
+                "reference": "98bc8e02758eb461135a7831dd65353b20129952",
                 "shasum": ""
             },
             "require": {
@@ -43,7 +43,7 @@
             "keywords": [
                 "utils"
             ],
-            "time": "2017-11-09T11:04:58+00:00"
+            "time": "2017-11-16T01:49:54+00:00"
         },
         {
             "name": "catfan/medoo",

@@ -26,7 +26,7 @@ use aryelgois\Medools\Exceptions\{
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-abstract class Model
+abstract class Model implements \JsonSerializable
 {
     /*
      * Model configuration
@@ -102,7 +102,7 @@ abstract class Model
     const FOREIGN_KEYS = [];
 
     /**
-     * If set(), save(), update() and delete() are
+     * If __set(), save(), update() and delete() are
      * disabled
      *
      * @const boolean
@@ -134,7 +134,7 @@ abstract class Model
      */
 
     /**
-     * Changes done by set() to be saved by update()
+     * Changes done by __set() to be saved by save() or update()
      *
      * @var mixed[]
      */
@@ -164,17 +164,107 @@ abstract class Model
      *
      * @param mixed $where @see load(). If null, a fresh model is created
      *
-     * @throws \InvalidArgumentException  @see load() 2 cases
+     * @throws \InvalidArgumentException  @see load()
      * @throws ForeignConstraintException @see load()
+     * @throws \InvalidArgumentException  If could not load from Database
      */
     public function __construct($where = null)
     {
-        foreach (static::FOREIGN_KEYS as $column => $map) {
-            $this->foreign[$column] = new $map[0];
-        }
         if ($where !== null) {
-            $this->load($where);
+            if (!$this->load($where)) {
+                throw new \InvalidArgumentException(
+                    'Could not load from Database'
+                );
+            }
         }
+    }
+
+    /**
+     * Returns the stored data in a column
+     *
+     * If a Foreign column is requested, returns the corresponding Model instead
+     *
+     * @param string $column A known column
+     *
+     * @return mixed
+     *
+     * @throws UnknownColumnException
+     */
+    public function __get($column)
+    {
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+
+        if (array_key_exists($column, static::FOREIGN_KEYS)) {
+            return $this->foreign[$column] ?? null;
+        }
+        return $this->changes[$column] ?? $this->data[$column];
+    }
+
+    /**
+     * Checks if a column has some value
+     *
+     * @param string  $column A known column
+     *
+     * @return boolean
+     *
+     * @throws UnknownColumnException @see __get()
+     */
+    public function __isset($column)
+    {
+        return null !== $this->__get($column);
+    }
+
+    /**
+     * Changes the value in a column
+     *
+     * NOTE:
+     * - Changes need to be saved in the Database with save() or update($column)
+     *
+     * @param string $column A known column
+     * @param mixed  $value  The new value
+     *
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException @see loadForeign()
+     */
+    public function __set($column, $value)
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+
+        if (array_key_exists($column, static::FOREIGN_KEYS)) {
+            $foreign_map = static::FOREIGN_KEYS[$column];
+            if ($value instanceof $foreign_map[0]) {
+                $this->foreign[$column] = $value;
+                $this->changes[$column] = $value->data[$foreign_map[1]];
+                return;
+            } else {
+                $this->loadForeign($column, $value);
+            }
+        }
+        $this->changes[$column] = $value;
+    }
+
+    /**
+     * Sets a column to NULL
+     *
+     * @see __set()
+     *
+     * @param [type] $column A known column
+     *
+     * @throws ReadOnlyModelException
+     * @throws UnknownColumnException
+     * @throws ForeignConstraintException
+     */
+    public function __unset($column)
+    {
+        $this->__set($column, null);
     }
 
     /**
@@ -199,33 +289,25 @@ abstract class Model
     }
 
     /**
-     * Returns all the data in model's Table
+     * Returns data in model's Table
      *
-     * @param mixed[] $where \Medoo\Medoo where clause
+     * @param mixed[]  $where   \Medoo\Medoo where clause
+     * @param string[] $columns Specify which columns you want
      *
      * @return array[]
+     *
+     * @throws UnknownColumnException If any item in $columns is invalid
      */
-    public static function dump($where = [])
+    public static function dump($where = [], $columns = [])
     {
-        $database = self::getDatabase();
-        return $database->select(static::TABLE, static::COLUMNS, $where);
-    }
-
-    /**
-     * Returns the stored data in a column
-     *
-     * @param string $column A known column
-     *
-     * @return mixed
-     *
-     * @throws UnknownColumnException
-     */
-    public function get($column)
-    {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
+        if (empty($columns)) {
+            $columns = static::COLUMNS;
+        } elseif (!empty($invalid = array_diff($columns, static::COLUMNS))) {
+            throw new UnknownColumnException($invalid);
         }
-        return $this->changes[$column] ?? $this->data[$column];
+
+        $database = self::getDatabase();
+        return $database->select(static::TABLE, $columns, $where);
     }
 
     /**
@@ -243,25 +325,6 @@ abstract class Model
     }
 
     /**
-     * Returns the stored data
-     *
-     * @param boolean $foreign If should include foreign data
-     *                         They replace the foreign column
-     *
-     * @return mixed[]
-     */
-    public function getData($foreign = false)
-    {
-        $data = array_replace($this->data, $this->changes);
-        if ($foreign) {
-            foreach ($this->foreign as $column => $model) {
-                $data[$column] = $model->getData($foreign);
-            }
-        }
-        return $data;
-    }
-
-    /**
      * Returns a database connection
      *
      * @return \Medoo\Medoo
@@ -272,43 +335,90 @@ abstract class Model
     }
 
     /**
-     * Returns a foreign model
-     *
-     * It tests if $column is a valid foreign column
-     *
-     * @param string $column A column in FOREIGN_KEYS keys
-     *
-     * @return Model
-     *
-     * @throws UnknownColumnException
-     * @throws NotForeignColumnException
-     */
-    public function getForeign($column)
-    {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
-        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
-            throw new NotForeignColumnException();
-        }
-        return $this->foreign[$column];
-    }
-
-    /**
      * Returns model's Primary Key
      *
      * NOTE:
-     * - It returns the data saved in Database, changes by set() are ignored
+     * - It returns the data saved in Database, changes by __set() are ignored
      *
      * @return mixed[] Usually it will contain an integer key
      * @return null    If the model was not saved yet
      */
     public function getPrimaryKey()
     {
-        if ($this->data == null) {
+        if ($this->data === null) {
             return null;
         }
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
+    }
+
+    /**
+     * Returns the stored data in an array
+     *
+     * @return mixed[]
+     */
+    public function jsonSerialize()
+    {
+        $data = array_replace($this->data ?? [], $this->changes);
+        if (empty($data)) {
+            return null;
+        }
+        foreach ($this->foreign as $column => $model) {
+            $data[$column] = $model;
+        }
+        return $data;
+    }
+
+    /**
+     * Exports this Model to ModelManager
+     *
+     * @return boolean For success or failure
+     */
+    protected function managerExport()
+    {
+        ModelManager::import($this);
+    }
+
+    /**
+     * Updates this Model in the ModelManager
+     *
+     * @param string[] $old_primary_key
+     */
+    protected function managerUpdate($old_primary_key)
+    {
+        ModelManager::remove(array_merge([get_class($this)], $old_primary_key));
+        $this->managerExport();
+    }
+
+    /**
+     * Process $where, adding the PRIMARY_KEY if needed
+     *
+     * It allows the use of a simple value (e.g. string or integer) or a
+     * simple array without specifing the PRIMARY_KEY column(s)
+     *
+     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException  If $where is null
+     * @throws \InvalidArgumentException  If could not solve Primary Key:
+     *                                    - $where does not specify columns and
+     *                                      does not match PRIMARY_KEY length
+     */
+    final public static function processWhere($where)
+    {
+        if ($where === null) {
+            throw new \InvalidArgumentException('Primary Key can not be null');
+        }
+        $where = (array) $where;
+        if (!Utils::arrayIsAssoc($where)) {
+            $where = @array_combine(static::PRIMARY_KEY, $where);
+            if ($where === false) {
+                throw new \InvalidArgumentException(
+                    'Could not solve Primary Key'
+                );
+            }
+        }
+        return $where;
     }
 
     /**
@@ -328,55 +438,106 @@ abstract class Model
     {
         $this->changes = [];
         $this->data = null;
+        $this->foreign = [];
     }
 
     /**
-     * Changes the value in a column
+     * Changes the value in multiple columns
      *
-     * NOTE:
-     * - Changes need to be saved in the Database with save() or update($column)
+     * @see __set()
      *
-     * @param string $column A known column
-     * @param mixed  $value  The new value
+     * @param mixed[] $data An array of known columns => value
      *
      * @throws ReadOnlyModelException
      * @throws UnknownColumnException
-     * @throws ForeignConstraintException @see updateForeign()
+     * @throws ForeignConstraintException
      */
-    public function set($column, $value)
+    public function setMultiple($data)
+    {
+        foreach ($data as $column => $value) {
+            $this->__set($column, $value);
+        }
+    }
+
+    /**
+     * Sets the SOFT_DELETE column to a undeleted state
+     *
+     * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
+     * @throws \LogicException        If the Model is not soft-deletable
+     * @throws \LogicException        If SOFT_DELETE_MODE is unknown
+     */
+    public function undelete()
     {
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException();
         }
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
-        if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            $this->updateForeign($column, $value);
+        if (static::SOFT_DELETE === null) {
+            throw new \LogicException('Model is not soft-deletable');
         }
 
-        $this->changes[$column] = $value;
+        $database = self::getDatabase();
+        $column = static::SOFT_DELETE;
+
+        switch (static::SOFT_DELETE_MODE) {
+            case 'deleted':
+                $this->__set($column, 0);
+                break;
+
+            case 'active':
+                $this->__set($column, 1);
+                break;
+
+            case 'stamp':
+                $this->__set($column, null);
+                break;
+
+            default:
+                throw new \LogicException(
+                    "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
+                );
+                break;
+        }
+
+        return $this->update($column);
     }
 
     /**
      * Updates a foreign model to a new row
      *
+     * It tests if $column is a valid foreign column
+     *
      * @param string $column A column in FOREIGN_KEYS keys
      * @param mixed  $value  A value in the foreign table
      *
-     * @throws UnknownColumnException     @see getForeign()
-     * @throws NotForeignColumnException  @see getForeign()
+     * @throws UnknownColumnException
+     * @throws NotForeignColumnException
      * @throws ForeignConstraintException
      */
-    protected function updateForeign($column, $value)
+    protected function loadForeign($column, $value)
     {
-        $foreign = $this->getForeign($column);
-        $foreign_column = static::FOREIGN_KEYS[$column][1];
+        if (!in_array($column, static::COLUMNS)) {
+            throw new UnknownColumnException();
+        }
+        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
+            throw new NotForeignColumnException();
+        }
+
+        $foreign_map = static::FOREIGN_KEYS[$column];
+
         if ($value === null) {
-            $foreign->reset();
+            unset($this->foreign[$column]);
             return;
         }
-        if (!$foreign->load([$foreign_column => $value])) {
+        $foreign = ModelManager::getInstance(
+            $foreign_map[0],
+            [$foreign_map[1] => $value]
+        );
+
+        if ($foreign) {
+            $this->foreign[$column] = $foreign;
+        } else {
             throw new ForeignConstraintException(static::class, $column);
         }
     }
@@ -426,13 +587,13 @@ abstract class Model
         /*
          * Expanded validation
          */
-        $hook = static::validateHook($data, $full);
-        if ($hook === false) {
+        $result = static::validateHook($data, $full);
+        if ($result === false) {
             throw new \UnexpectedValueException('Invalid data');
-        } elseif (is_array($hook)) {
-            $data = (empty(Utils::arrayUniqueDiffKey($data, $hook)))
-                  ? $hook
-                  : array_replace($data, $hook);
+        } elseif (is_array($result)) {
+            $data = (empty(Utils::arrayUniqueDiffKey($data, $result)))
+                  ? $result
+                  : array_replace($data, $result);
         }
 
         return $data;
@@ -465,10 +626,16 @@ abstract class Model
         $data = $this->changes;
         $data = static::validate($data, true);
 
+        $old_primary_key = $this->getPrimaryKey();
+        $update_manager = $this->data !== null && !empty(array_intersect(
+            array_keys($data),
+            static::PRIMARY_KEY
+        ));
+
         $database = self::getDatabase();
         $stmt = ($this->data === null)
               ? $database->insert(static::TABLE, static::dataCleanup($data))
-              : $database->update(static::TABLE, $data, $this->getPrimaryKey());
+              : $database->update(static::TABLE, $data, $old_primary_key);
 
         if ($stmt->errorCode() == '00000') {
             if ($this->data === null) {
@@ -490,6 +657,9 @@ abstract class Model
             }
             $this->changes = [];
             $this->data = array_replace($this->data, $data);
+            if ($update_manager) {
+                $this->managerUpdate($old_primary_key);
+            }
             return true;
         }
         return false;
@@ -502,42 +672,28 @@ abstract class Model
      *
      * @return boolean For success or failure
      *
-     * @throws \InvalidArgumentException  If could not solve Primary Key:
-     *                                    - $where does not specify columns and
-     *                                      does not match PRIMARY_KEY length
-     * @throws \InvalidArgumentException  If $where is null
-     * @throws ForeignConstraintException @see updateForeign()
+     * @throws \InvalidArgumentException  @see processWhere()
+     * @throws ForeignConstraintException @see loadForeign()
      */
     public function load($where)
     {
-        /*
-         * Preprocess $where
-         *
-         * It allows the use of a simple value (e.g. string or integer) or a
-         * simple array without specifing the PRIMARY_KEY column(s)
-         */
-        if ($where === null) {
-            throw new \InvalidArgumentException('Primary Key can not be null');
-        }
-        $where = (array) $where;
-        if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine(static::PRIMARY_KEY, $where);
-            if ($where === false) {
-                throw new \InvalidArgumentException(
-                    'Could not solve Primary Key'
-                );
-            }
-        }
+        $where = self::processWhere($where);
 
-        $this->reset();
+        $old_primary_key = $this->getPrimaryKey();
 
         $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
         if ($data) {
-            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
-                $this->updateForeign($column, $data[$column]);
-            }
+            $this->reset();
             $this->data = $data;
+            if ($old_primary_key) {
+                $this->managerUpdate($old_primary_key);
+            } else {
+                $this->managerExport();
+            }
+            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+                $this->loadForeign($column, $data[$column]);
+            }
             return true;
         }
 
@@ -554,22 +710,35 @@ abstract class Model
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
+     * @throws \LogicException        If trying to update a fresh Model
      */
     public function update($columns)
     {
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException();
         }
+        if ($this->data === null) {
+            throw new \LogicException('Can not update a fresh Model');
+        }
 
         $columns = (array) $columns;
         $data = Utils::arrayWhitelist($this->changes, $columns);
         $data = static::validate($data, false);
 
+        $old_primary_key = $this->getPrimaryKey();
+        $update_manager = !empty(array_intersect(
+            $columns,
+            static::PRIMARY_KEY
+        ));
+
         $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
+        $stmt = $database->update(static::TABLE, $data, $old_primary_key);
         if ($stmt->errorCode() == '00000') {
             $this->changes = Utils::arrayBlacklist($this->changes, $columns);
             $this->data = array_replace($this->data, $data);
+            if ($update_manager) {
+                $this->managerUpdate($old_primary_key);
+            }
             return true;
         }
 
@@ -577,12 +746,12 @@ abstract class Model
     }
 
     /**
-     * Removes model's row from the Table
+     * Removes model's row from the Table or sets the SOFT_DELETE column
      *
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
-     * @throws \LogicException If SOFT_DELETE_MODE is unknown
+     * @throws \LogicException        If SOFT_DELETE_MODE is unknown
      */
     public function delete()
     {
@@ -595,15 +764,15 @@ abstract class Model
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->set($column, 1);
+                    $this->__set($column, 1);
                     break;
 
                 case 'active':
-                    $this->set($column, 0);
+                    $this->__set($column, 0);
                     break;
 
                 case 'stamp':
-                    $this->set($column, static::getCurrentTimestamp());
+                    $this->__set($column, static::getCurrentTimestamp());
                     break;
 
                 default:
@@ -615,6 +784,7 @@ abstract class Model
             return $this->update($column);
         } else {
             $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
+            ModelManager::remove($this);
             $this->reset();
             return ($stmt->rowCount() > 0);
         }

@@ -10,7 +10,7 @@ namespace aryelgois\Medools;
 use Medoo\Medoo;
 
 /**
- * A Multiton creator of \Medoo\Medoo objects
+ * A Factory of \Medoo\Medoo objects
  *
  * It avoids recreate a Medoo for the same database, while implements an
  * abstraction for the Medoo configuration
@@ -24,7 +24,7 @@ use Medoo\Medoo;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-class MedooConnection
+abstract class MedooConnection
 {
     /**
      * Store the configurations for a new instance

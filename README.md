@@ -2,7 +2,7 @@
 
 ## (pt_BR)
 
-Um básico framework para modelos relacionados a um Banco de Dados.
+Um framework básico para modelos relacionados a um Banco de Dados.
 
 Com esse framework, você configura o mínimo para os seus modelos e foca no seu
 próprio código. Abstraia a comunicação com seu Banco de Dados!
@@ -30,7 +30,7 @@ class and define some settings.
 
 Open a terminal in your project directory and run:
 
-`composer require aryelgois/medools:^1.0`
+`composer require aryelgois/medools:^2.0`
 
 
 # Setup
@@ -49,34 +49,32 @@ Also, you need to include this line in the beginning of your code:
 aryelgois\Medools\MedooConnection::loadConfig($root . '/config/medools.php');
 ```
 
-It is because this framework uses a multiton technique to reuse the Database
-connections.
+It is because this framework uses a factory to reuse the Database connections.
 
 
 # Using a Model
 
-## Creating a new Entry
+## Creating a new Model
 
-You can instance a new Model, without any parameters, to create a fresh model
-object. Then use `set()` to add data into the model. Your code should known
-which columns are available, but you can look at `Model::COLUMNS` for a complete
-list from that model.
+You can instantiate a new Model, without any parameters, to create a fresh model
+object. Then add data into its columns, like in any other object. Your code
+should known which columns are available, but you can look at `$model::COLUMNS`
+for a complete list from that model.
 
-Your changes are stored only in that object, so you need to `save()` in order
-to send to the Database.
-
-
-## Loading an Entry from Database
-
-Instance the model with a value for its `PRIMARY_KEY`, or specify an associative
-array with which columns you would like to [filter][where_clause]. Only one row
-is loaded.
-
-Then you can `get()` any stored column or `set()` new data (remember to
-`save()` or `update()` these data).
+Your changes are stored in that object, so you need to `save()` in order to send
+to the Database.
 
 
-## Saving an Entry
+## Loading from Database
+
+Instantiate the model with a value for its `PRIMARY_KEY`, or specify an
+associative array with which columns you would like to [filter][where_clause].
+Only one row is loaded.
+
+You can also `load()` after creating the object.
+
+
+## Saving into Database
 
 Use `save()` to send all changes to the Database, and `update()` to only send
 some.
@@ -85,38 +83,41 @@ Some columns you might have changed can have different values afterwards, due to
 some validation process or Database defaults.
 
 
-## Deleting an Entry
+## Deleting from Database
 
-Simply use `delete()`. If the model has `SOFT_DELETE` configured, it will only
-update that column. Otherwise, it will completely delete the row from the
-Database, and `reset()` the model object.
+Simply use `delete()`.
+
+If the model has `SOFT_DELETE` configured, it will just update that column. So
+you are able to `undelete()` later.
+
+Otherwise, it will completely delete the row from the Database, and `reset()`
+the model object.
 
 
-## Accessing data
+## Accessing and manipulating data
 
-A few methods are provided by default. They are:
+Just like in any object:
 
-- `get()`: Gives one column
-- `getData()`: Gives all the stored data in the model. You can pass `true` to
-  get from foreign models as well.
-- `getForeign()`: Returns another model for the foreign constrain in a column
-- `getPrimaryKey():` Returns the last saved Primary Key.
+- `$model->column` will return the stored data, or a foreign model
+- `$model->column = value` will set a new data
 
-#### Dumping data from Table
+You can also:
 
-Every model can `dump()` its own Table, optionally a [part of it][where_clause].
+- `dump()`: Returns data from model's Table, you can [filter which rows][where_clause]
+  and which columns you want
+- `getPrimaryKey():` Returns the last saved Primary Key
+- `setMultiple():` Sets multiple columns from an array
 
 
 ## Reloading the model
 
-Use `reload()` to re fetch the row with models Primary Key. Foreigns are also
-reloaded.
+Use `reload()` to re fetch the row with model's Primary Key.
 
 
-## Iterating on many entries
+## Iterating over many rows
 
 A [ModelIterator] is provided to access multiple rows, but it provides only one
-entry at time.
+at time.
 
 Give it a model instance you want to iterate over, it can be a fresh one, and
 some [filter][where_clause] array. Then it will `load()` each matched row, one
@@ -125,18 +126,23 @@ by one.
 
 ## Foreign models
 
-This framework supports foreign models, so you can configure them in the model
-class, and access with `getForeign()`. They are simply other models, referenced
-in your model.
+This framework supports foreign models. You can configure them in the model
+class, and access `$model->foreign_column`. They are simply other models,
+referenced in your model.
 
-You can add custom methods to your models, so they automatically `get()` some
-data from it's foreigns, as needed.
-
-> Warning: Be careful not to configure a circular foreign constrain. PHP might
-> hang trying to create infinite models.
+> :warning: Warning: Be careful not to configure a circular foreign constrain.
+> PHP might hang trying to create infinite models.
 
 
-## Hooks
+## Advanced
+
+Use `getDatabase()` for a direct access to the Database, already connected and
+ready to use. See [catfan/Medoo] for details.
+
+You can add custom methods to your models, to automatically get some data and
+format as needed.
+
+#### Hooks
 
 There is a Hook concept in this framework, where you can add specific methods
 which are automatically called by default methods. It makes easier to extend
@@ -148,11 +154,10 @@ Current, these hooks are available:
   Make sure your code can validate some columns or all of them, depending on the
   `$full` argument.
 
+#### ModelManager
 
-## Advanced
-
-Use `getDatabase()` for a direct access to the Database, already connected and
-ready to use. See [catfan/Medoo] for details.
+[This class][ModelManager] tracks every model loaded during a request. It aims
+to avoid model duplication, mainly in foreign keys.
 
 
 # Configuring a Model
@@ -201,8 +206,6 @@ Primary Key column or columns
 
 Auto Increment column
 
-> This column is ignored by update()
-
 - Type: `string|null`
 - Default: `'id'`
 
@@ -240,7 +243,7 @@ const FOREIGN_KEYS = [
 
 #### READ_ONLY
 
-If `set()`, `save()`, `update()` and `delete()` are disabled
+If `__set()`, `save()`, `update()`, `delete()` and `undelete()` are disabled
 
 - Type: `boolean`
 - Default: `false`
@@ -272,6 +275,25 @@ Possible value | When not deleted | When deleted
 `'stamp'`      | null             | current timestamp
 
 
+# Changelog
+
+#### v2.0 (2017-11-18) ModelManager release
+
+Some methods were added, some changed, and some were removed. The most notable
+are `get()` and `set()`, replaced by PHP magic methods, and `getForeign()`,
+integrated with `__get()` to create a chain.
+
+Models are now JsonSerializable, so you can simply wrap a model in
+`json_encode()`. The reverse is not possible.
+
+The featuring [ModelManager][ModelManager] provides a way to reduce object
+duplication, keeping a track of loaded models, which are reused when referenced
+as foreign keys.
+
+Also, some fixes were made.
+
+#### v1.0 (2017-11-09) First release
+
 # TODO
 
 - [ ] Real World tests
@@ -279,9 +301,10 @@ Possible value | When not deleted | When deleted
 
 
 [config_example]: config/example.php
-[Model]: src/Model.php
-[ModelIterator]: src/ModelIterator.php
+[Model]:          src/Model.php
+[ModelIterator]:  src/ModelIterator.php
+[ModelManager]:   src/ModelManager.php
 
-[where_clause]: https://medoo.in/api/where
+[catfan/Medoo]:   https://github.com/catfan/Medoo
 
-[catfan/Medoo]: https://github.com/catfan/Medoo
+[where_clause]:   https://medoo.in/api/where

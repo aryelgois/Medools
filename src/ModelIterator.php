@@ -19,7 +19,7 @@ use aryelgois\Utils;
 class ModelIterator implements \Iterator
 {
     /**
-     * List PRIMARY KEYS for $model
+     * List PRIMARY KEYS for $model_class
      *
      * @var mixed[]
      */
@@ -28,9 +28,9 @@ class ModelIterator implements \Iterator
     /**
      * A model to load data from Database, with one item in $list at time
      *
-     * @var Model
+     * @var string
      */
-    protected $model;
+    protected $model_class;
 
     /**
      * The current PRIMARY KEY to be used from $list
@@ -42,31 +42,25 @@ class ModelIterator implements \Iterator
     /**
      * Creates a new Model Iterator
      *
-     * - You provide a Model instance (preferably empty) and a Medoo $where
-     * - It selects PRIMARY KEYS for that model matching $where
+     * - You provide a Fully Qualified Model Class and a Medoo $where
+     * - It loads instances of that model class matching $where
      * - Now you can iterate over Database rows for that model, one at time
      *
      * EXAMPLE:
-     *     foreach (new ModelIterator(new Model, ['id[>=]' => 1]) as $model) {
+     *     $class = 'aryelgois\Medools\Models\Person';
+     *     foreach (new ModelIterator($class, ['id[>=]' => 1]) as $model) {
      *         // code...
      *     }
      *
      * @see https://medoo.in/api/where
      *
-     * @param Model   $model A model to iterate
+     * @param string  $model A Fully Qualified Model Class to iterate
      * @param mixed[] $where \Medoo\Medoo where clause
      */
-    public function __construct(Model $model, $where)
+    public function __construct($model_class, $where = [])
     {
-        $this->model = $model;
-
-        $database = $model::getDatabase();
-
-        $this->list = $database->select(
-            $model::TABLE,
-            $model::PRIMARY_KEY,
-            $where
-        );
+        $this->model_class = $model_class;
+        $this->list = $model_class::dump($where, $model_class::PRIMARY_KEY);
     }
 
     /**
@@ -76,8 +70,10 @@ class ModelIterator implements \Iterator
      */
     public function current()
     {
-        $this->model->load($this->list[$this->pointer]);
-        return $this->model;
+        return ModelManager::getInstance(
+            $this->model_class,
+            $this->list[$this->pointer]
+        );
     }
 
     /**

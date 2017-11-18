@@ -33,7 +33,7 @@ class Person extends Medools\Model
      */
     public function documentValidate()
     {
-        return Utils\Validation::document($this->get('document'));
+        return Utils\Validation::document($this->document);
     }
 
     /**
@@ -47,6 +47,6 @@ class Person extends Medools\Model
      */
     public function documentFormat($prepend = false)
     {
-        return Utils\Format::document($this->get('document'), $prepend);
+        return Utils\Format::document($this->document, $prepend);
     }
 }
