@@ -56,42 +56,27 @@ class ModelManager
      * @param mixed[] $where       Value for Model Primary Key
      *                             or \Medoo\Medoo where clause
      *
-     * @return Model
+     * @return Model Loaded from Database
+     * @return null  If no entry is found in the Database
      *
-     * @throws \InvalidArgumentException If $model_class is not a Model class
      * @throws \InvalidArgumentException @see Model::processWhere()
      */
-    public static function getInstance($model_class, $where = null)
+    public static function getInstance($model_class, $where)
     {
-        $model = new $model_class;
-        if (!$model instanceof Model) {
-            throw new \InvalidArgumentException('Class is not a Model');
-        }
-
-        if ($where === null) {
-            $primary_key = null;
-        } else {
-            $database = $model->getDatabase();
-            $primary_key = $database->get(
-                $model::TABLE,
-                $model::PRIMARY_KEY,
-                $model::processWhere($where)
-            );
-        }
-
+        $database = $model_class::getDatabase();
+        $primary_key = $database->get(
+            $model_class::TABLE,
+            $model_class::PRIMARY_KEY,
+            $model_class::processWhere($where)
+        );
         if ($primary_key) {
             $path = array_merge([$model_class], $primary_key);
             $get_model = Utils\Utils::arrayPathGet(self::$models, $path);
             if ($get_model === null) {
-                $model->load($primary_key);
-                self::import($model);
-            } else {
-                unset($model);
-                return $get_model;
+                return new $model_class($primary_key);
             }
+            return $get_model;
         }
-
-        return $model;
     }
 
     /**

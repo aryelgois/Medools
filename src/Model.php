@@ -169,9 +169,6 @@ abstract class Model implements \JsonSerializable
      */
     public function __construct($where = null)
     {
-        foreach (static::FOREIGN_KEYS as $column => $map) {
-            $this->foreign[$column] = new $map[0];
-        }
         if ($where !== null) {
             $this->load($where);
         }
@@ -195,7 +192,7 @@ abstract class Model implements \JsonSerializable
         }
 
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            return $this->foreign[$column];
+            return $this->foreign[$column] ?? null;
         }
         return $this->changes[$column] ?? $this->data[$column];
     }
@@ -237,7 +234,14 @@ abstract class Model implements \JsonSerializable
         }
 
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            $this->updateForeign($column, $value);
+            $foreign = static::FOREIGN_KEYS[$column];
+            if ($value instanceof $foreign[0]) {
+                $this->foreign[$column] = $value;
+                $this->changes[$column] = $value->data[$foreign[1]];
+                return;
+            } else {
+                $this->updateForeign($column, $value);
+            }
         }
         $this->changes[$column] = $value;
     }
@@ -429,9 +433,7 @@ abstract class Model implements \JsonSerializable
     {
         $this->changes = [];
         $this->data = null;
-        foreach ($this->foreign as $model) {
-            $model->reset();
-        }
+        $this->foreign = [];
     }
 
     /**
@@ -473,14 +475,20 @@ abstract class Model implements \JsonSerializable
             throw new NotForeignColumnException();
         }
 
-        $foreign = $this->foreign[$column];
-        $foreign_column = static::FOREIGN_KEYS[$column][1];
+        $foreign_map = static::FOREIGN_KEYS[$column];
 
         if ($value === null) {
-            $foreign->reset();
+            unset($this->foreign[$column]);
             return;
         }
-        if (!$foreign->load([$foreign_column => $value])) {
+        $foreign = ModelManager::getInstance(
+            $foreign_map[0],
+            [$foreign_map[1] => $value]
+        );
+
+        if ($foreign) {
+            $this->foreign[$column] = $foreign;
+        } else {
             throw new ForeignConstraintException(static::class, $column);
         }
     }
@@ -628,19 +636,18 @@ abstract class Model implements \JsonSerializable
 
         $old_primary_key = $this->getPrimaryKey();
 
-        $this->reset();
-
         $database = self::getDatabase();
         $data = $database->get(static::TABLE, static::COLUMNS, $where);
         if ($data) {
-            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
-                $this->updateForeign($column, $data[$column]);
-            }
+            $this->reset();
             $this->data = $data;
             if ($old_primary_key) {
                 $this->managerUpdate($old_primary_key);
             } else {
                 $this->managerExport();
+            }
+            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+                $this->updateForeign($column, $data[$column]);
             }
             return true;
         }
