@@ -746,12 +746,12 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Removes model's row from the Table
+     * Removes model's row from the Table or sets the SOFT_DELETE column
      *
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
-     * @throws \LogicException If SOFT_DELETE_MODE is unknown
+     * @throws \LogicException        If SOFT_DELETE_MODE is unknown
      */
     public function delete()
     {
