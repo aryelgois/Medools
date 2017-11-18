@@ -340,7 +340,7 @@ abstract class Model implements \JsonSerializable
      */
     public function getPrimaryKey()
     {
-        if ($this->data == null) {
+        if ($this->data === null) {
             return null;
         }
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
