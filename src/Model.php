@@ -661,11 +661,15 @@ abstract class Model implements \JsonSerializable
      * @return boolean For success or failure
      *
      * @throws ReadOnlyModelException
+     * @throws \LogicException        If trying to update a fresh Model
      */
     public function update($columns)
     {
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException();
+        }
+        if ($this->data === null) {
+            throw new \LogicException('Can not update a fresh Model');
         }
 
         $columns = (array) $columns;
