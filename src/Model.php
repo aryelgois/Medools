@@ -373,7 +373,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      */
-    public function managerExport()
+    protected function managerExport()
     {
         ModelManager::import($this);
     }
