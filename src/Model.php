@@ -429,7 +429,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Cleans model data
      */
-    public function reset()
+    protected function reset()
     {
         $this->changes = [];
         $this->data = null;
