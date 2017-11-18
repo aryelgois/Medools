@@ -460,6 +460,50 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Sets the SOFT_DELETE column to a undeleted state
+     *
+     * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
+     * @throws \LogicException        If the Model is not soft-deletable
+     * @throws \LogicException        If SOFT_DELETE_MODE is unknown
+     */
+    public function undelete()
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+        if (static::SOFT_DELETE === null) {
+            throw new \LogicException('Model is not soft-deletable');
+        }
+
+        $database = self::getDatabase();
+        $column = static::SOFT_DELETE;
+
+        switch (static::SOFT_DELETE_MODE) {
+            case 'deleted':
+                $this->__set($column, 0);
+                break;
+
+            case 'active':
+                $this->__set($column, 1);
+                break;
+
+            case 'stamp':
+                $this->__set($column, null);
+                break;
+
+            default:
+                throw new \LogicException(
+                    "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
+                );
+                break;
+        }
+
+        return $this->update($column);
+    }
+
+    /**
      * Updates a foreign model to a new row
      *
      * It tests if $column is a valid foreign column
