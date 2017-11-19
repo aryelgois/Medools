@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aryelgois/utils",
-            "version": "v0.2",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aryelgois/utils.git",
-                "reference": "98bc8e02758eb461135a7831dd65353b20129952"
+                "reference": "dcd2d5bd5866e4feaa1ad1e1a83c9b4f4217c3b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aryelgois/utils/zipball/98bc8e02758eb461135a7831dd65353b20129952",
-                "reference": "98bc8e02758eb461135a7831dd65353b20129952",
+                "url": "https://api.github.com/repos/aryelgois/utils/zipball/dcd2d5bd5866e4feaa1ad1e1a83c9b4f4217c3b0",
+                "reference": "dcd2d5bd5866e4feaa1ad1e1a83c9b4f4217c3b0",
                 "shasum": ""
             },
             "require": {
@@ -43,7 +43,7 @@
             "keywords": [
                 "utils"
             ],
-            "time": "2017-11-16T01:49:54+00:00"
+            "time": "2017-11-19T12:27:56+00:00"
         },
         {
             "name": "catfan/medoo",
