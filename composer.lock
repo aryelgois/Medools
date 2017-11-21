@@ -47,16 +47,16 @@
         },
         {
             "name": "catfan/medoo",
-            "version": "v1.4.5",
+            "version": "v1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/catfan/Medoo.git",
-                "reference": "8ee8ae1c4df0fee3822a01333eab88893e548fcc"
+                "reference": "c5c7202fad8292977f5d047c1ee50373080d1dd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/catfan/Medoo/zipball/8ee8ae1c4df0fee3822a01333eab88893e548fcc",
-                "reference": "8ee8ae1c4df0fee3822a01333eab88893e548fcc",
+                "url": "https://api.github.com/repos/catfan/Medoo/zipball/c5c7202fad8292977f5d047c1ee50373080d1dd6",
+                "reference": "c5c7202fad8292977f5d047c1ee50373080d1dd6",
                 "shasum": ""
             },
             "require": {
@@ -70,7 +70,7 @@
                 "ext-pdo_oci8": "For Oracle version 8 database",
                 "ext-pdo_pqsql": "For PostgreSQL database",
                 "ext-pdo_sqlite": "For SQLite database",
-                "ext-pdo_sqlsrv": "For MSSQL database on Windows platform"
+                "ext-pdo_sqlsrv": "For MSSQL database"
             },
             "type": "framework",
             "autoload": {
@@ -102,7 +102,7 @@
                 "sql",
                 "sqlite"
             ],
-            "time": "2017-06-24T14:43:07+00:00"
+            "time": "2017-11-20T15:15:51+00:00"
         }
     ],
     "packages-dev": [],
