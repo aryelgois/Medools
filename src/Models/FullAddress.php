@@ -12,8 +12,10 @@ use aryelgois\Medools;
 /**
  * A Full Address model to reference a specific place in the world
  *
- * This class allows you to use more specific information about the Address,
- * which should be provided by your clients.
+ * This class expands the Address database to contain more specific information
+ * about the address, which should be provided by your clients.
+ *
+ * @see https://github.com/aryelgois/databases
  *
  * @author Aryel Mota Góis
  * @license MIT
