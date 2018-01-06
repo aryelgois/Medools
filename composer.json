@@ -18,5 +18,9 @@
         "psr-4": {
             "aryelgois\\Medools\\": "src/"
         }
+    },
+    "suggest": {
+        "aryelgois/databases": "For replacing classes in namespace aryelgois\\Medools\\Models\\Address",
+        "aryelgois/yasql-php": "For creating database schemas"
     }
 }
