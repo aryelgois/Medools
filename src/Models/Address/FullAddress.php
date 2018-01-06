@@ -1,6 +1,6 @@
 <?php
 /**
- * This Software is part of aryelgois\Medools and is provided "as is".
+ * This Software is part of aryelgois/Medools and is provided "as is".
  *
  * @see LICENSE
  */
@@ -41,6 +41,7 @@ class FullAddress extends Medools\Model
 
     const FOREIGN_KEYS = [
         'county' => [
+            /** @deprecated Replace by 'aryelgois\Databases\Models\County' */
             __NAMESPACE__ . '\County',
             'id'
         ],
