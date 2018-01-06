@@ -12,6 +12,8 @@ use aryelgois\Medools;
 /**
  * A Country contains States which contain Counties
  *
+ * @deprecated This class has been moved to aryelgois/databases
+ *
  * It is built on top of aryelgois\databases\Address, which means it expects
  * you have a database following that scheme in your server.
  *

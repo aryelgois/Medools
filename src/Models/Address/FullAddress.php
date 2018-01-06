@@ -41,6 +41,7 @@ class FullAddress extends Medools\Model
 
     const FOREIGN_KEYS = [
         'county' => [
+            /** @deprecated Replace by 'aryelgois\Databases\Models\County' */
             __NAMESPACE__ . '\County',
             'id'
         ],
