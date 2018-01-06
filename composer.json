@@ -1,7 +1,7 @@
 {
     "name": "aryelgois/medools",
     "description": "Wrapper on catfan/Medoo",
-    "keywords": ["database", "Medoo"],
+    "keywords": ["database", "Medoo", "Medools"],
     "license": "MIT",
     "authors": [
         {
@@ -14,9 +14,13 @@
         "aryelgois/utils": "^0.2",
         "catfan/medoo": "^1.4"
     },
-	"autoload": {
-		"psr-4": {
-			"aryelgois\\Medools\\": "src/"
-		}
-	}
+    "autoload": {
+        "psr-4": {
+            "aryelgois\\Medools\\": "src/"
+        }
+    },
+    "suggest": {
+        "aryelgois/databases": "For replacing classes in namespace aryelgois\\Medools\\Models\\Address",
+        "aryelgois/yasql-php": "For creating database schemas"
+    }
 }

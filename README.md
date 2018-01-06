@@ -30,7 +30,7 @@ class and define some settings.
 
 Open a terminal in your project directory and run:
 
-`composer require aryelgois/medools:^2.0`
+`composer require aryelgois/medools`
 
 
 # Setup
@@ -277,6 +277,13 @@ Possible value | When not deleted | When deleted
 
 # Changelog
 
+#### v2.1 (2018-01-06)
+
+Models in the namespace `aryelgois\Medools\Models\Address` are being deprecated
+in favor to the same ones in [`aryelgois\Databases\Models\Address`][aryelgois/databases].
+
+Some DocBlocks and the composer.json where updated.
+
 #### v2.0 (2017-11-18) ModelManager release
 
 Some methods were added, some changed, and some were removed. The most notable
@@ -306,5 +313,6 @@ Also, some fixes were made.
 [ModelManager]:   src/ModelManager.php
 
 [catfan/Medoo]:   https://github.com/catfan/Medoo
+[aryelgois/databases]: https://github.com/aryelgois/databases
 
 [where_clause]:   https://medoo.in/api/where

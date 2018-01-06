@@ -1,6 +1,6 @@
 <?php
 /**
- * This Software is part of aryelgois\Medools and is provided "as is".
+ * This Software is part of aryelgois/Medools and is provided "as is".
  *
  * @see LICENSE
  */
@@ -11,6 +11,8 @@ use aryelgois\Medools;
 
 /**
  * A State contains counties
+ *
+ * @deprecated This class has been moved to aryelgois/databases
  *
  * It is built on top of aryelgois\databases\Address, which means it expects
  * you have a database following that scheme in your server.
