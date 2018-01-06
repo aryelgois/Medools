@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "49231227386aac1e13e6d92f33113996",
+    "content-hash": "d00eb8c68bad5927f9fcdbc41f3974c9",
     "packages": [
         {
             "name": "aryelgois/utils",
@@ -47,16 +47,16 @@
         },
         {
             "name": "catfan/medoo",
-            "version": "v1.5",
+            "version": "v1.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/catfan/Medoo.git",
-                "reference": "c5c7202fad8292977f5d047c1ee50373080d1dd6"
+                "reference": "1aa25a4001e0cfb739ba2996f00f4a3d2a7fdf07"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/catfan/Medoo/zipball/c5c7202fad8292977f5d047c1ee50373080d1dd6",
-                "reference": "c5c7202fad8292977f5d047c1ee50373080d1dd6",
+                "url": "https://api.github.com/repos/catfan/Medoo/zipball/1aa25a4001e0cfb739ba2996f00f4a3d2a7fdf07",
+                "reference": "1aa25a4001e0cfb739ba2996f00f4a3d2a7fdf07",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
                 "sql",
                 "sqlite"
             ],
-            "time": "2017-11-20T15:15:51+00:00"
+            "time": "2017-12-25T17:02:41+00:00"
         }
     ],
     "packages-dev": [],
