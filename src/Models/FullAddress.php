@@ -5,7 +5,7 @@
  * @see LICENSE
  */
 
-namespace aryelgois\Medools\Models\Address;
+namespace aryelgois\Medools\Models;
 
 use aryelgois\Medools;
 
@@ -41,8 +41,7 @@ class FullAddress extends Medools\Model
 
     const FOREIGN_KEYS = [
         'county' => [
-            /** @deprecated Replace by 'aryelgois\Databases\Models\County' */
-            __NAMESPACE__ . '\County',
+            'aryelgois\Databases\Models\County',
             'id'
         ],
     ];
