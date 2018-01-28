@@ -153,6 +153,11 @@ some functionalities.
 
 Current, these hooks are available:
 
+- `patchHook()`: Useful when you need to change the model `$columns`, because
+  you want to add or remove columns in a child model class, or somehow need a
+  dynamic column. Note that this method is automatically called in a model's
+  first instance.
+
 - `validateHook()`: Use it to validate the data before sending to the Database.
   Make sure your code can validate some columns or all of them, depending on the
   `$full` argument.
@@ -165,10 +170,10 @@ to avoid model duplication, mainly in foreign keys.
 
 # Configuring a Model
 
-The settings are constants in each model class. You can omit some to reuse from
-parent class.
+The settings are stored in constants and static properties in each model class.
+You can omit some to reuse from parent classes.
 
-Only TABLE and COLUMNS are required to define a new model.
+Only `TABLE` and `$columns` are required to define a new model.
 
 
 #### DATABASE_NAME_KEY
@@ -187,61 +192,6 @@ Database's Table the model works with
   model name
 
 - Type: `string`
-
-
-#### COLUMNS
-
-Columns the model expects to exist
-
-- Type: `string[]`
-- Default: `['id']`
-
-
-#### PRIMARY_KEY
-
-Primary Key column or columns
-
-- Type: `string[]`
-- Default: `['id']`
-
-
-#### AUTO_INCREMENT
-
-Auto Increment column
-
-- Type: `string|null`
-- Default: `'id'`
-
-
-#### OPTIONAL_COLUMNS
-
-List of optional columns
-
-> List all columns which have a default value (e.g. timestamp) or are nullable.
-  AUTO_INCREMENT is always optional and does not need to be here.
-
-- Type: `string[]`
-
-
-#### FOREIGN_KEYS
-
-Foreign Keys map
-
-> A map of columns in the curent model which point to a column in another model
-
-- Type: `array[]`
-- Example:
-
-```php
-<?php
-
-const FOREIGN_KEYS = [
-    'local_column' => [
-        'Fully\Qualified\ClassName',
-        'foreign_column'
-    ],
-];
-```
 
 
 #### READ_ONLY
@@ -276,6 +226,79 @@ Possible value | When not deleted | When deleted
 `'deleted'`    | 0                | 1
 `'active'`     | 1                | 0
 `'stamp'`      | null             | current timestamp
+
+
+#### $columns
+
+Defines the model columns and some settings they have
+
+- Type: `array[]`
+
+It is the most complex configuration, and is a mutable property to make it
+easier to change in children classes. Keep in mind that it is **static**, so all
+instances of a model will have the same columns.
+
+It contains a sequence of arrays which can have the following keys:
+
+- name: `string` **required**
+
+- primary: `boolean` multiple columns with this key produce a compound
+  primary key, in the order the columns are listed
+
+- auto_increment: `boolean` there may exist only one column containing this key
+  with a truthy value. The `optional` key is implicit
+
+- optional: `boolean` having this key means that the model can be `save()`d
+  without a value to this column: it is nullable or has a default value
+
+- foreign: `string[]` the first item is a Fully Qualified Class name of another
+  model, and the second item is a column in that model
+
+Example:
+
+```php
+<?php
+
+class User extends aryelgois\Medools\Model {
+    const TABLE = 'users';
+
+    protected static $columns = [
+        [
+            'name' => 'id',
+            'primary' => true,
+            'auto_increment' => true,
+        ],
+        [
+            'name' => 'name',
+        ],
+        [
+            'name' => 'email',
+        ],
+        [
+            'name' => 'password',
+        ],
+        [
+            'name' => 'address',
+            'foreign' => [
+                'Fully\Qualified\ClassName',
+                'foreign_column'
+            ],
+        ],
+        [
+            'name' => 'description',
+            'optional' => true,
+        ],
+    ];
+}
+```
+
+Other keys are allowed, but ignored by the core package. So, you can for example
+add a 'validate' key with the validation method to be used by a custom
+`validateHook()`.
+
+When extending a model class, use `patchHook()` to modify this property without
+needing to repeat all the columns that will be the same. This method is called
+only once for the first instance of a class.
 
 
 # Changelog
