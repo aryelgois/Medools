@@ -176,7 +176,7 @@ You can omit some to reuse from parent classes.
 Only `TABLE` and `$columns` are required to define a new model.
 
 
-#### DATABASE_NAME_KEY
+#### DATABASE
 
 Database name key in the config file
 

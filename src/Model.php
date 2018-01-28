@@ -38,7 +38,7 @@ abstract class Model implements \JsonSerializable
      *
      * @const string
      */
-    const DATABASE_NAME_KEY = 'default';
+    const DATABASE = 'default';
 
     /**
      * Database's Table the model works with
@@ -331,7 +331,7 @@ abstract class Model implements \JsonSerializable
      */
     final public static function getDatabase()
     {
-        return MedooConnection::getInstance(static::DATABASE_NAME_KEY);
+        return MedooConnection::getInstance(static::DATABASE);
     }
 
     /**
