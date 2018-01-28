@@ -98,7 +98,7 @@ the model object.
 
 Just like in any object:
 
-- `$model->column` will return the stored data, or a foreign model
+- `$model->column` will return the stored data, or a foreign model *
 - `$model->column = value` will set a new data
 
 You can also:
@@ -107,6 +107,9 @@ You can also:
   and which columns you want
 - `getPrimaryKey():` Returns the last saved Primary Key
 - `setMultiple():` Sets multiple columns from an array
+
+> \* It means that you can chain the models:  
+> `$model->foreign->column`
 
 
 ## Reloading the model
