@@ -47,16 +47,16 @@
         },
         {
             "name": "catfan/medoo",
-            "version": "v1.5.3",
+            "version": "v1.5.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/catfan/Medoo.git",
-                "reference": "1aa25a4001e0cfb739ba2996f00f4a3d2a7fdf07"
+                "reference": "a6b7b05b18fa7c8f955e259d491344b1db9a51bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/catfan/Medoo/zipball/1aa25a4001e0cfb739ba2996f00f4a3d2a7fdf07",
-                "reference": "1aa25a4001e0cfb739ba2996f00f4a3d2a7fdf07",
+                "url": "https://api.github.com/repos/catfan/Medoo/zipball/a6b7b05b18fa7c8f955e259d491344b1db9a51bf",
+                "reference": "a6b7b05b18fa7c8f955e259d491344b1db9a51bf",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
                 "sql",
                 "sqlite"
             ],
-            "time": "2017-12-25T17:02:41+00:00"
+            "time": "2018-01-08T20:01:12+00:00"
         }
     ],
     "packages-dev": [],
