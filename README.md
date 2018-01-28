@@ -171,7 +171,7 @@ parent class.
 Only TABLE and COLUMNS are required to define a new model.
 
 
-#### DATABASE_NAME_KEY
+#### DATABASE
 
 Database name key in the config file
 
