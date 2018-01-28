@@ -308,11 +308,11 @@ Also, some fixes were made.
 
 
 [config_example]: config/example.php
-[Model]:          src/Model.php
-[ModelIterator]:  src/ModelIterator.php
-[ModelManager]:   src/ModelManager.php
+[Model]: src/Model.php
+[ModelIterator]: src/ModelIterator.php
+[ModelManager]: src/ModelManager.php
 
-[catfan/Medoo]:   https://github.com/catfan/Medoo
+[catfan/Medoo]: https://github.com/catfan/Medoo
 [aryelgois/databases]: https://github.com/aryelgois/databases
 
-[where_clause]:   https://medoo.in/api/where
+[where_clause]: https://medoo.in/api/where
