@@ -17,6 +17,8 @@ use aryelgois\Medools;
  *
  * @see https://github.com/aryelgois/databases
  *
+ * @deprecated This class will be moved to the previous link
+ *
  * @author Aryel Mota Góis
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools

@@ -44,12 +44,16 @@ Also, you need to include this line in the beginning of your code:
 ```php
 <?php
 
-// set $root to your application root directory.
-
-aryelgois\Medools\MedooConnection::loadConfig($root . '/config/medools.php');
+aryelgois\Medools\MedooConnection::loadConfig('path/to/config/medools.php');
 ```
 
-It is because this framework uses a factory to reuse the Database connections.
+It's a good idea to put in a bootstrap which also requires composer's autoload
+(prior to the line above), and is always required by your scripts.
+
+The method called is from [MedooConnection], which works as a factory to reuse
+the Database connections. The reason for the config file being `.php` is that it
+contains passwords, and if this file is accessible in the public directory of
+your app, loading it will show nothing.
 
 
 # Using a Model
@@ -147,7 +151,7 @@ Only `TABLE` and `$columns` are required to define a new model.
 
 #### DATABASE
 
-Database name key in the config file
+Database name key in the Medools config file
 
 - Type: `string`
 - Default: `'default'`
@@ -155,7 +159,7 @@ Database name key in the config file
 
 #### TABLE
 
-Database's Table the model works with
+Database's Table the model represents
 
 > The recomended is to use a plural name for the table and it's singular in the
   model name
@@ -370,6 +374,7 @@ Also, some fixes were made.
 
 
 [config_example]: config/example.php
+[MedooConnection]: src/MedooConnection.php
 [Model]: src/Model.php
 [ModelIterator]: src/ModelIterator.php
 [ModelManager]: src/ModelManager.php
