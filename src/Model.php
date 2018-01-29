@@ -646,8 +646,8 @@ abstract class Model implements \JsonSerializable
             throw new \UnexpectedValueException('Invalid data');
         } elseif (is_array($result)) {
             $data = (empty(Utils::arrayUniqueDiffKey($data, $result)))
-                  ? $result
-                  : array_replace($data, $result);
+                ? $result
+                : array_replace($data, $result);
         }
 
         return $data;
@@ -690,8 +690,8 @@ abstract class Model implements \JsonSerializable
 
         $database = self::getDatabase();
         $stmt = ($this->data === null)
-              ? $database->insert(static::TABLE, static::dataCleanup($data))
-              : $database->update(static::TABLE, $data, $old_primary_key);
+            ? $database->insert(static::TABLE, static::dataCleanup($data))
+            : $database->update(static::TABLE, $data, $old_primary_key);
 
         if ($stmt->errorCode() == '00000') {
             if ($this->data === null) {

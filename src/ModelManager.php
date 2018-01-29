@@ -108,8 +108,8 @@ abstract class ModelManager
     public static function remove($var)
     {
         $path = ($var instanceof Model)
-              ? self::getPath($var)
-              : $var;
+            ? self::getPath($var)
+            : $var;
 
         Utils\Utils::arrayPathUnset(self::$models, $path);
     }
