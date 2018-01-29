@@ -231,7 +231,8 @@ Example:
 ```php
 <?php
 
-class User extends aryelgois\Medools\Model {
+class User extends aryelgois\Medools\Model
+{
     const TABLE = 'users';
 
     protected static $columns = [
