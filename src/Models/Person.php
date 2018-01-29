@@ -22,7 +22,19 @@ class Person extends Medools\Model
 {
     const TABLE = 'people';
 
-    const COLUMNS = ['id', 'name', 'document'];
+    protected static $columns = [
+        [
+            'name' => 'id',
+            'primary' => true,
+            'auto_increment' => true,
+        ],
+        [
+            'name' => 'name',
+        ],
+        [
+            'name' => 'document',
+        ],
+    ];
 
     /**
      * Validates Person's document as Brazilian CPF or CNPJ

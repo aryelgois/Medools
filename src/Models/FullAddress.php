@@ -25,26 +25,38 @@ class FullAddress extends Medools\Model
 {
     const TABLE = 'full_addresses';
 
-    const COLUMNS = [
-        'id',
-        'county',
-        'neighborhood',
-        'place',
-        'number',
-        'zipcode',
-        'detail',
-        'update'
-    ];
-
-    const OPTIONAL_COLUMNS = [
-        'detail',
-        'update',
-    ];
-
-    const FOREIGN_KEYS = [
-        'county' => [
-            'aryelgois\Databases\Models\County',
-            'id'
+    protected static $columns = [
+        [
+            'name' => 'id',
+            'primary' => true,
+            'auto_increment' => true,
+        ],
+        [
+            'name' => 'county',
+            'foreign' => [
+                'aryelgois\Databases\Models\County',
+                'id'
+            ],
+        ],
+        [
+            'name' => 'neighborhood',
+        ],
+        [
+            'name' => 'place',
+        ],
+        [
+            'name' => 'number',
+        ],
+        [
+            'name' => 'zipcode',
+        ],
+        [
+            'name' => 'detail',
+            'optional' => true,
+        ],
+        [
+            'name' => 'update',
+            'optional' => true,
         ],
     ];
 }
