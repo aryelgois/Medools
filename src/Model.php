@@ -97,9 +97,9 @@ abstract class Model implements \JsonSerializable
      * FORMAT:
      *     [
      *         'columns' => [...string],
-     *         'primary' => [...string],          #
-     *         'foreign' => [...string => array], # can be empty
-     *         'optional' => [...string],         #
+     *         'primaries' => [...string],         #
+     *         'foreigns' => [...string => array], # can be empty
+     *         'optionals' => [...string],         #
      *         'auto_increment' => null|string,
      *     ];
      *
@@ -309,9 +309,9 @@ abstract class Model implements \JsonSerializable
         }
         $cache = [
             'columns' => [],
-            'primary' => [],
-            'foreign' => [],
-            'optional' => [],
+            'primaries' => [],
+            'foreigns' => [],
+            'optionals' => [],
             'auto_increment' => null,
         ];
         foreach (static::$columns as $id => $column) {
@@ -325,13 +325,13 @@ abstract class Model implements \JsonSerializable
             }
             $cache['columns'][] = $column['name'];
             if ($column['primary'] ?? false) {
-                $cache['primary'][] = $column['name'];
+                $cache['primaries'][] = $column['name'];
             }
             if (is_array($column['foreign'] ?? false)) {
-                $cache['foreign'][$column['name']] = $column['foreign'];
+                $cache['foreigns'][$column['name']] = $column['foreign'];
             }
             if ($column['optional'] ?? false) {
-                $cache['optional'][] = $column['name'];
+                $cache['optionals'][] = $column['name'];
             }
             if ($column['auto_increment'] ?? false) {
                 if (empty($cache['auto_increment'])) {
