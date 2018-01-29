@@ -137,32 +137,6 @@ referenced in your model.
 > PHP might hang trying to create infinite models.
 
 
-## Advanced
-
-Use `getDatabase()` for a direct access to the Database, already connected and
-ready to use. See [catfan/Medoo] for details.
-
-You can add custom methods to your models, to automatically get some data and
-format as needed.
-
-#### Hooks
-
-There is a Hook concept in this framework, where you can add specific methods
-which are automatically called by default methods. It makes easier to extend
-some functionalities.
-
-Current, these hooks are available:
-
-- `validateHook()`: Use it to validate the data before sending to the Database.
-  Make sure your code can validate some columns or all of them, depending on the
-  `$full` argument.
-
-#### ModelManager
-
-[This class][ModelManager] tracks every model loaded during a request. It aims
-to avoid model duplication, mainly in foreign keys.
-
-
 # Configuring a Model
 
 The settings are constants in each model class. You can omit some to reuse from
@@ -276,6 +250,32 @@ Possible value | When not deleted | When deleted
 `'deleted'`    | 0                | 1
 `'active'`     | 1                | 0
 `'stamp'`      | null             | current timestamp
+
+
+## Advanced
+
+Use `getDatabase()` for a direct access to the Database, already connected and
+ready to use. See [catfan/Medoo] for details.
+
+You can add custom methods to your models, to automatically get some data and
+format as needed.
+
+#### Hooks
+
+There is a Hook concept in this framework, where you can add specific methods
+which are automatically called by default methods. It makes easier to extend
+some functionalities.
+
+Current, these hooks are available:
+
+- `validateHook()`: Use it to validate the data before sending to the Database.
+  Make sure your code can validate some columns or all of them, depending on the
+  `$full` argument.
+
+#### ModelManager
+
+[This class][ModelManager] tracks every model loaded during a request. It aims
+to avoid model duplication, mainly in foreign keys.
 
 
 # Changelog
