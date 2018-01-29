@@ -170,12 +170,8 @@ abstract class Model implements \JsonSerializable
      */
     public function __construct($where = null)
     {
-        if ($where !== null) {
-            if (!$this->load($where)) {
-                throw new \InvalidArgumentException(
-                    'Could not load from Database'
-                );
-            }
+        if ($where !== null && !$this->load($where)) {
+            throw new \InvalidArgumentException('Could not load from Database');
         }
     }
 
