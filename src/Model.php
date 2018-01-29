@@ -51,57 +51,6 @@ abstract class Model implements \JsonSerializable
     const TABLE = '';
 
     /**
-     * Columns the model expects to exist
-     *
-     * @const string[]
-     */
-    const COLUMNS = ['id'];
-
-    /**
-     * Primary Key column or columns
-     *
-     * @const string[]
-     */
-    const PRIMARY_KEY = ['id'];
-
-    /**
-     * Auto Increment column
-     *
-     * This column is ignored by update()
-     *
-     * @const string|null
-     */
-    const AUTO_INCREMENT = 'id';
-
-    /**
-     * List of optional columns
-     *
-     * List here all columns which have a default value (e.g. timestamp) or are
-     * nullable. AUTO_INCREMENT is always optional and does not need to be here.
-     *
-     * @const string[]
-     */
-    const OPTIONAL_COLUMNS = [];
-
-    /**
-     * Foreign Keys map
-     *
-     * A map of zero or more columns in this model, each pointing to a column in
-     * another model
-     *
-     * EXAMPLE:
-     *     [
-     *         'local_column' => [
-     *             'Fully\Qualified\ClassName',
-     *             'foreign_column'
-     *         ],
-     *     ];
-     *
-     * @const array[]
-     */
-    const FOREIGN_KEYS = [];
-
-    /**
      * If __set(), save(), update() and delete() are
      * disabled
      *
@@ -127,6 +76,13 @@ abstract class Model implements \JsonSerializable
      * @const string
      */
     const SOFT_DELETE_MODE = 'deleted';
+
+    /**
+     * Defines the model columns and some settings they have
+     *
+     * @var array[]
+     */
+    protected static $columns = [];
 
     /*
      * Model data
@@ -794,6 +750,22 @@ abstract class Model implements \JsonSerializable
      * Hook methods
      * =========================================================================
      */
+
+    /**
+     * Patches the class' $columns
+     *
+     * Useful for children classes that need to modify some parent columns, or
+     * add new columns
+     *
+     * NOTE:
+     * - Automatically called
+     *
+     * @return boolean For success or failure
+     */
+    protected static function patchHook()
+    {
+        return true;
+    }
 
     /**
      * Expanded validation
