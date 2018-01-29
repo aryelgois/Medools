@@ -331,10 +331,10 @@ to avoid model duplication, mainly in foreign keys.
 #### Models cache
 
 Internally, a cache for each model is kept in the base [Model] class, containing
-the model's columns grouped in different keys. It is generated automatically
+the model's columns grouped by different keys. It is automatically generated
 and calls the `patchHook()`. To access the cache for a specific model, call
-`$model_class::getCache()`, where `$model_class` is the Fully Qualified Class.
-Instances of a given model shares the same cache.
+`$model::getCache()`, where `$model` can be the Fully Qualified Class. Instances
+of a given model shares the same cache.
 
 
 # Changelog
