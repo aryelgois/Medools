@@ -58,8 +58,8 @@ It is because this framework uses a factory to reuse the Database connections.
 
 You can instantiate a new Model, without any parameters, to create a fresh model
 object. Then add data into its columns, like in any other object. Your code
-should known which columns are available, but you can look at `$model::COLUMNS`
-for a complete list from that model.
+should known which columns are available, but you can look at 'Models cache' in
+the `Advanced` section for how to access the column list in runtime.
 
 Your changes are stored in that object, so you need to `save()` in order to send
 to the Database.
@@ -166,6 +166,14 @@ Current, these hooks are available:
 
 [This class][ModelManager] tracks every model loaded during a request. It aims
 to avoid model duplication, mainly in foreign keys.
+
+#### Models cache
+
+Internally, a cache for each model is kept in the base [Model] class, containing
+the model's columns grouped in different keys. It is generated automatically
+and calls the `patchHook()`. To access the cache for a specific model, call
+`$model_class::getCache()`, where `$model_class` is the Fully Qualified Class.
+Instances of a given model shares the same cache.
 
 
 # Configuring a Model
