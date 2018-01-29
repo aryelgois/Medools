@@ -263,6 +263,197 @@ abstract class Model implements \JsonSerializable
     }
 
     /*
+     * CRUD methods
+     * =========================================================================
+     */
+
+    /**
+     * Creates a new row in the Table or updates it with new data
+     *
+     * @see validate() Throws
+     *
+     * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
+     */
+    public function save()
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+
+        if (empty($this->changes)) {
+            return false;
+        }
+
+        $data = $this->changes;
+        $data = static::validate($data, true);
+
+        $old_primary_key = $this->getPrimaryKey();
+        $update_manager = $this->data !== null && !empty(array_intersect(
+            array_keys($data),
+            static::PRIMARY_KEY
+        ));
+
+        $database = self::getDatabase();
+        $stmt = ($this->data === null)
+            ? $database->insert(static::TABLE, static::dataCleanup($data))
+            : $database->update(static::TABLE, $data, $old_primary_key);
+
+        if ($stmt->errorCode() == '00000') {
+            if ($this->data === null) {
+                /*
+                 * It is prefered to load back because the Database may apply
+                 * default values or alter some columns. Also, it updates
+                 * foreign models.
+                 *
+                 * First, get the AUTO_INCREMENT
+                 * Then, extract the PRIMARY_KEY
+                 * Finally, load from Database
+                 */
+                $column = static::AUTO_INCREMENT;
+                if ($column !== null) {
+                    $data[$column] = $database->id();
+                }
+                $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
+                return $this->load($where);
+            }
+            $this->changes = [];
+            $this->data = array_replace($this->data, $data);
+            if ($update_manager) {
+                $this->managerUpdate($old_primary_key);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Loads a row from Table into the model
+     *
+     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException  @see processWhere()
+     * @throws ForeignConstraintException @see loadForeign()
+     */
+    public function load($where)
+    {
+        $where = self::processWhere($where);
+
+        $old_primary_key = $this->getPrimaryKey();
+
+        $database = self::getDatabase();
+        $data = $database->get(static::TABLE, static::COLUMNS, $where);
+        if ($data) {
+            $this->reset();
+            $this->data = $data;
+            if ($old_primary_key) {
+                $this->managerUpdate($old_primary_key);
+            } else {
+                $this->managerExport();
+            }
+            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+                $this->loadForeign($column, $data[$column]);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Selectively updates the model's row in the Database
+     *
+     * @see validate() Throws
+     *
+     * @param string|string[] $columns Specify which columns to update
+     *
+     * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
+     * @throws \LogicException        If trying to update a fresh Model
+     */
+    public function update($columns)
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+        if ($this->data === null) {
+            throw new \LogicException('Can not update a fresh Model');
+        }
+
+        $columns = (array) $columns;
+        $data = Utils::arrayWhitelist($this->changes, $columns);
+        $data = static::validate($data, false);
+
+        $old_primary_key = $this->getPrimaryKey();
+        $update_manager = !empty(array_intersect(
+            $columns,
+            static::PRIMARY_KEY
+        ));
+
+        $database = self::getDatabase();
+        $stmt = $database->update(static::TABLE, $data, $old_primary_key);
+        if ($stmt->errorCode() == '00000') {
+            $this->changes = Utils::arrayBlacklist($this->changes, $columns);
+            $this->data = array_replace($this->data, $data);
+            if ($update_manager) {
+                $this->managerUpdate($old_primary_key);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes model's row from the Table or sets the SOFT_DELETE column
+     *
+     * @return boolean For success or failure
+     *
+     * @throws ReadOnlyModelException
+     * @throws \LogicException        If SOFT_DELETE_MODE is unknown
+     */
+    public function delete()
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException();
+        }
+
+        $database = self::getDatabase();
+        $column = static::SOFT_DELETE;
+        if ($column) {
+            switch (static::SOFT_DELETE_MODE) {
+                case 'deleted':
+                    $this->__set($column, 1);
+                    break;
+
+                case 'active':
+                    $this->__set($column, 0);
+                    break;
+
+                case 'stamp':
+                    $this->__set($column, static::getCurrentTimestamp());
+                    break;
+
+                default:
+                    throw new \LogicException(
+                        "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
+                    );
+                    break;
+            }
+            return $this->update($column);
+        } else {
+            $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
+            ModelManager::remove($this);
+            $this->reset();
+            return ($stmt->rowCount() > 0);
+        }
+    }
+
+    /*
      * Basic methods
      * =========================================================================
      */
@@ -600,197 +791,6 @@ abstract class Model implements \JsonSerializable
         }
 
         return $data;
-    }
-
-    /*
-     * CRUD methods
-     * =========================================================================
-     */
-
-    /**
-     * Creates a new row in the Table or updates it with new data
-     *
-     * @see validate() Throws
-     *
-     * @return boolean For success or failure
-     *
-     * @throws ReadOnlyModelException
-     */
-    public function save()
-    {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
-
-        if (empty($this->changes)) {
-            return false;
-        }
-
-        $data = $this->changes;
-        $data = static::validate($data, true);
-
-        $old_primary_key = $this->getPrimaryKey();
-        $update_manager = $this->data !== null && !empty(array_intersect(
-            array_keys($data),
-            static::PRIMARY_KEY
-        ));
-
-        $database = self::getDatabase();
-        $stmt = ($this->data === null)
-            ? $database->insert(static::TABLE, static::dataCleanup($data))
-            : $database->update(static::TABLE, $data, $old_primary_key);
-
-        if ($stmt->errorCode() == '00000') {
-            if ($this->data === null) {
-                /*
-                 * It is prefered to load back because the Database may apply
-                 * default values or alter some columns. Also, it updates
-                 * foreign models.
-                 *
-                 * First, get the AUTO_INCREMENT
-                 * Then, extract the PRIMARY_KEY
-                 * Finally, load from Database
-                 */
-                $column = static::AUTO_INCREMENT;
-                if ($column !== null) {
-                    $data[$column] = $database->id();
-                }
-                $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
-                return $this->load($where);
-            }
-            $this->changes = [];
-            $this->data = array_replace($this->data, $data);
-            if ($update_manager) {
-                $this->managerUpdate($old_primary_key);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Loads a row from Table into the model
-     *
-     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
-     *
-     * @return boolean For success or failure
-     *
-     * @throws \InvalidArgumentException  @see processWhere()
-     * @throws ForeignConstraintException @see loadForeign()
-     */
-    public function load($where)
-    {
-        $where = self::processWhere($where);
-
-        $old_primary_key = $this->getPrimaryKey();
-
-        $database = self::getDatabase();
-        $data = $database->get(static::TABLE, static::COLUMNS, $where);
-        if ($data) {
-            $this->reset();
-            $this->data = $data;
-            if ($old_primary_key) {
-                $this->managerUpdate($old_primary_key);
-            } else {
-                $this->managerExport();
-            }
-            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
-                $this->loadForeign($column, $data[$column]);
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Selectively updates the model's row in the Database
-     *
-     * @see validate() Throws
-     *
-     * @param string|string[] $columns Specify which columns to update
-     *
-     * @return boolean For success or failure
-     *
-     * @throws ReadOnlyModelException
-     * @throws \LogicException        If trying to update a fresh Model
-     */
-    public function update($columns)
-    {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
-        if ($this->data === null) {
-            throw new \LogicException('Can not update a fresh Model');
-        }
-
-        $columns = (array) $columns;
-        $data = Utils::arrayWhitelist($this->changes, $columns);
-        $data = static::validate($data, false);
-
-        $old_primary_key = $this->getPrimaryKey();
-        $update_manager = !empty(array_intersect(
-            $columns,
-            static::PRIMARY_KEY
-        ));
-
-        $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $old_primary_key);
-        if ($stmt->errorCode() == '00000') {
-            $this->changes = Utils::arrayBlacklist($this->changes, $columns);
-            $this->data = array_replace($this->data, $data);
-            if ($update_manager) {
-                $this->managerUpdate($old_primary_key);
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Removes model's row from the Table or sets the SOFT_DELETE column
-     *
-     * @return boolean For success or failure
-     *
-     * @throws ReadOnlyModelException
-     * @throws \LogicException        If SOFT_DELETE_MODE is unknown
-     */
-    public function delete()
-    {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
-
-        $database = self::getDatabase();
-        $column = static::SOFT_DELETE;
-        if ($column) {
-            switch (static::SOFT_DELETE_MODE) {
-                case 'deleted':
-                    $this->__set($column, 1);
-                    break;
-
-                case 'active':
-                    $this->__set($column, 0);
-                    break;
-
-                case 'stamp':
-                    $this->__set($column, static::getCurrentTimestamp());
-                    break;
-
-                default:
-                    throw new \LogicException(
-                        "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
-                    );
-                    break;
-            }
-            return $this->update($column);
-        } else {
-            $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
-            ModelManager::remove($this);
-            $this->reset();
-            return ($stmt->rowCount() > 0);
-        }
     }
 
     /*
