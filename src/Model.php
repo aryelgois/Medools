@@ -102,8 +102,7 @@ abstract class Model implements \JsonSerializable
     const FOREIGN_KEYS = [];
 
     /**
-     * If __set(), save(), update() and delete() are
-     * disabled
+     * If __set(), save(), update() and delete() are disabled
      *
      * @const boolean
      */
@@ -155,7 +154,7 @@ abstract class Model implements \JsonSerializable
     protected $foreign = [];
 
     /*
-     * Basic methods
+     * Magic methods
      * =========================================================================
      */
 
@@ -262,6 +261,11 @@ abstract class Model implements \JsonSerializable
     {
         $this->__set($column, null);
     }
+
+    /*
+     * Basic methods
+     * =========================================================================
+     */
 
     /**
      * Cleans data keys, removing unwanted columns
