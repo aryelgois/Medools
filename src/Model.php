@@ -90,6 +90,27 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
+     * Contains data from static::$columns normalized
+     *
+     * It list column names in different groups, for fast and easy lookup
+     *
+     * FORMAT:
+     *     [
+     *         'columns' => [...string],
+     *         'primary' => [...string],          #
+     *         'foreign' => [...string => array], # can be empty
+     *         'optional' => [...string],         #
+     *         'auto_increment' => null|string,
+     *     ];
+     *
+     * NOTE:
+     * - Does not contain custom keys in static::$columns
+     *
+     * @var mixed[]
+     */
+    protected static $class_cache = [];
+
+    /**
      * Changes done by __set() to be saved by save() or update()
      *
      * @var mixed[]
@@ -126,6 +147,7 @@ abstract class Model implements \JsonSerializable
      */
     public function __construct($where = null)
     {
+        static::generateCache();
         if ($where !== null && !$this->load($where)) {
             throw new \InvalidArgumentException('Could not load from Database');
         }
@@ -260,6 +282,67 @@ abstract class Model implements \JsonSerializable
 
         $database = self::getDatabase();
         return $database->select(static::TABLE, $columns, $where);
+    }
+
+    /**
+     * Generates the class cache from static::$columns
+     *
+     * @return array Class cache
+     *
+     * @throws \LogicException If failed to apply patch
+     * @throws \LogicException If $columns is empty
+     * @throws \LogicException If column is not array
+     * @throws \LogicException If column does not have 'name' key
+     * @throws \LogicException If there are multiple auto_increment columns
+     */
+    final protected static function generateCache()
+    {
+        if (!empty(static::$class_cache)) {
+            return static::$class_cache;
+        }
+        $message = 'Fatal in ' . static::class . ': ';
+        if (!static::patchHook()) {
+            throw new \LogicException($message . 'Could not apply patch');
+        }
+        if (empty(static::$columns)) {
+            throw new \Exception($message . "'\$columns' is empty");
+        }
+        $cache = [
+            'columns' => [],
+            'primary' => [],
+            'foreign' => [],
+            'optional' => [],
+            'auto_increment' => null,
+        ];
+        foreach (static::$columns as $id => $column) {
+            if (!is_array($column)) {
+                $message .= "Column #$id is not an array";
+                throw new \LogicException($message);
+            }
+            if (!array_key_exists('name', $column)) {
+                $message .= "Column #$id does not have a name";
+                throw new \LogicException($message);
+            }
+            $cache['columns'][] = $column['name'];
+            if ($column['primary'] ?? false) {
+                $cache['primary'][] = $column['name'];
+            }
+            if (is_array($column['foreign'] ?? false)) {
+                $cache['foreign'][$column['name']] = $column['foreign'];
+            }
+            if ($column['optional'] ?? false) {
+                $cache['optional'][] = $column['name'];
+            }
+            if ($column['auto_increment'] ?? false) {
+                if (empty($cache['auto_increment'])) {
+                    $cache['auto_increment'] = $column['name'];
+                } else {
+                    $message .= 'Multiple auto_increment columns';
+                    throw new \LogicException($message);
+                }
+            }
+        }
+        return (static::$class_cache = $cache);
     }
 
     /**
