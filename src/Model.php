@@ -568,7 +568,10 @@ abstract class Model implements \JsonSerializable
             $required = array_diff(
                 static::COLUMNS,
                 static::OPTIONAL_COLUMNS,
-                (array) static::AUTO_INCREMENT
+                [ // implicit optional columns
+                    static::AUTO_INCREMENT,
+                    static::SOFT_DELETE,
+                ]
             );
             $missing = array_diff($required, $columns);
             if (!empty($missing)) {

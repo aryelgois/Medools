@@ -232,6 +232,9 @@ If `delete()` actually removes the row or if it changes a column
 
 > It defines the column affected by the soft delete
 
+This column is **implicitly** optional, so you must define a default value in
+the database accordingly to SOFT_DELETE_MODE. *(see below)*
+
 - Type: `string|null`
 - Default: `null`
 
