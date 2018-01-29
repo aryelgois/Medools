@@ -137,45 +137,6 @@ referenced in your model.
 > PHP might hang trying to create infinite models.
 
 
-## Advanced
-
-Use `getDatabase()` for a direct access to the Database, already connected and
-ready to use. See [catfan/Medoo] for details.
-
-You can add custom methods to your models, to automatically get some data and
-format as needed.
-
-#### Hooks
-
-There is a Hook concept in this framework, where you can add specific methods
-which are automatically called by default methods. It makes easier to extend
-some functionalities.
-
-Current, these hooks are available:
-
-- `patchHook()`: Useful when you need to change the model `$columns`, because
-  you want to add or remove columns in a child model class, or somehow need a
-  dynamic column. Note that this method is automatically called in a model's
-  first instance.
-
-- `validateHook()`: Use it to validate the data before sending to the Database.
-  Make sure your code can validate some columns or all of them, depending on the
-  `$full` argument.
-
-#### ModelManager
-
-[This class][ModelManager] tracks every model loaded during a request. It aims
-to avoid model duplication, mainly in foreign keys.
-
-#### Models cache
-
-Internally, a cache for each model is kept in the base [Model] class, containing
-the model's columns grouped in different keys. It is generated automatically
-and calls the `patchHook()`. To access the cache for a specific model, call
-`$model_class::getCache()`, where `$model_class` is the Fully Qualified Class.
-Instances of a given model shares the same cache.
-
-
 # Configuring a Model
 
 The settings are stored in constants and static properties in each model class.
@@ -215,6 +176,9 @@ If `__set()`, `save()`, `update()`, `delete()` and `undelete()` are disabled
 If `delete()` actually removes the row or if it changes a column
 
 > It defines the column affected by the soft delete
+
+This column is **implicitly** optional, so you must define a default value in
+the database accordingly to SOFT_DELETE_MODE. *(see below)*
 
 - Type: `string|null`
 - Default: `null`
@@ -307,6 +271,45 @@ add a 'validate' key with the validation method to be used by a custom
 When extending a model class, use `patchHook()` to modify this property without
 needing to repeat all the columns that will be the same. This method is called
 only once for the first instance of a class.
+
+
+## Advanced
+
+Use `getDatabase()` for a direct access to the Database, already connected and
+ready to use. See [catfan/Medoo] for details.
+
+You can add custom methods to your models, to automatically get some data and
+format as needed.
+
+#### Hooks
+
+There is a Hook concept in this framework, where you can add specific methods
+which are automatically called by default methods. It makes easier to extend
+some functionalities.
+
+Current, these hooks are available:
+
+- `patchHook()`: Useful when you need to change the model `$columns`, because
+  you want to add or remove columns in a child model class, or somehow need a
+  dynamic column. Note that this method is automatically called in a model's
+  first instance.
+
+- `validateHook()`: Use it to validate the data before sending to the Database.
+  Make sure your code can validate some columns or all of them, depending on the
+  `$full` argument.
+
+#### ModelManager
+
+[This class][ModelManager] tracks every model loaded during a request. It aims
+to avoid model duplication, mainly in foreign keys.
+
+#### Models cache
+
+Internally, a cache for each model is kept in the base [Model] class, containing
+the model's columns grouped in different keys. It is generated automatically
+and calls the `patchHook()`. To access the cache for a specific model, call
+`$model_class::getCache()`, where `$model_class` is the Fully Qualified Class.
+Instances of a given model shares the same cache.
 
 
 # Changelog

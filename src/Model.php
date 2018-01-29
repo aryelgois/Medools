@@ -51,8 +51,7 @@ abstract class Model implements \JsonSerializable
     const TABLE = '';
 
     /**
-     * If __set(), save(), update() and delete() are
-     * disabled
+     * If __set(), save(), update() and delete() are disabled
      *
      * @const boolean
      */
@@ -133,7 +132,7 @@ abstract class Model implements \JsonSerializable
     protected $foreign = [];
 
     /*
-     * Basic methods
+     * Magic methods
      * =========================================================================
      */
 
@@ -244,6 +243,11 @@ abstract class Model implements \JsonSerializable
     {
         $this->__set($column, null);
     }
+
+    /*
+     * Basic methods
+     * =========================================================================
+     */
 
     /**
      * Cleans data keys, removing unwanted columns
@@ -615,7 +619,10 @@ abstract class Model implements \JsonSerializable
             $required = array_diff(
                 $cache['columns'],
                 $cache['optionals'],
-                [$cache['auto_increment']]
+                [ // implicit optional columns
+                    $cache['auto_increment'],
+                    static::SOFT_DELETE,
+                ]
             );
             $missing = array_diff($required, $columns);
             if (!empty($missing)) {
