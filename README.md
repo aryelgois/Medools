@@ -295,6 +295,30 @@ Current, these hooks are available:
   dynamic column. Note that this method is automatically called in a model's
   first instance.
 
+  Example:
+
+```php
+<?php
+
+class GlobalAddress extends aryelgois\Medools\Models\FullAddress
+{
+    TABLE = 'global_addresses';
+
+    protected static function patchHook()
+    {
+        return array_push(
+            static::$columns,
+            [
+                'name' => 'longitude',
+            ],
+            [
+                'name' => 'latitude',
+            ]
+        );
+    }
+}
+```
+
 - `validateHook()`: Use it to validate the data before sending to the Database.
   Make sure your code can validate some columns or all of them, depending on the
   `$full` argument.
