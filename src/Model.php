@@ -90,9 +90,10 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
-     * Contains data from static::$columns normalized
+     * Contains columns for every model in groups for fast and easy lookup
      *
-     * It list column names in different groups, for fast and easy lookup
+     * Each key is the Fully Qualified Class of a model, and the value is an
+     * array with normalized static::$columns, as follows:
      *
      * FORMAT:
      *     [
@@ -106,9 +107,9 @@ abstract class Model implements \JsonSerializable
      * NOTE:
      * - Does not contain custom keys in static::$columns
      *
-     * @var mixed[]
+     * @var array[]
      */
-    protected static $class_cache = [];
+    private static $models_cache = [];
 
     /**
      * Changes done by __set() to be saved by save() or update()
@@ -147,7 +148,7 @@ abstract class Model implements \JsonSerializable
      */
     public function __construct($where = null)
     {
-        static::generateCache();
+        static::getCache();
         if ($where !== null && !$this->load($where)) {
             throw new \InvalidArgumentException('Could not load from Database');
         }
@@ -295,10 +296,10 @@ abstract class Model implements \JsonSerializable
      * @throws \LogicException If column does not have 'name' key
      * @throws \LogicException If there are multiple auto_increment columns
      */
-    final protected static function generateCache()
+    final public static function getCache()
     {
-        if (!empty(static::$class_cache)) {
-            return static::$class_cache;
+        if (!empty(self::$models_cache[static::class])) {
+            return self::$models_cache[static::class];
         }
         $message = 'Fatal in ' . static::class . ': ';
         if (!static::patchHook()) {
@@ -342,7 +343,7 @@ abstract class Model implements \JsonSerializable
                 }
             }
         }
-        return (static::$class_cache = $cache);
+        return (self::$models_cache[static::class] = $cache);
     }
 
     /**
