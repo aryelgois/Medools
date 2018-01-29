@@ -34,14 +34,14 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
-     * Database name key in the config file
+     * Database name key in the Medools config file
      *
      * @const string
      */
     const DATABASE = 'default';
 
     /**
-     * Database's Table the model works with
+     * Database's Table the model represents
      *
      * The recomended is to use a plural name for the table and it's singular in
      * the model name

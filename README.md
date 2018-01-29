@@ -147,7 +147,7 @@ Only TABLE and COLUMNS are required to define a new model.
 
 #### DATABASE
 
-Database name key in the config file
+Database name key in the Medools config file
 
 - Type: `string`
 - Default: `'default'`
@@ -155,7 +155,7 @@ Database name key in the config file
 
 #### TABLE
 
-Database's Table the model works with
+Database's Table the model represents
 
 > The recomended is to use a plural name for the table and it's singular in the
   model name
