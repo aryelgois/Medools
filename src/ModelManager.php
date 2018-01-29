@@ -22,13 +22,13 @@ abstract class ModelManager
      * Nested list of Models
      *
      * This list creates a path to the Model instance. This path is defined by
-     * the Model class name, and any amount of columns for it's PRIMARY_KEY.
+     * the Model class name, and any amount of columns for it's primaries.
      *
      * EXAMPLE:
      *     [
      *         'Fully\Qualified\ClassName' => [
-     *             value for PRIMARY_KEY[0] => [
-     *                 value for PRIMARY_KEY[1] => Model,
+     *             value for $class_cache['primaries'][0] => [
+     *                 value for $class_cache['primaries'][1] => Model,
      *             ],
      *         ],
      *     ];
@@ -63,10 +63,11 @@ abstract class ModelManager
      */
     public static function getInstance($model_class, $where)
     {
+        $model_cache = $model_class::getCache();
         $database = $model_class::getDatabase();
         $primary_key = $database->get(
             $model_class::TABLE,
-            $model_class::PRIMARY_KEY,
+            $model_cache['primaries'],
             $model_class::processWhere($where)
         );
         if ($primary_key) {

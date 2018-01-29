@@ -167,11 +167,12 @@ abstract class Model implements \JsonSerializable
      */
     public function __get($column)
     {
-        if (!in_array($column, static::COLUMNS)) {
+        $cache = static::getCache();
+        if (!in_array($column, $cache['columns'])) {
             throw new UnknownColumnException();
         }
 
-        if (array_key_exists($column, static::FOREIGN_KEYS)) {
+        if (array_key_exists($column, $cache['foreigns'])) {
             return $this->foreign[$column] ?? null;
         }
         return $this->changes[$column] ?? $this->data[$column];
@@ -209,12 +210,14 @@ abstract class Model implements \JsonSerializable
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException();
         }
-        if (!in_array($column, static::COLUMNS)) {
+
+        $cache = static::getCache();
+        if (!in_array($column, $cache['columns'])) {
             throw new UnknownColumnException();
         }
 
-        if (array_key_exists($column, static::FOREIGN_KEYS)) {
-            $foreign_map = static::FOREIGN_KEYS[$column];
+        if (array_key_exists($column, $cache['foreigns'])) {
+            $foreign_map = $cache['foreigns'][$column];
             if ($value instanceof $foreign_map[0]) {
                 $this->foreign[$column] = $value;
                 $this->changes[$column] = $value->data[$foreign_map[1]];
@@ -255,8 +258,9 @@ abstract class Model implements \JsonSerializable
      */
     protected static function dataCleanup($data)
     {
-        $whitelist = static::COLUMNS;
-        $blacklist = [static::AUTO_INCREMENT];
+        $cache = static::getCache();
+        $whitelist = $cache['columns'];
+        $blacklist = [$cache['auto_increment']];
 
         $data = Utils::arrayWhitelist($data, $whitelist);
         $data = Utils::arrayBlacklist($data, $blacklist);
@@ -275,9 +279,10 @@ abstract class Model implements \JsonSerializable
      */
     public static function dump($where = [], $columns = [])
     {
+        $cache = static::getCache();
         if (empty($columns)) {
-            $columns = static::COLUMNS;
-        } elseif (!empty($invalid = array_diff($columns, static::COLUMNS))) {
+            $columns = $cache['columns'];
+        } elseif (!empty($invalid = array_diff($columns, $cache['columns']))) {
             throw new UnknownColumnException($invalid);
         }
 
@@ -384,7 +389,10 @@ abstract class Model implements \JsonSerializable
         if ($this->data === null) {
             return null;
         }
-        return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
+        return Utils::arrayWhitelist(
+            $this->data,
+            static::getCache()['primaries']
+        );
     }
 
     /**
@@ -426,10 +434,10 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Process $where, adding the PRIMARY_KEY if needed
+     * Process $where, normalizing for use in \Medoo\Medoo
      *
      * It allows the use of a simple value (e.g. string or integer) or a
-     * simple array without specifing the PRIMARY_KEY column(s)
+     * simple array without specifing the primary column(s)
      *
      * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
      *
@@ -438,7 +446,8 @@ abstract class Model implements \JsonSerializable
      * @throws \InvalidArgumentException  If $where is null
      * @throws \InvalidArgumentException  If could not solve Primary Key:
      *                                    - $where does not specify columns and
-     *                                      does not match PRIMARY_KEY length
+     *                                      does not match $cache['primaries']
+     *                                      length
      */
     final public static function processWhere($where)
     {
@@ -447,7 +456,7 @@ abstract class Model implements \JsonSerializable
         }
         $where = (array) $where;
         if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine(static::PRIMARY_KEY, $where);
+            $where = @array_combine(static::getCache()['primaries'], $where);
             if ($where === false) {
                 throw new \InvalidArgumentException(
                     'Could not solve Primary Key'
@@ -553,14 +562,15 @@ abstract class Model implements \JsonSerializable
      */
     protected function loadForeign($column, $value)
     {
-        if (!in_array($column, static::COLUMNS)) {
+        $cache = static::getCache();
+        if (!in_array($column, $cache['columns'])) {
             throw new UnknownColumnException();
         }
-        if (!array_key_exists($column, static::FOREIGN_KEYS)) {
+        if (!array_key_exists($column, $cache['foreigns'])) {
             throw new NotForeignColumnException();
         }
 
-        $foreign_map = static::FOREIGN_KEYS[$column];
+        $foreign_map = $cache['foreigns'][$column];
 
         if ($value === null) {
             unset($this->foreign[$column]);
@@ -595,6 +605,7 @@ abstract class Model implements \JsonSerializable
      */
     protected static function validate($data, $full)
     {
+        $cache = static::getCache();
         $columns = array_keys($data);
 
         /*
@@ -602,9 +613,9 @@ abstract class Model implements \JsonSerializable
          */
         if ($full) {
             $required = array_diff(
-                static::COLUMNS,
-                static::OPTIONAL_COLUMNS,
-                (array) static::AUTO_INCREMENT
+                $cache['columns'],
+                $cache['optionals'],
+                [$cache['auto_increment']]
             );
             $missing = array_diff($required, $columns);
             if (!empty($missing)) {
@@ -615,7 +626,7 @@ abstract class Model implements \JsonSerializable
         /*
          * Check unknown columns
          */
-        $unknown = array_diff($columns, static::COLUMNS);
+        $unknown = array_diff($columns, $cache['columns']);
         if (!empty($unknown)) {
             throw new UnknownColumnException($unknown);
         }
@@ -659,13 +670,15 @@ abstract class Model implements \JsonSerializable
             return false;
         }
 
+        $cache = static::getCache();
+
         $data = $this->changes;
         $data = static::validate($data, true);
 
         $old_primary_key = $this->getPrimaryKey();
         $update_manager = $this->data !== null && !empty(array_intersect(
             array_keys($data),
-            static::PRIMARY_KEY
+            $cache['primaries']
         ));
 
         $database = self::getDatabase();
@@ -680,15 +693,15 @@ abstract class Model implements \JsonSerializable
                  * default values or alter some columns. Also, it updates
                  * foreign models.
                  *
-                 * First, get the AUTO_INCREMENT
-                 * Then, extract the PRIMARY_KEY
+                 * First, update the AUTO_INCREMENT column
+                 * Then, extract the PRIMARY_KEY column(s)
                  * Finally, load from Database
                  */
-                $column = static::AUTO_INCREMENT;
+                $column = $cache['auto_increment'];
                 if ($column !== null) {
                     $data[$column] = $database->id();
                 }
-                $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
+                $where = Utils::arrayWhitelist($data, $cache['primaries']);
                 return $this->load($where);
             }
             $this->changes = [];
@@ -713,12 +726,13 @@ abstract class Model implements \JsonSerializable
      */
     public function load($where)
     {
+        $cache = static::getCache();
         $where = self::processWhere($where);
 
         $old_primary_key = $this->getPrimaryKey();
 
         $database = self::getDatabase();
-        $data = $database->get(static::TABLE, static::COLUMNS, $where);
+        $data = $database->get(static::TABLE, $cache['columns'], $where);
         if ($data) {
             $this->reset();
             $this->data = $data;
@@ -727,7 +741,7 @@ abstract class Model implements \JsonSerializable
             } else {
                 $this->managerExport();
             }
-            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+            foreach (array_keys($cache['foreigns']) as $column) {
                 $this->loadForeign($column, $data[$column]);
             }
             return true;
@@ -764,7 +778,7 @@ abstract class Model implements \JsonSerializable
         $old_primary_key = $this->getPrimaryKey();
         $update_manager = !empty(array_intersect(
             $columns,
-            static::PRIMARY_KEY
+            static::getCache()['primaries']
         ));
 
         $database = self::getDatabase();

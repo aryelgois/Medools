@@ -60,7 +60,10 @@ class ModelIterator implements \Iterator
     public function __construct($model_class, $where = [])
     {
         $this->model_class = $model_class;
-        $this->list = $model_class::dump($where, $model_class::PRIMARY_KEY);
+        $this->list = $model_class::dump(
+            $where,
+            $model_class::getCache()['primaries']
+        );
     }
 
     /**
