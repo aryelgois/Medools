@@ -77,7 +77,7 @@ abstract class Model implements \JsonSerializable
      * List of optional columns
      *
      * List here all columns which have a default value (e.g. timestamp) or are
-     * nullable. AUTO_INCREMENT is always optional and does not need to be here.
+     * nullable. You don't need to include implict optional columns.
      *
      * @const string[]
      */
@@ -740,7 +740,7 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed[] $data Data to be validated
      * @param boolean $full If $data is supposed to contain all columns
-     *                      (optional columns not required) :D
+     *                      (optional columns are ignored)
      *
      * @return mixed[] Valid data
      *
