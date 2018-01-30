@@ -576,7 +576,7 @@ abstract class Model implements \JsonSerializable
      */
     protected function managerUpdate($old_primary_key)
     {
-        ModelManager::remove(array_merge([get_class($this)], $old_primary_key));
+        ModelManager::remove(array_merge([static::class], $old_primary_key));
         $this->managerExport();
     }
 
