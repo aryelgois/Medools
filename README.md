@@ -311,6 +311,8 @@ Also, some fixes were made.
 
 #### v1.0 (2017-11-09) First release
 
+> I should have started from v0.1..
+
 
 [config_example]: config/example.php
 [MedooConnection]: src/MedooConnection.php
