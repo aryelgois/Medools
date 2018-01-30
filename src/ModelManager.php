@@ -35,7 +35,7 @@ abstract class ModelManager
      *
      * @var array[] The deepest element is a Model
      */
-    protected static $models = [];
+    private static $models = [];
 
     // Prevents creating multiple instances due to 'private' constructor
     private function __construct()
