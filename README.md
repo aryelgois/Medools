@@ -311,11 +311,6 @@ Also, some fixes were made.
 
 #### v1.0 (2017-11-09) First release
 
-# TODO
-
-- [ ] Real World tests
-- [ ] Add more Models
-
 
 [config_example]: config/example.php
 [MedooConnection]: src/MedooConnection.php
