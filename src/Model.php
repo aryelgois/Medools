@@ -728,6 +728,41 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Normalize column lists
+     *
+     * EXAMPLE:
+     *     $list = [
+     *         'column_a',
+     *         'column_b' => value,
+     *     ];
+     *
+     *     return [
+     *         'column_a' => $default,
+     *         'column_b' => value,
+     *     ];
+     *
+     * NOTE:
+     * - Columns can not contain only numbers
+     *
+     * @param mixed[] $list    Array to be normalized
+     * @param mixed   $default Value to columns listed as value
+     *
+     * @return mixed[]
+     */
+    final protected static function normalizeColumnList($list, $default = null)
+    {
+        $result = [];
+        foreach ($list as $key => $value) {
+            if (is_int($key)) {
+                $result[$value] = $default;
+            } else {
+                $result[$key] = $value;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Process $where, adding the PRIMARY_KEY if needed
      *
      * It allows the use of a simple value (e.g. string or integer) or a
