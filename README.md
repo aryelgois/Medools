@@ -44,12 +44,16 @@ Also, you need to include this line in the beginning of your code:
 ```php
 <?php
 
-// set $root to your application root directory.
-
-aryelgois\Medools\MedooConnection::loadConfig($root . '/config/medools.php');
+aryelgois\Medools\MedooConnection::loadConfig('path/to/config/medools.php');
 ```
 
-It is because this framework uses a factory to reuse the Database connections.
+It's a good idea to put in a bootstrap which also requires composer's autoload
+(prior to the line above), and is always required by your scripts.
+
+The method called is from [MedooConnection], which works as a factory to reuse
+the Database connections. The reason for the config file being `.php` is that it
+contains passwords, and if this file is accessible in the public directory of
+your app, loading it will show nothing.
 
 
 # Using a Model
@@ -98,15 +102,19 @@ the model object.
 
 Just like in any object:
 
-- `$model->column` will return the stored data, or a foreign model
+- `$model->column` will return the stored data, or a foreign model *
 - `$model->column = value` will set a new data
 
 You can also:
 
 - `dump()`: Returns data from model's Table, you can [filter which rows][where_clause]
   and which columns you want
-- `getPrimaryKey():` Returns the last saved Primary Key
-- `setMultiple():` Sets multiple columns from an array
+- `getPrimaryKey()`: Returns the last saved Primary Key
+- `setMultiple()`: Sets multiple columns from an array
+- `toArray()`: Returns data from the model in an array (foreigns included)
+
+> \* It means that you can chain the models:  
+> `$model->foreign->column`
 
 
 ## Reloading the model
@@ -130,34 +138,11 @@ This framework supports foreign models. You can configure them in the model
 class, and access `$model->foreign_column`. They are simply other models,
 referenced in your model.
 
+They are loaded on demand, so you don't need to worry about loading lots of
+foreigns just because you want a single column from the model.
+
 > :warning: Warning: Be careful not to configure a circular foreign constrain.
-> PHP might hang trying to create infinite models.
-
-
-## Advanced
-
-Use `getDatabase()` for a direct access to the Database, already connected and
-ready to use. See [catfan/Medoo] for details.
-
-You can add custom methods to your models, to automatically get some data and
-format as needed.
-
-#### Hooks
-
-There is a Hook concept in this framework, where you can add specific methods
-which are automatically called by default methods. It makes easier to extend
-some functionalities.
-
-Current, these hooks are available:
-
-- `validateHook()`: Use it to validate the data before sending to the Database.
-  Make sure your code can validate some columns or all of them, depending on the
-  `$full` argument.
-
-#### ModelManager
-
-[This class][ModelManager] tracks every model loaded during a request. It aims
-to avoid model duplication, mainly in foreign keys.
+> When serializing a model, it can fail because of recursion.
 
 
 # Configuring a Model
@@ -168,9 +153,9 @@ parent class.
 Only TABLE and COLUMNS are required to define a new model.
 
 
-#### DATABASE_NAME_KEY
+#### DATABASE
 
-Database name key in the config file
+Database name key in the Medools config file
 
 - Type: `string`
 - Default: `'default'`
@@ -178,7 +163,7 @@ Database name key in the config file
 
 #### TABLE
 
-Database's Table the model works with
+Database's Table the model represents
 
 > The recomended is to use a plural name for the table and it's singular in the
   model name
@@ -210,6 +195,36 @@ Auto Increment column
 - Default: `'id'`
 
 
+#### STAMP_COLUMNS
+
+List of columns to receive the current timestamp automatically
+
+- Type: `string[]`
+- Values: `'auto'`, `'date'`, `'time'` or `'datetime'`
+- Default: `'datetime'`
+
+The columns are automatically updated with the current timestamp on `save()` and
+`update()`. This constant allows multiple timestamp columns. If the column was
+manually changed, it will not be overwritten.
+
+- **NOTE**: Columns with timestamp controlled by the Database must be listed
+  with `'auto'`
+
+The following structure is valid:
+
+```php
+<?php
+
+const STAMP_COLUMNS = [
+    'column_a' => 'datetime',
+    'column_b',
+    'column_c' => 'date',
+];
+```
+
+Here, `column_b` will use the default.
+
+
 #### OPTIONAL_COLUMNS
 
 List of optional columns
@@ -227,7 +242,8 @@ Foreign Keys map
 > A map of columns in the curent model which point to a column in another model
 
 - Type: `array[]`
-- Example:
+
+Example:
 
 ```php
 <?php
@@ -255,6 +271,9 @@ If `delete()` actually removes the row or if it changes a column
 
 > It defines the column affected by the soft delete
 
+This column is **implicitly** optional, so you must define a default value in
+the database accordingly to SOFT_DELETE_MODE. *(see below)*
+
 - Type: `string|null`
 - Default: `null`
 
@@ -275,7 +294,49 @@ Possible value | When not deleted | When deleted
 `'stamp'`      | null             | current timestamp
 
 
+## Advanced
+
+Use `getDatabase()` for a direct access to the Database, already connected and
+ready to use. See [catfan/Medoo] for details.
+
+You can add custom methods to your models, to automatically get some data and
+format as needed.
+
+#### Hooks
+
+There is a Hook concept in this framework, where you can add specific methods
+which are automatically called by default methods. It makes easier to extend
+some functionalities.
+
+Currently, these hooks are available:
+
+- `validateHook()`: Use it to validate the data before sending to the Database.
+  Make sure your code can validate some columns or all of them, depending on the
+  `$full` argument.
+
+#### ModelManager
+
+[This class][ModelManager] tracks every model loaded during a request. It aims
+to avoid model duplication, mainly in foreign keys.
+
+
 # Changelog
+
+#### v3.0
+
+- SOFT_DELETE is implicitly optional
+- Foreigns are loaded on demand
+- Models are restored to [ModelManager] after `unserialize()`
+- Models can be converted `toArray()`
+- Add const STAMP_COLUMNS
+- Columns whit timestamp controlled by Database can be ignored
+- Update README
+- Some fixes and minor updates
+
+**BREAKING CHANGES**
+
+- Some models in the namespace `aryelgois\Medools\Models\Address` were removed
+- Rename DATABASE_NAME_KEY to DATABASE
 
 #### v2.1 (2018-01-06)
 
@@ -301,18 +362,16 @@ Also, some fixes were made.
 
 #### v1.0 (2017-11-09) First release
 
-# TODO
-
-- [ ] Real World tests
-- [ ] Add more Models
+> I should have started from v0.1..
 
 
 [config_example]: config/example.php
-[Model]:          src/Model.php
-[ModelIterator]:  src/ModelIterator.php
-[ModelManager]:   src/ModelManager.php
+[MedooConnection]: src/MedooConnection.php
+[Model]: src/Model.php
+[ModelIterator]: src/ModelIterator.php
+[ModelManager]: src/ModelManager.php
 
-[catfan/Medoo]:   https://github.com/catfan/Medoo
+[catfan/Medoo]: https://github.com/catfan/Medoo
 [aryelgois/databases]: https://github.com/aryelgois/databases
 
-[where_clause]:   https://medoo.in/api/where
+[where_clause]: https://medoo.in/api/where

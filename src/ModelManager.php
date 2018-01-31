@@ -35,7 +35,7 @@ abstract class ModelManager
      *
      * @var array[] The deepest element is a Model
      */
-    protected static $models = [];
+    private static $models = [];
 
     // Prevents creating multiple instances due to 'private' constructor
     private function __construct()
@@ -107,8 +107,8 @@ abstract class ModelManager
     public static function remove($var)
     {
         $path = ($var instanceof Model)
-              ? self::getPath($var)
-              : $var;
+            ? self::getPath($var)
+            : $var;
 
         Utils\Utils::arrayPathUnset(self::$models, $path);
     }

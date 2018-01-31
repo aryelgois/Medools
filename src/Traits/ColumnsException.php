@@ -22,8 +22,8 @@ trait ColumnsException
             $columns = implode("', '", $columns);
         }
         $message = ($columns !== '')
-                 ? "'" . $columns . "'"
-                 : '';
+            ? "'" . $columns . "'"
+            : '';
 
         parent::__construct($message, 0, $previous);
     }
