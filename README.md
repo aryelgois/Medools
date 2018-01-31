@@ -242,7 +242,8 @@ Foreign Keys map
 > A map of columns in the curent model which point to a column in another model
 
 - Type: `array[]`
-- Example:
+
+Example:
 
 ```php
 <?php
