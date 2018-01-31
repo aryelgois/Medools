@@ -477,27 +477,6 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
-     * Cleans data keys, removing unwanted columns
-     *
-     * @todo Ignore auto timestamp column
-     * @todo Option to tell custom ignored columns
-     *
-     * @param string[] $data Data to be cleaned
-     * @param string   $data Which method will use the result
-     *
-     * @return string[]
-     */
-    protected static function dataCleanup($data)
-    {
-        $whitelist = static::COLUMNS;
-        $blacklist = [static::AUTO_INCREMENT];
-
-        $data = Utils::arrayWhitelist($data, $whitelist);
-        $data = Utils::arrayBlacklist($data, $blacklist);
-        return $data;
-    }
-
-    /**
      * Returns data in model's Table
      *
      * @param mixed[]  $where   \Medoo\Medoo where clause
@@ -561,76 +540,6 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Returns the stored data in an array
-     *
-     * @return mixed[]
-     */
-    public function jsonSerialize()
-    {
-        $data = array_replace($this->data ?? [], $this->changes);
-        if (empty($data)) {
-            return null;
-        }
-        foreach (array_keys(static::FOREIGN_KEYS) as $column) {
-            $data[$column] = $this->__get($column);
-        }
-        return $data;
-    }
-
-    /**
-     * Exports this Model to ModelManager
-     *
-     * @return boolean For success or failure
-     */
-    protected function managerExport()
-    {
-        ModelManager::import($this);
-    }
-
-    /**
-     * Updates this Model in the ModelManager
-     *
-     * @param string[] $old_primary_key
-     */
-    protected function managerUpdate($old_primary_key)
-    {
-        ModelManager::remove(array_merge([static::class], $old_primary_key));
-        $this->managerExport();
-    }
-
-    /**
-     * Process $where, adding the PRIMARY_KEY if needed
-     *
-     * It allows the use of a simple value (e.g. string or integer) or a
-     * simple array without specifing the PRIMARY_KEY column(s)
-     *
-     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
-     *
-     * @return boolean For success or failure
-     *
-     * @throws \InvalidArgumentException  If $where is null
-     * @throws \InvalidArgumentException  If could not solve Primary Key:
-     *                                    - $where does not specify columns and
-     *                                      does not match PRIMARY_KEY length
-     */
-    final public static function processWhere($where)
-    {
-        if ($where === null) {
-            throw new \InvalidArgumentException('Primary Key can not be null');
-        }
-        $where = (array) $where;
-        if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine(static::PRIMARY_KEY, $where);
-            if ($where === false) {
-                throw new \InvalidArgumentException(
-                    'Could not solve Primary Key'
-                );
-            }
-        }
-        return $where;
-    }
-
-    /**
      * Reloads model data
      *
      * @return boolean For success or failure
@@ -638,16 +547,6 @@ abstract class Model implements \JsonSerializable
     public function reload()
     {
         return $this->load($this->getPrimaryKey());
-    }
-
-    /**
-     * Cleans model data
-     */
-    protected function reset()
-    {
-        $this->changes = [];
-        $this->data = null;
-        $this->foreign = [];
     }
 
     /**
@@ -725,6 +624,49 @@ abstract class Model implements \JsonSerializable
         return $this->update($column);
     }
 
+    /*
+     * Internal methods
+     * =========================================================================
+     */
+
+    /**
+     * Cleans data keys, removing unwanted columns
+     *
+     * @todo Ignore auto timestamp column
+     * @todo Option to tell custom ignored columns
+     *
+     * @param string[] $data Data to be cleaned
+     * @param string   $data Which method will use the result
+     *
+     * @return string[]
+     */
+    protected static function dataCleanup($data)
+    {
+        $whitelist = static::COLUMNS;
+        $blacklist = [static::AUTO_INCREMENT];
+
+        $data = Utils::arrayWhitelist($data, $whitelist);
+        $data = Utils::arrayBlacklist($data, $blacklist);
+        return $data;
+    }
+
+    /**
+     * Returns the stored data in an array
+     *
+     * @return mixed[]
+     */
+    public function jsonSerialize()
+    {
+        $data = array_replace($this->data ?? [], $this->changes);
+        if (empty($data)) {
+            return null;
+        }
+        foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+            $data[$column] = $this->__get($column);
+        }
+        return $data;
+    }
+
     /**
      * Updates a foreign model to a new row
      *
@@ -762,6 +704,69 @@ abstract class Model implements \JsonSerializable
         } else {
             throw new ForeignConstraintException(static::class, $column);
         }
+    }
+
+    /**
+     * Exports this Model to ModelManager
+     *
+     * @return boolean For success or failure
+     */
+    protected function managerExport()
+    {
+        ModelManager::import($this);
+    }
+
+    /**
+     * Updates this Model in the ModelManager
+     *
+     * @param string[] $old_primary_key
+     */
+    protected function managerUpdate($old_primary_key)
+    {
+        ModelManager::remove(array_merge([static::class], $old_primary_key));
+        $this->managerExport();
+    }
+
+    /**
+     * Process $where, adding the PRIMARY_KEY if needed
+     *
+     * It allows the use of a simple value (e.g. string or integer) or a
+     * simple array without specifing the PRIMARY_KEY column(s)
+     *
+     * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
+     *
+     * @return boolean For success or failure
+     *
+     * @throws \InvalidArgumentException  If $where is null
+     * @throws \InvalidArgumentException  If could not solve Primary Key:
+     *                                    - $where does not specify columns and
+     *                                      does not match PRIMARY_KEY length
+     */
+    final public static function processWhere($where)
+    {
+        if ($where === null) {
+            throw new \InvalidArgumentException('Primary Key can not be null');
+        }
+        $where = (array) $where;
+        if (!Utils::arrayIsAssoc($where)) {
+            $where = @array_combine(static::PRIMARY_KEY, $where);
+            if ($where === false) {
+                throw new \InvalidArgumentException(
+                    'Could not solve Primary Key'
+                );
+            }
+        }
+        return $where;
+    }
+
+    /**
+     * Cleans model data
+     */
+    protected function reset()
+    {
+        $this->changes = [];
+        $this->data = null;
+        $this->foreign = [];
     }
 
     /**
