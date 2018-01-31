@@ -192,6 +192,12 @@ abstract class Model implements \JsonSerializable
             throw new UnknownColumnException();
         }
 
+        if (array_key_exists($column, $this->changes)
+            && $this->changes[$column] === null
+        ) {
+            return null;
+        }
+
         $value = $this->changes[$column] ?? $this->data[$column];
 
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
