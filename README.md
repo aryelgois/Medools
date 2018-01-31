@@ -308,7 +308,7 @@ There is a Hook concept in this framework, where you can add specific methods
 which are automatically called by default methods. It makes easier to extend
 some functionalities.
 
-Current, these hooks are available:
+Currently, these hooks are available:
 
 - `validateHook()`: Use it to validate the data before sending to the Database.
   Make sure your code can validate some columns or all of them, depending on the
