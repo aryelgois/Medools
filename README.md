@@ -1,3 +1,5 @@
+> “We can solve any problem by introducing an extra level of [indirection].”
+
 # Intro
 
 ## (pt_BR)
@@ -375,3 +377,5 @@ Also, some fixes were made.
 [aryelgois/databases]: https://github.com/aryelgois/databases
 
 [where_clause]: https://medoo.in/api/where
+
+[indirection]: https://en.wikipedia.org/wiki/Indirection
