@@ -76,7 +76,7 @@ abstract class Model implements \JsonSerializable
     /**
      * List of columns to receive the current timestamp automatically
      *
-     * Values: 'date', 'time' or 'datetime'
+     * Values: 'auto, 'date', 'time' or 'datetime'
      * Default: 'datetime'
      *
      * @const string[]
@@ -646,7 +646,6 @@ abstract class Model implements \JsonSerializable
     /**
      * Cleans data keys, removing unwanted columns
      *
-     * @todo Ignore auto timestamp column
      * @todo Option to tell custom ignored columns
      *
      * @param string[] $data Data to be cleaned
@@ -657,11 +656,31 @@ abstract class Model implements \JsonSerializable
     protected static function dataCleanup($data)
     {
         $whitelist = static::COLUMNS;
-        $blacklist = [static::AUTO_INCREMENT];
+        $blacklist = array_merge(
+            [static::AUTO_INCREMENT],
+            static::getAutoStampColumns()
+        );
 
         $data = Utils::arrayWhitelist($data, $whitelist);
         $data = Utils::arrayBlacklist($data, $blacklist);
         return $data;
+    }
+
+    /**
+     * Returns STAMP_COLUMNS with 'auto' mode
+     *
+     * @return string[]
+     */
+    public static function getAutoStampColumns()
+    {
+        $auto_stamp = [];
+        if (!empty(static::STAMP_COLUMNS)) {
+            $stamp_columns = self::normalizeColumnList(static::STAMP_COLUMNS);
+            $auto_stamp = array_filter($stamp_columns, function ($mode) {
+                return $mode === 'auto';
+            });
+        }
+        return array_keys($auto_stamp);
     }
 
     /**
@@ -842,6 +861,9 @@ abstract class Model implements \JsonSerializable
                 continue;
             }
             switch ($mode) {
+                case 'auto':
+                    break;
+
                 case 'date':
                     $this->__set($column, $stamp[0]);
                     break;
@@ -887,10 +909,11 @@ abstract class Model implements \JsonSerializable
             $required = array_diff(
                 static::COLUMNS,
                 static::OPTIONAL_COLUMNS,
-                [ // implicit optional columns
+                [ // implicit optional/automatic columns
                     static::AUTO_INCREMENT,
                     static::SOFT_DELETE,
-                ]
+                ],
+                static::getAutoStampColumns()
             );
             $missing = array_diff($required, $columns);
             if (!empty($missing)) {
