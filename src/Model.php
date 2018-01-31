@@ -274,6 +274,14 @@ abstract class Model implements \JsonSerializable
         $this->__set($column, null);
     }
 
+    /**
+     * Exports the Model to the ModelManager after unserialize()
+     */
+    public function __wakeup()
+    {
+        $this->managerExport();
+    }
+
     /*
      * CRUD methods
      * =========================================================================
