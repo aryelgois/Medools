@@ -195,6 +195,34 @@ Auto Increment column
 - Default: `'id'`
 
 
+#### STAMP_COLUMNS
+
+List of columns to receive the current timestamp automatically
+
+- Type: `string[]`
+- Values: `'date'`, `'time'` or `'datetime'`
+- Default: `'datetime'`
+
+The columns are automatically updated with the current timestamp on `save()` and
+`update()`. Do not include a column defined as `timestamp` in the Database,
+because it will handle by itself. But this constant allows multiple timestamp
+columns. If the column was manually changed, it will not be overwritten.
+
+The following structure is valid:
+
+```php
+<?php
+
+const STAMP_COLUMNS = [
+    'column_a' => 'datetime',
+    'column_b',
+    'column_c' => 'date',
+];
+```
+
+Here, `column_b` will use the default.
+
+
 #### OPTIONAL_COLUMNS
 
 List of optional columns

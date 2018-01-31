@@ -74,6 +74,16 @@ abstract class Model implements \JsonSerializable
     const AUTO_INCREMENT = 'id';
 
     /**
+     * List of columns to receive the current timestamp automatically
+     *
+     * Values: 'date', 'time' or 'datetime'
+     * Default: 'datetime'
+     *
+     * @const string[]
+     */
+    const STAMP_COLUMNS = [];
+
+    /**
      * List of optional columns
      *
      * List here all columns which have a default value (e.g. timestamp) or are
@@ -308,6 +318,8 @@ abstract class Model implements \JsonSerializable
 
         $is_fresh = $this->data === null;
 
+        $this->updateStampColumns();
+
         $data = $this->changes;
         $data = static::validate($data, $is_fresh);
 
@@ -401,6 +413,8 @@ abstract class Model implements \JsonSerializable
         if ($this->data === null) {
             throw new \LogicException('Can not update a fresh Model');
         }
+
+        $this->updateStampColumns($columns);
 
         $columns = (array) $columns;
         $data = Utils::arrayWhitelist($this->changes, $columns);
@@ -802,6 +816,49 @@ abstract class Model implements \JsonSerializable
         $this->changes = [];
         $this->data = null;
         $this->foreign = [];
+    }
+
+    /**
+     * Updates STAMP_COLUMNS to current timestamp
+     *
+     * NOTE:
+     * - It expects getCurrentTimestamp() to return in format 'Y-m-d H:i:s'
+     * - Columns already changed are ignored
+     *
+     * @param string|string[] $subset Only update these columns
+     *                                Invalid columns are ignored
+     */
+    public function updateStampColumns($subset = null)
+    {
+        $columns = self::normalizeColumnList(static::STAMP_COLUMNS, 'datetime');
+        if ($subset !== null) {
+            $columns = array_intersect_key($columns, (array) $subset);
+        }
+
+        $stamp = explode(' ', static::getCurrentTimestamp());
+
+        foreach ($columns as $column => $mode) {
+            if (array_key_exists($column, $this->changes)) {
+                continue;
+            }
+            switch ($mode) {
+                case 'date':
+                    $this->__set($column, $stamp[0]);
+                    break;
+
+                case 'time':
+                    $this->__set($column, $stamp[1]);
+                    break;
+
+                case 'datetime':
+                    $this->__set($column, implode(' ', $stamp));
+                    break;
+
+                default:
+                    throw new \LogicException("Unknown mode '$mode'");
+                    break;
+            }
+        }
     }
 
     /**
