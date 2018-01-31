@@ -212,7 +212,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Checks if a column has some value
      *
-     * @param string  $column A known column
+     * @param string $column A known column
      *
      * @return boolean
      *
