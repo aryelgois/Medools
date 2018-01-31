@@ -286,22 +286,24 @@ abstract class Model implements \JsonSerializable
             return false;
         }
 
+        $is_fresh = $this->data === null;
+
         $data = $this->changes;
-        $data = static::validate($data, true);
+        $data = static::validate($data, $is_fresh);
 
         $old_primary_key = $this->getPrimaryKey();
-        $update_manager = $this->data !== null && !empty(array_intersect(
+        $update_manager = !$is_fresh && !empty(array_intersect(
             array_keys($data),
             static::PRIMARY_KEY
         ));
 
         $database = self::getDatabase();
-        $stmt = ($this->data === null)
+        $stmt = ($is_fresh)
             ? $database->insert(static::TABLE, static::dataCleanup($data))
             : $database->update(static::TABLE, $data, $old_primary_key);
 
         if ($stmt->errorCode() == '00000') {
-            if ($this->data === null) {
+            if ($is_fresh) {
                 /*
                  * It is prefered to load back because the Database may apply
                  * default values or alter some columns. Also, it updates
