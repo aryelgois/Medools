@@ -329,7 +329,7 @@ to avoid model duplication, mainly in foreign keys.
 - Models are restored to [ModelManager] after `unserialize()`
 - Models can be converted `toArray()`
 - Add const STAMP_COLUMNS
-- Columns whit timestamp controlled by Database can be ignored
+- Columns with timestamp controlled by Database can be ignored
 - Update README
 - Some fixes and minor updates
 
