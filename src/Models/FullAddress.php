@@ -5,15 +5,19 @@
  * @see LICENSE
  */
 
-namespace aryelgois\Medools\Models\Address;
+namespace aryelgois\Medools\Models;
 
 use aryelgois\Medools;
 
 /**
  * A Full Address model to reference a specific place in the world
  *
- * This class allows you to use more specific information about the Address,
- * which should be provided by your clients.
+ * This class expands the Address database to contain more specific information
+ * about the address, which should be provided by your clients.
+ *
+ * @see https://github.com/aryelgois/databases
+ *
+ * @deprecated This class will be moved to the previous link
  *
  * @author Aryel Mota Góis
  * @license MIT
@@ -41,8 +45,7 @@ class FullAddress extends Medools\Model
 
     const FOREIGN_KEYS = [
         'county' => [
-            /** @deprecated Replace by 'aryelgois\Databases\Models\County' */
-            __NAMESPACE__ . '\County',
+            'aryelgois\Databases\Models\County',
             'id'
         ],
     ];

@@ -15,8 +15,9 @@ use Medoo\Medoo;
  * It avoids recreate a Medoo for the same database, while implements an
  * abstraction for the Medoo configuration
  *
- * NOTES:
- * - The reason for being a static class is to be accessible from anywhere
+ * NOTE:
+ * - The reason for storing in a static property is to be accessible in the
+ *   whole script
  * - At the start of your script, you need to call loadConfig() with the path to
  *   a file in your project like in the config/example.php
  *

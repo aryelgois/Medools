@@ -8,7 +8,7 @@
 namespace aryelgois\Medools\Exceptions;
 
 /**
- * A model is configured as read-only, but tries to change it's data
+ * A model is configured as read-only, but tries to change its data
  *
  * @author Aryel Mota Góis
  * @license MIT
