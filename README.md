@@ -322,6 +322,22 @@ to avoid model duplication, mainly in foreign keys.
 
 # Changelog
 
+#### v3.0
+
+- SOFT_DELETE is implicitly optional
+- Foreigns are loaded on demand
+- Models are restored to [ModelManager] after `unserialize()`
+- Models can be converted `toArray()`
+- Add const STAMP_COLUMNS
+- Columns whit timestamp controlled by Database can be ignored
+- Update README
+- Some fixes and minor updates
+
+**BREAKING CHANGES**
+
+- Some models in the namespace `aryelgois\Medools\Models\Address` were removed
+- Rename DATABASE_NAME_KEY to DATABASE
+
 #### v2.1 (2018-01-06)
 
 Models in the namespace `aryelgois\Medools\Models\Address` are being deprecated
