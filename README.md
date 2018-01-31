@@ -324,7 +324,7 @@ to avoid model duplication, mainly in foreign keys.
 
 # Changelog
 
-#### v3.0
+#### v3.0 (2018-01-31) Usability release
 
 - SOFT_DELETE is implicitly optional
 - Foreigns are loaded on demand
@@ -337,7 +337,7 @@ to avoid model duplication, mainly in foreign keys.
 
 **BREAKING CHANGES**
 
-- Some models in the namespace `aryelgois\Medools\Models\Address` were removed
+- Models in the namespace `aryelgois\Medools\Models\Address` were removed
 - Rename DATABASE_NAME_KEY to DATABASE
 
 #### v2.1 (2018-01-06)
