@@ -184,6 +184,7 @@ abstract class Model implements \JsonSerializable
      * @return mixed
      *
      * @throws UnknownColumnException
+     * @throws ForeignConstraintException @see loadForeign()
      */
     public function __get($column)
     {
@@ -191,10 +192,15 @@ abstract class Model implements \JsonSerializable
             throw new UnknownColumnException();
         }
 
+        $value = $this->changes[$column] ?? $this->data[$column];
+
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
+            if (!array_key_exists($column, $this->foreign)) {
+                $this->loadForeign($column, $value);
+            }
             return $this->foreign[$column] ?? null;
         }
-        return $this->changes[$column] ?? $this->data[$column];
+        return $value;
     }
 
     /**
@@ -337,8 +343,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws \InvalidArgumentException  @see processWhere()
-     * @throws ForeignConstraintException @see loadForeign()
+     * @throws \InvalidArgumentException @see processWhere()
      */
     public function load($where)
     {
@@ -355,9 +360,6 @@ abstract class Model implements \JsonSerializable
                 $this->managerUpdate($old_primary_key);
             } else {
                 $this->managerExport();
-            }
-            foreach (array_keys(static::FOREIGN_KEYS) as $column) {
-                $this->loadForeign($column, $data[$column]);
             }
             return true;
         }
@@ -555,8 +557,8 @@ abstract class Model implements \JsonSerializable
         if (empty($data)) {
             return null;
         }
-        foreach ($this->foreign as $column => $model) {
-            $data[$column] = $model;
+        foreach (array_keys(static::FOREIGN_KEYS) as $column) {
+            $data[$column] = $this->__get($column);
         }
         return $data;
     }

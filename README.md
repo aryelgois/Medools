@@ -137,8 +137,11 @@ This framework supports foreign models. You can configure them in the model
 class, and access `$model->foreign_column`. They are simply other models,
 referenced in your model.
 
+They are loaded on demand, so you don't need to worry about loading lots of
+foreigns just because you want a single column from the model.
+
 > :warning: Warning: Be careful not to configure a circular foreign constrain.
-> PHP might hang trying to create infinite models.
+> When serializing a model, it can fail because of recursion.
 
 
 # Configuring a Model
