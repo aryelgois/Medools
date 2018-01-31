@@ -909,7 +909,7 @@ abstract class Model implements \JsonSerializable
             $required = array_diff(
                 static::COLUMNS,
                 static::OPTIONAL_COLUMNS,
-                [ // implicit optional/automatic columns
+                [ // implicit optional columns
                     static::AUTO_INCREMENT,
                     static::SOFT_DELETE,
                 ],
