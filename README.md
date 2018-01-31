@@ -111,6 +111,7 @@ You can also:
   and which columns you want
 - `getPrimaryKey():` Returns the last saved Primary Key
 - `setMultiple():` Sets multiple columns from an array
+- `toArray()`: Returns data from the model in an array (foreigns included)
 
 > \* It means that you can chain the models:  
 > `$model->foreign->column`

@@ -669,6 +669,19 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Converts the Model to array
+     *
+     * NOTE:
+     * - Loads all foreigns recursively
+     *
+     * @return mixed[]
+     */
+    public function toArray()
+    {
+        return json_decode(json_encode($this), true);
+    }
+
+    /**
      * Sets the SOFT_DELETE column to a undeleted state
      *
      * @return boolean For success or failure
