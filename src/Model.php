@@ -513,6 +513,25 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Changes the value in multiple columns
+     *
+     * Very useful when chaining __construct()
+     *
+     * @todo Replaces setMultiple()
+     *
+     * @param mixed[] $data An array of known columns => value
+     *
+     * @return $this
+     *
+     * @throws ... same as __set()
+     */
+    public function fill(array $data)
+    {
+        $this->setMultiple($data);
+        return $this;
+    }
+
+    /**
      * Selects Current Timestamp from Database
      *
      * Useful to keep timezone consistent
@@ -567,6 +586,8 @@ abstract class Model implements \JsonSerializable
      * Changes the value in multiple columns
      *
      * @see __set()
+     *
+     * @deprecated Use fill() instead
      *
      * @param mixed[] $data An array of known columns => value
      *
