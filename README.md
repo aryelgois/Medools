@@ -107,13 +107,17 @@ Just like in any object:
 - `$model->column` will return the stored data, or a foreign model *
 - `$model->column = value` will set a new data
 
-You can also:
+You can also get data with:
 
 - `dump()`: Returns data from model's Table, you can [filter which rows][where_clause]
   and which columns you want
 - `getPrimaryKey()`: Returns the last saved Primary Key
-- `setMultiple()`: Sets multiple columns from an array
 - `toArray()`: Returns data from the model in an array (foreigns included)
+
+And change data with:
+
+- `fill()`: Sets multiple columns from an array of column => value. It returns
+  the object (is chainable)
 
 > \* It means that you can chain the models:  
 > `$model->foreign->column`
