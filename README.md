@@ -107,6 +107,9 @@ Just like in any object:
 - `$model->column` will return the stored data, or a foreign model *
 - `$model->column = value` will set a new data
 
+> \* It means that you can chain the models:  
+> `$model->foreign->column`
+
 You can also get data with:
 
 - `dump()`: Returns data from model's Table, you can [filter which rows][where_clause]
@@ -118,9 +121,6 @@ And change data with:
 
 - `fill()`: Sets multiple columns from an array of column => value. It returns
   the object (is chainable)
-
-> \* It means that you can chain the models:  
-> `$model->foreign->column`
 
 
 ## Reloading the model
