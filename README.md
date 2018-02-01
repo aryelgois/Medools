@@ -256,7 +256,7 @@ Example:
 
 const FOREIGN_KEYS = [
     'local_column' => [
-        'Fully\Qualified\ClassName',
+        'Fully\\Qualified\\ClassName',
         'foreign_column'
     ],
 ];

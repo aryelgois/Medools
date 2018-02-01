@@ -102,7 +102,7 @@ abstract class Model implements \JsonSerializable
      * EXAMPLE:
      *     [
      *         'local_column' => [
-     *             'Fully\Qualified\ClassName',
+     *             'Fully\\Qualified\\ClassName',
      *             'foreign_column'
      *         ],
      *     ];

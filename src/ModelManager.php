@@ -26,7 +26,7 @@ abstract class ModelManager
      *
      * EXAMPLE:
      *     [
-     *         'Fully\Qualified\ClassName' => [
+     *         'Fully\\Qualified\\ClassName' => [
      *             value for PRIMARY_KEY[0] => [
      *                 value for PRIMARY_KEY[1] => Model,
      *             ],
