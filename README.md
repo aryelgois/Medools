@@ -345,51 +345,6 @@ not updated. To avoid this, use the `getInstance()` method provided either in
 this class or in the model.
 
 
-# Changelog
-
-#### v3.0 (2018-01-31) Usability release
-
-- SOFT_DELETE is implicitly optional
-- Foreigns are loaded on demand
-- Models are restored to [ModelManager] after `unserialize()`
-- Models can be converted `toArray()`
-- Add const STAMP_COLUMNS
-- Columns with timestamp controlled by Database can be ignored
-- Update README
-- Some fixes and minor updates
-
-**BREAKING CHANGES**
-
-- Models in the namespace `aryelgois\Medools\Models\Address` were removed
-- Rename DATABASE_NAME_KEY to DATABASE
-
-#### v2.1 (2018-01-06)
-
-Models in the namespace `aryelgois\Medools\Models\Address` are being deprecated
-in favor to the same ones in [`aryelgois\Databases\Models\Address`][aryelgois/databases].
-
-Some DocBlocks and the composer.json where updated.
-
-#### v2.0 (2017-11-18) ModelManager release
-
-Some methods were added, some changed, and some were removed. The most notable
-are `get()` and `set()`, replaced by PHP magic methods, and `getForeign()`,
-integrated with `__get()` to create a chain.
-
-Models are now JsonSerializable, so you can simply wrap a model in
-`json_encode()`. The reverse is not possible.
-
-The featuring [ModelManager][ModelManager] provides a way to reduce object
-duplication, keeping a track of loaded models, which are reused when referenced
-as foreign keys.
-
-Also, some fixes were made.
-
-#### v1.0 (2017-11-09) First release
-
-> I should have started from v0.1..
-
-
 [config_example]: config/example.php
 [MedooConnection]: src/MedooConnection.php
 [Model]: src/Model.php
@@ -397,7 +352,6 @@ Also, some fixes were made.
 [ModelManager]: src/ModelManager.php
 
 [catfan/Medoo]: https://github.com/catfan/Medoo
-[aryelgois/databases]: https://github.com/aryelgois/databases
 
 [where_clause]: https://medoo.in/api/where
 
