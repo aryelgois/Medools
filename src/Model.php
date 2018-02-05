@@ -556,6 +556,24 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Safely loads a model
+     *
+     * If an instance for the desired model already exists, it is returned,
+     * otherwise creates a new one
+     *
+     * @param mixed $where @see load()
+     *
+     * @return Model
+     */
+    final public static function getInstance($where)
+    {
+        return ModelManager::getInstance(
+            static::class,
+            $where
+        );
+    }
+
+    /**
      * Returns model's Primary Key
      *
      * NOTE:
