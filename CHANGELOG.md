@@ -127,7 +127,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.0...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.0...v3.x
 [3.0]: https://github.com/aryelgois/Medools/compare/v3.0-alpha...v3.0
 [3.0-alpha]: https://github.com/aryelgois/Medools/compare/v2.1...v3.0-alpha
 [2.1]: https://github.com/aryelgois/Medools/compare/v2.0...v2.1
