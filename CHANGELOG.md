@@ -11,10 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Model `fill()`
+- Model `getInstance()`
+- Section about Reusing models
 
 ### Changed
+- Moved changelog to its own file
 
 ### Deprecated
+- Model `setMultiple()`
 
 ### Removed
 
