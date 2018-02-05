@@ -151,6 +151,20 @@ foreigns just because you want a single column from the model.
 > When serializing a model, it can fail because of recursion.
 
 
+# Reusing models
+
+To avoid creating multiple instances for the same model, there is a
+[ModelManager] class which contains pointers to models already created. To
+retrieve them, use the `getInstance()` method, which asks for a model class and
+a [where clause][where_clause] (only one row is selected). A shortcut is calling
+the `getInstance()` directly from the model, which just asks for `$where`.
+
+See more in the [Advanced](#modelmanager) section.
+
+If you wish, you can still create a new instance for an already existing model.
+The new object will not contain changes made in the old one.
+
+
 # Configuring a Model
 
 The settings are constants in each model class. You can omit some to reuse from
@@ -324,6 +338,11 @@ Currently, these hooks are available:
 
 [This class][ModelManager] tracks every model loaded during a request. It aims
 to avoid model duplication, mainly in foreign keys.
+
+If you create a new instance for an already existing model, the new instance
+replaces the old one in this class, but other pointers to the old instance are
+not updated. To avoid this, use the `getInstance()` method provided either in
+this class or in the model.
 
 
 # Changelog
