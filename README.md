@@ -38,7 +38,7 @@ Open a terminal in your project directory and run:
 # Setup
 
 Before using this framework, you need a config file somewhere in your
-application. This file setups some data for [catfan/Medoo]. Use this
+application. This file setups some data for [catfan/Medoo]. Follow this
 [example][config_example].
 
 Also, you need to include this line in the beginning of your code:
@@ -49,13 +49,14 @@ Also, you need to include this line in the beginning of your code:
 aryelgois\Medools\MedooConnection::loadConfig('path/to/config/medools.php');
 ```
 
-It's a good idea to put in a bootstrap which also requires composer's autoload
-(prior to the line above), and is always required by your scripts.
+It's a good idea to put in something like `bootstrap.php`, which also requires
+composer's autoload (prior to the line above), and is always required by your
+scripts.
 
-The method called is from [MedooConnection], which works as a factory to reuse
-the Database connections. The reason for the config file being `.php` is that it
-contains passwords, and if this file is accessible in the public directory of
-your app, loading it will show nothing.
+[MedooConnection] works as a factory that reuses Database connections. The
+reason for the config file being `.php` is that it contains passwords, and if
+this file is accessible in the public directory of your app, loading it will
+show nothing.
 
 
 # Using a Model
