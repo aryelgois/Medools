@@ -11,16 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Model `fill()`
-- Model `getInstance()`
-- Model hooks `onFirstSaveHook()` and `onSaveHook()`
-- Model `getChangedColumns()`
-- Section about Reusing models
-- Section about Other methods
 - README Index
+- Sections about `Reusing models` and `Other methods`
+- Model methods:
+  - `fill()`
+  - `getChangedColumns()`
+  - `getInstance()`
+  - `onFirstSaveHook()`
+  - `onSaveHook()`
 
 ### Changed
-- Moved changelog to its own file
+- Move changelog to its own file
 - Move `Reloading the model` section to Other methods
 - Move paragraphs from Advanced section to Other methods
 - Header level inside Advanced section
