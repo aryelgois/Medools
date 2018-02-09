@@ -124,11 +124,6 @@ And change data with:
   the object (is chainable)
 
 
-## Reloading the model
-
-Use `reload()` to re fetch the row with model's Primary Key.
-
-
 ## Iterating over many rows
 
 A [ModelIterator] is provided to access multiple rows, but it provides only one
@@ -164,6 +159,7 @@ Useful methods that are available:
 - `getCurrentTimestamp()`: Selects the current timestamp from Database, useful
   to keep timezone consistent
 - `jsonSerialize()`: You can [json_encode] models!
+- `reload()`: Use to re fetch the row with model's Primary Key
 
 
 # Reusing models
