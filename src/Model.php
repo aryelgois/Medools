@@ -535,6 +535,16 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Returns list of changed columns
+     *
+     * @return string[]
+     */
+    public function getChangedColumns()
+    {
+        return array_keys($this->changes);
+    }
+
+    /**
      * Selects Current Timestamp from Database
      *
      * Useful to keep timezone consistent
