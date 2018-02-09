@@ -158,8 +158,13 @@ Useful methods that are available:
 - `getChangedColumns()`: Lists changed columns
 - `getCurrentTimestamp()`: Selects the current timestamp from Database, useful
   to keep timezone consistent
+- `getDatabase()`: Gives a direct access to the Database, already connected and
+  ready to use. See [catfan/Medoo] for details
 - `jsonSerialize()`: You can [json_encode] models!
 - `reload()`: Use to re fetch the row with model's Primary Key
+
+You can also add custom methods in your models, to automatically get some data
+in a format, or for doing a specific task.
 
 
 # Reusing models
@@ -326,12 +331,6 @@ Possible value | When not deleted | When deleted
 
 
 ## Advanced
-
-Use `getDatabase()` for a direct access to the Database, already connected and
-ready to use. See [catfan/Medoo] for details.
-
-You can add custom methods to your models, to automatically get some data and
-format as needed.
 
 #### Hooks
 
