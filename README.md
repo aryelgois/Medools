@@ -1,5 +1,39 @@
 > “We can solve any problem by introducing an extra level of [indirection].”
 
+Index:
+
+- [Intro]
+  - [(pt_BR)]
+  - [(en_US)]
+- [Install]
+- [Setup]
+- [Using a Model]
+  - [Creating a new Model]
+  - [Loading from Database]
+  - [Saving into Database]
+  - [Deleting from Database]
+  - [Accessing and manipulating data]
+  - [Iterating over many rows]
+  - [Foreign models]
+  - [Other methods]
+- [Reusing models]
+- [Configuring a Model]
+  - [DATABASE]
+  - [TABLE]
+  - [COLUMNS]
+  - [PRIMARY_KEY]
+  - [AUTO_INCREMENT]
+  - [STAMP_COLUMNS]
+  - [OPTIONAL_COLUMNS]
+  - [FOREIGN_KEYS]
+  - [READ_ONLY]
+  - [SOFT_DELETE]
+  - [SOFT_DELETE_MODE]
+- [Advanced]
+  - [Hooks]
+  - [ModelManager]
+
+
 # Intro
 
 ## (pt_BR)
@@ -166,7 +200,7 @@ Useful methods that are available:
 You can also add custom methods in your models, to automatically get some data
 in a format, or for doing a specific task.
 
-> There are also [hook methods](#hooks) that are automatically called by some
+> There are also [hook methods][hooks] that are automatically called by some
 > base methods.
 
 
@@ -178,7 +212,7 @@ retrieve them, use the `getInstance()` method, which asks for a model class and
 a [where clause][where_clause] (only one row is selected). A shortcut is calling
 the `getInstance()` directly from the model, which just asks for `$where`.
 
-See more in the [Advanced](#modelmanager) section.
+See more in the [Advanced][modelmanager] section.
 
 If you wish, you can still create a new instance for an already existing model.
 The new object will not contain changes made in the old one.
@@ -359,6 +393,37 @@ replaces the old one in this class, but other pointers to the old instance are
 not updated. To avoid this, use the `getInstance()` method provided either in
 this class or in the model.
 
+
+[Intro]: #intro
+[(pt_BR)]: #pt_br
+[(en_US)]: #en_us
+[Install]: #install
+[Setup]: #setup
+[Using a Model]: #using-a-model
+[Creating a new Model]: #creating-a-new-model
+[Loading from Database]: #loading-from-database
+[Saving into Database]: #saving-into-database
+[Deleting from Database]: #deleting-from-database
+[Accessing and manipulating data]: #accessing-and-manipulating-data
+[Iterating over many rows]: #iterating-over-many-rows
+[Foreign models]: #foreign-models
+[Other methods]: #other-methods
+[Reusing models]: #reusing-models
+[Configuring a Model]: #configuring-a-model
+[DATABASE]: #database
+[TABLE]: #table
+[COLUMNS]: #columns
+[PRIMARY_KEY]: #primary_key
+[AUTO_INCREMENT]: #auto_increment
+[STAMP_COLUMNS]: #stamp_columns
+[OPTIONAL_COLUMNS]: #optional_columns
+[FOREIGN_KEYS]: #foreign_keys
+[READ_ONLY]: #read_only
+[SOFT_DELETE]: #soft_delete
+[SOFT_DELETE_MODE]: #soft_delete_mode
+[Advanced]: #advanced
+[Hooks]: #hooks
+[ModelManager]: #modelmanager
 
 [config_example]: config/example.php
 [MedooConnection]: src/MedooConnection.php
