@@ -520,6 +520,12 @@ abstract class Model implements \JsonSerializable
      *
      * Very useful when chaining __construct()
      *
+     * Example:
+     *
+     *    $model = (new My\Model)->fill([
+     *        'column' => 'value',
+     *    ]);
+     *
      * @todo Replaces setMultiple()
      *
      * @param mixed[] $data An array of known columns => value
