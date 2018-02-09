@@ -30,6 +30,7 @@ Index:
 - [Advanced]
   - [Hooks]
   - [ModelManager]
+- [Changelog]
 
 
 # Intro
@@ -377,6 +378,9 @@ not updated. To avoid this, use the `getInstance()` method provided either in
 this class or in the model.
 
 
+# [Changelog]
+
+
 [Intro]: #intro
 [Install]: #install
 [Setup]: #setup
@@ -411,6 +415,7 @@ this class or in the model.
 [Model]: src/Model.php
 [ModelIterator]: src/ModelIterator.php
 [ModelManager]: src/ModelManager.php
+[changelog]: CHANGELOG.md
 
 [catfan/Medoo]: https://github.com/catfan/Medoo
 
