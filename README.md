@@ -152,6 +152,20 @@ foreigns just because you want a single column from the model.
 > When serializing a model, it can fail because of recursion.
 
 
+## Other methods
+
+Useful methods that are available:
+
+- `__isset()`: Use with [isset] to check if a column is `null`
+- `__unset()`: Use with [unset] to set a column to `null`
+- `__wakeup()`: You can [unserialize] a model, i.e. save in `$_SESSION` and
+  recover in a another request
+- `getChangedColumns()`: Lists changed columns
+- `getCurrentTimestamp()`: Selects the current timestamp from Database, useful
+  to keep timezone consistent
+- `jsonSerialize()`: You can [json_encode] models!
+
+
 # Reusing models
 
 To avoid creating multiple instances for the same model, there is a
@@ -357,5 +371,10 @@ this class or in the model.
 [catfan/Medoo]: https://github.com/catfan/Medoo
 
 [where_clause]: https://medoo.in/api/where
+
+[isset]: http://php.net/manual/en/function.isset.php
+[json_encode]: http://php.net/manual/en/function.json-encode.php
+[unserialize]: http://php.net/manual/en/function.unserialize.php
+[unset]: http://php.net/manual/en/function.unset.php
 
 [indirection]: https://en.wikipedia.org/wiki/Indirection

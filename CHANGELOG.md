@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Model hooks `onFirstSaveHook()` and `onSaveHook()`
 - Model `getChangedColumns()`
 - Section about Reusing models
+- Section about Other methods
 
 ### Changed
 - Moved changelog to its own file
