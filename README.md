@@ -166,6 +166,9 @@ Useful methods that are available:
 You can also add custom methods in your models, to automatically get some data
 in a format, or for doing a specific task.
 
+> There are also [hook methods](#hooks) that are automatically called by some
+> base methods.
+
 
 # Reusing models
 
