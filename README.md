@@ -350,9 +350,9 @@ Possible value | When not deleted | When deleted
 `'stamp'`      | null             | current timestamp
 
 
-## Advanced
+# Advanced
 
-### Hooks
+## Hooks
 
 There is a Hook concept in this framework, where you can add specific methods
 which are automatically called by default methods. It makes easier to extend
@@ -366,7 +366,7 @@ Currently, these hooks are available:
   Make sure your code can validate some columns or all of them, depending on the
   `$full` argument.
 
-### ModelManager
+## ModelManager
 
 [This class][ModelManager] tracks every model loaded during a request. It aims
 to avoid model duplication, mainly in foreign keys.

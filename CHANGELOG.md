@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Move changelog to its own file
 - Move `Reloading the model` section to Other methods
 - Move paragraphs from Advanced section to Other methods
-- Header level inside Advanced section
+- Header level in Advanced section
 
 ### Deprecated
 - Model `setMultiple()`
