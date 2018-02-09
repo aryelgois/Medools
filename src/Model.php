@@ -312,11 +312,14 @@ abstract class Model implements \JsonSerializable
             throw new ReadOnlyModelException();
         }
 
-        if (empty($this->changes)) {
+        $is_fresh = $this->data === null;
+
+        if (($is_fresh && !$this->onFirstSaveHook())
+            || !$this->onSaveHook()
+            || empty($this->changes)
+        ) {
             return false;
         }
-
-        $is_fresh = $this->data === null;
 
         $this->updateStampColumns();
 
@@ -987,6 +990,26 @@ abstract class Model implements \JsonSerializable
      * Hook methods
      * =========================================================================
      */
+
+    /**
+     * Called on the first time a model is saved
+     *
+     * @return boolean for success or failure
+     */
+    protected function onFirstSaveHook()
+    {
+        return true;
+    }
+
+    /**
+     * Called every time a model is saved
+     *
+     * @return boolean for success or failure
+     */
+    protected function onSaveHook()
+    {
+        return true;
+    }
 
     /**
      * Expanded validation

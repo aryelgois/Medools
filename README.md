@@ -330,6 +330,8 @@ some functionalities.
 
 Currently, these hooks are available:
 
+- `onFirstSaveHook()`: Called on the first time a model is saved
+- `onSaveHook()`: Called every time a model is saved
 - `validateHook()`: Use it to validate the data before sending to the Database.
   Make sure your code can validate some columns or all of them, depending on the
   `$full` argument.
