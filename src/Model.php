@@ -312,7 +312,7 @@ abstract class Model implements \JsonSerializable
             throw new ReadOnlyModelException();
         }
 
-        $is_fresh = $this->data === null;
+        $is_fresh = $this->isFresh();
 
         if (($is_fresh && !$this->onFirstSaveHook())
             || !$this->onSaveHook()
@@ -413,7 +413,7 @@ abstract class Model implements \JsonSerializable
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException();
         }
-        if ($this->data === null) {
+        if ($this->isFresh()) {
             throw new \LogicException('Can not update a fresh Model');
         }
 
@@ -603,10 +603,20 @@ abstract class Model implements \JsonSerializable
      */
     public function getPrimaryKey()
     {
-        if ($this->data === null) {
+        if ($this->isFresh()) {
             return null;
         }
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
+    }
+
+    /**
+     * Tells if the object is a new Model
+     *
+     * @return boolean
+     */
+    final public function isFresh()
+    {
+        return $this->data === null;
     }
 
     /**

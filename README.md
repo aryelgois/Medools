@@ -178,6 +178,7 @@ Useful methods that are available:
   to keep timezone consistent
 - `getDatabase()`: Gives a direct access to the Database, already connected and
   ready to use. See [catfan/Medoo] for details
+- `isFresh()`: Tells if the object is a new Model
 - `jsonSerialize()`: You can [json_encode] models!
 - `reload()`: Use to re fetch the row with model's Primary Key
 
