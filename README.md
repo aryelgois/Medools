@@ -3,8 +3,6 @@
 Index:
 
 - [Intro]
-  - [(pt_BR)]
-  - [(en_US)]
 - [Install]
 - [Setup]
 - [Using a Model]
@@ -35,21 +33,6 @@ Index:
 
 
 # Intro
-
-## (pt_BR)
-
-Um framework básico para modelos relacionados a um Banco de Dados.
-
-Com esse framework, você configura o mínimo para os seus modelos e foca no seu
-próprio código. Abstraia a comunicação com seu Banco de Dados!
-
-Criar um novo modelo para sua aplicação é simples, basta estender a classe base
-[Model] e definir algumas opções.
-
-> Para interagir com o Banco de Dados, é usado o [catfan/Medoo].
-
-
-## (en_US)
 
 A basic framework for models related to a Database.
 
@@ -395,8 +378,6 @@ this class or in the model.
 
 
 [Intro]: #intro
-[(pt_BR)]: #pt_br
-[(en_US)]: #en_us
 [Install]: #install
 [Setup]: #setup
 [Using a Model]: #using-a-model
