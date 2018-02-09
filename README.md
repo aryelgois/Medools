@@ -1,21 +1,39 @@
 > “We can solve any problem by introducing an extra level of [indirection].”
 
+Index:
+
+- [Intro]
+- [Install]
+- [Setup]
+- [Using a Model]
+  - [Creating a new Model]
+  - [Loading from Database]
+  - [Saving into Database]
+  - [Deleting from Database]
+  - [Accessing and manipulating data]
+  - [Iterating over many rows]
+  - [Foreign models]
+  - [Other methods]
+- [Reusing models]
+- [Configuring a Model]
+  - [DATABASE]
+  - [TABLE]
+  - [COLUMNS]
+  - [PRIMARY_KEY]
+  - [AUTO_INCREMENT]
+  - [STAMP_COLUMNS]
+  - [OPTIONAL_COLUMNS]
+  - [FOREIGN_KEYS]
+  - [READ_ONLY]
+  - [SOFT_DELETE]
+  - [SOFT_DELETE_MODE]
+- [Advanced]
+  - [Hooks]
+  - [ModelManager]
+- [Changelog]
+
+
 # Intro
-
-## (pt_BR)
-
-Um framework básico para modelos relacionados a um Banco de Dados.
-
-Com esse framework, você configura o mínimo para os seus modelos e foca no seu
-próprio código. Abstraia a comunicação com seu Banco de Dados!
-
-Criar um novo modelo para sua aplicação é simples, basta estender a classe base
-[Model] e definir algumas opções.
-
-> Para interagir com o Banco de Dados, é usado o [catfan/Medoo].
-
-
-## (en_US)
 
 A basic framework for models related to a Database.
 
@@ -38,7 +56,7 @@ Open a terminal in your project directory and run:
 # Setup
 
 Before using this framework, you need a config file somewhere in your
-application. This file setups some data for [catfan/Medoo]. Use this
+application. This file setups some data for [catfan/Medoo]. Follow this
 [example][config_example].
 
 Also, you need to include this line in the beginning of your code:
@@ -49,13 +67,14 @@ Also, you need to include this line in the beginning of your code:
 aryelgois\Medools\MedooConnection::loadConfig('path/to/config/medools.php');
 ```
 
-It's a good idea to put in a bootstrap which also requires composer's autoload
-(prior to the line above), and is always required by your scripts.
+It's a good idea to put in something like `bootstrap.php`, which also requires
+composer's autoload (prior to the line above), and is always required by your
+scripts.
 
-The method called is from [MedooConnection], which works as a factory to reuse
-the Database connections. The reason for the config file being `.php` is that it
-contains passwords, and if this file is accessible in the public directory of
-your app, loading it will show nothing.
+[MedooConnection] works as a factory that reuses Database connections. The
+reason for the config file being `.php` is that it contains passwords, and if
+this file is accessible in the public directory of your app, loading it will
+show nothing.
 
 
 # Using a Model
@@ -107,21 +126,20 @@ Just like in any object:
 - `$model->column` will return the stored data, or a foreign model *
 - `$model->column = value` will set a new data
 
-You can also:
+> \* It means that you can chain the models:  
+> `$model->foreign->column`
+
+You can also get data with:
 
 - `dump()`: Returns data from model's Table, you can [filter which rows][where_clause]
   and which columns you want
 - `getPrimaryKey()`: Returns the last saved Primary Key
-- `setMultiple()`: Sets multiple columns from an array
 - `toArray()`: Returns data from the model in an array (foreigns included)
 
-> \* It means that you can chain the models:  
-> `$model->foreign->column`
+And change data with:
 
-
-## Reloading the model
-
-Use `reload()` to re fetch the row with model's Primary Key.
+- `fill()`: Sets multiple columns from an array of column => value. It returns
+  the object (is chainable)
 
 
 ## Iterating over many rows
@@ -145,6 +163,43 @@ foreigns just because you want a single column from the model.
 
 > :warning: Warning: Be careful not to configure a circular foreign constrain.
 > When serializing a model, it can fail because of recursion.
+
+
+## Other methods
+
+Useful methods that are available:
+
+- `__isset()`: Use with [isset] to check if a column is `null`
+- `__unset()`: Use with [unset] to set a column to `null`
+- `__wakeup()`: You can [unserialize] a model, i.e. save in `$_SESSION` and
+  recover in a another request
+- `getChangedColumns()`: Lists changed columns
+- `getCurrentTimestamp()`: Selects the current timestamp from Database, useful
+  to keep timezone consistent
+- `getDatabase()`: Gives a direct access to the Database, already connected and
+  ready to use. See [catfan/Medoo] for details
+- `jsonSerialize()`: You can [json_encode] models!
+- `reload()`: Use to re fetch the row with model's Primary Key
+
+You can also add custom methods in your models, to automatically get some data
+in a format, or for doing a specific task.
+
+> There are also [hook methods][hooks] that are automatically called by some
+> base methods.
+
+
+# Reusing models
+
+To avoid creating multiple instances for the same model, there is a
+[ModelManager] class which contains pointers to models already created. To
+retrieve them, use the `getInstance()` method, which asks for a model class and
+a [where clause][where_clause] (only one row is selected). A shortcut is calling
+the `getInstance()` directly from the model, which just asks for `$where`.
+
+See more in the [Advanced][modelmanager] section.
+
+If you wish, you can still create a new instance for an already existing model.
+The new object will not contain changes made in the old one.
 
 
 # Configuring a Model
@@ -252,7 +307,7 @@ Example:
 
 const FOREIGN_KEYS = [
     'local_column' => [
-        'Fully\Qualified\ClassName',
+        'Fully\\Qualified\\ClassName',
         'foreign_column'
     ],
 ];
@@ -296,15 +351,9 @@ Possible value | When not deleted | When deleted
 `'stamp'`      | null             | current timestamp
 
 
-## Advanced
+# Advanced
 
-Use `getDatabase()` for a direct access to the Database, already connected and
-ready to use. See [catfan/Medoo] for details.
-
-You can add custom methods to your models, to automatically get some data and
-format as needed.
-
-#### Hooks
+## Hooks
 
 There is a Hook concept in this framework, where you can add specific methods
 which are automatically called by default methods. It makes easier to extend
@@ -312,70 +361,69 @@ some functionalities.
 
 Currently, these hooks are available:
 
+- `onFirstSaveHook()`: Called on the first time a model is saved
+- `onSaveHook()`: Called every time a model is saved
 - `validateHook()`: Use it to validate the data before sending to the Database.
   Make sure your code can validate some columns or all of them, depending on the
   `$full` argument.
 
-#### ModelManager
+## ModelManager
 
 [This class][ModelManager] tracks every model loaded during a request. It aims
 to avoid model duplication, mainly in foreign keys.
 
+If you create a new instance for an already existing model, the new instance
+replaces the old one in this class, but other pointers to the old instance are
+not updated. To avoid this, use the `getInstance()` method provided either in
+this class or in the model.
 
-# Changelog
 
-#### v3.0 (2018-01-31) Usability release
+# [Changelog]
 
-- SOFT_DELETE is implicitly optional
-- Foreigns are loaded on demand
-- Models are restored to [ModelManager] after `unserialize()`
-- Models can be converted `toArray()`
-- Add const STAMP_COLUMNS
-- Columns with timestamp controlled by Database can be ignored
-- Update README
-- Some fixes and minor updates
 
-**BREAKING CHANGES**
-
-- Models in the namespace `aryelgois\Medools\Models\Address` were removed
-- Rename DATABASE_NAME_KEY to DATABASE
-
-#### v2.1 (2018-01-06)
-
-Models in the namespace `aryelgois\Medools\Models\Address` are being deprecated
-in favor to the same ones in [`aryelgois\Databases\Models\Address`][aryelgois/databases].
-
-Some DocBlocks and the composer.json where updated.
-
-#### v2.0 (2017-11-18) ModelManager release
-
-Some methods were added, some changed, and some were removed. The most notable
-are `get()` and `set()`, replaced by PHP magic methods, and `getForeign()`,
-integrated with `__get()` to create a chain.
-
-Models are now JsonSerializable, so you can simply wrap a model in
-`json_encode()`. The reverse is not possible.
-
-The featuring [ModelManager][ModelManager] provides a way to reduce object
-duplication, keeping a track of loaded models, which are reused when referenced
-as foreign keys.
-
-Also, some fixes were made.
-
-#### v1.0 (2017-11-09) First release
-
-> I should have started from v0.1..
-
+[Intro]: #intro
+[Install]: #install
+[Setup]: #setup
+[Using a Model]: #using-a-model
+[Creating a new Model]: #creating-a-new-model
+[Loading from Database]: #loading-from-database
+[Saving into Database]: #saving-into-database
+[Deleting from Database]: #deleting-from-database
+[Accessing and manipulating data]: #accessing-and-manipulating-data
+[Iterating over many rows]: #iterating-over-many-rows
+[Foreign models]: #foreign-models
+[Other methods]: #other-methods
+[Reusing models]: #reusing-models
+[Configuring a Model]: #configuring-a-model
+[DATABASE]: #database
+[TABLE]: #table
+[COLUMNS]: #columns
+[PRIMARY_KEY]: #primary_key
+[AUTO_INCREMENT]: #auto_increment
+[STAMP_COLUMNS]: #stamp_columns
+[OPTIONAL_COLUMNS]: #optional_columns
+[FOREIGN_KEYS]: #foreign_keys
+[READ_ONLY]: #read_only
+[SOFT_DELETE]: #soft_delete
+[SOFT_DELETE_MODE]: #soft_delete_mode
+[Advanced]: #advanced
+[Hooks]: #hooks
+[ModelManager]: #modelmanager
 
 [config_example]: config/example.php
 [MedooConnection]: src/MedooConnection.php
 [Model]: src/Model.php
 [ModelIterator]: src/ModelIterator.php
 [ModelManager]: src/ModelManager.php
+[changelog]: CHANGELOG.md
 
 [catfan/Medoo]: https://github.com/catfan/Medoo
-[aryelgois/databases]: https://github.com/aryelgois/databases
 
 [where_clause]: https://medoo.in/api/where
+
+[isset]: http://php.net/manual/en/function.isset.php
+[json_encode]: http://php.net/manual/en/function.json-encode.php
+[unserialize]: http://php.net/manual/en/function.unserialize.php
+[unset]: http://php.net/manual/en/function.unset.php
 
 [indirection]: https://en.wikipedia.org/wiki/Indirection
