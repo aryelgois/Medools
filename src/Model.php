@@ -102,7 +102,7 @@ abstract class Model implements \JsonSerializable
      * EXAMPLE:
      *     [
      *         'local_column' => [
-     *             'Fully\Qualified\ClassName',
+     *             'Fully\\Qualified\\ClassName',
      *             'foreign_column'
      *         ],
      *     ];
@@ -312,11 +312,14 @@ abstract class Model implements \JsonSerializable
             throw new ReadOnlyModelException();
         }
 
-        if (empty($this->changes)) {
+        $is_fresh = $this->data === null;
+
+        if (($is_fresh && !$this->onFirstSaveHook())
+            || !$this->onSaveHook()
+            || empty($this->changes)
+        ) {
             return false;
         }
-
-        $is_fresh = $this->data === null;
 
         $this->updateStampColumns();
 
@@ -513,6 +516,35 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Changes the value in multiple columns
+     *
+     * Very useful when chaining __construct()
+     *
+     * @todo Replaces setMultiple()
+     *
+     * @param mixed[] $data An array of known columns => value
+     *
+     * @return $this
+     *
+     * @throws ... same as __set()
+     */
+    public function fill(array $data)
+    {
+        $this->setMultiple($data);
+        return $this;
+    }
+
+    /**
+     * Returns list of changed columns
+     *
+     * @return string[]
+     */
+    public function getChangedColumns()
+    {
+        return array_keys($this->changes);
+    }
+
+    /**
      * Selects Current Timestamp from Database
      *
      * Useful to keep timezone consistent
@@ -534,6 +566,24 @@ abstract class Model implements \JsonSerializable
     final public static function getDatabase()
     {
         return MedooConnection::getInstance(static::DATABASE);
+    }
+
+    /**
+     * Safely loads a model
+     *
+     * If an instance for the desired model already exists, it is returned,
+     * otherwise creates a new one
+     *
+     * @param mixed $where @see load()
+     *
+     * @return Model
+     */
+    final public static function getInstance($where)
+    {
+        return ModelManager::getInstance(
+            static::class,
+            $where
+        );
     }
 
     /**
@@ -567,6 +617,8 @@ abstract class Model implements \JsonSerializable
      * Changes the value in multiple columns
      *
      * @see __set()
+     *
+     * @deprecated Use fill() instead
      *
      * @param mixed[] $data An array of known columns => value
      *
@@ -948,6 +1000,26 @@ abstract class Model implements \JsonSerializable
      * Hook methods
      * =========================================================================
      */
+
+    /**
+     * Called on the first time a model is saved
+     *
+     * @return boolean for success or failure
+     */
+    protected function onFirstSaveHook()
+    {
+        return true;
+    }
+
+    /**
+     * Called every time a model is saved
+     *
+     * @return boolean for success or failure
+     */
+    protected function onSaveHook()
+    {
+        return true;
+    }
 
     /**
      * Expanded validation

@@ -47,7 +47,7 @@ class ModelIterator implements \Iterator
      * - Now you can iterate over Database rows for that model, one at time
      *
      * EXAMPLE:
-     *     $class = 'aryelgois\Medools\Models\Person';
+     *     $class = 'aryelgois\\Medools\\Models\\Person';
      *     foreach (new ModelIterator($class, ['id[>=]' => 1]) as $model) {
      *         // code...
      *     }
