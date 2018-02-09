@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [3.1.0] - 2018-02-09
+
 ### Added
 - README Index
 - Sections about `Reusing models` and `Other methods`
@@ -31,10 +34,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - pt_BR section in README
-
-### Fixed
-
-### Security
 
 
 ## [3.0] - 2018-01-31
@@ -136,7 +135,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.0...v3.x
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.1.0...develop
+[3.1.0]: https://github.com/aryelgois/Medools/compare/v3.0...v3.1.0
 [3.0]: https://github.com/aryelgois/Medools/compare/v3.0-alpha...v3.0
 [3.0-alpha]: https://github.com/aryelgois/Medools/compare/v2.1...v3.0-alpha
 [2.1]: https://github.com/aryelgois/Medools/compare/v2.0...v2.1
