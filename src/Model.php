@@ -238,13 +238,14 @@ abstract class Model implements \JsonSerializable
      *
      * NOTE:
      * - Changes need to be saved in the Database with save() or update($column)
+     * - You can not assign a foreign model that was not saved yet
      *
      * @param string $column A known column
      * @param mixed  $value  The new value
      *
      * @throws ReadOnlyModelException
      * @throws UnknownColumnException
-     * @throws ForeignConstraintException @see loadForeign()
+     * @throws ForeignConstraintException
      */
     public function __set($column, $value)
     {
@@ -258,6 +259,12 @@ abstract class Model implements \JsonSerializable
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
             $foreign_map = static::FOREIGN_KEYS[$column];
             if ($value instanceof $foreign_map[0]) {
+                if ($value->isFresh()) {
+                    throw new ForeignConstraintException(
+                        static::class,
+                        $column
+                    );
+                }
                 $this->foreign[$column] = $value;
                 $this->changes[$column] = $value->data[$foreign_map[1]];
                 return;

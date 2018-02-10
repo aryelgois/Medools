@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - `isFresh()`
 
 ### Changed
+- Forbid assigning a fresh foreign model
 
 ### Deprecated
 
