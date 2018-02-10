@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Warning for `array_flip()` in [aryelgois/utils] `Utils::arrayBlacklist()` when
+  `AUTO_INCREMENT` is null
+
 
 ## [3.1.0] - 2018-02-09
 
