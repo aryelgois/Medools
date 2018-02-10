@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 
 
+## [3.1.1] - 2018-02-09
+
+### Fixed
+- Warning for `array_flip()` in [aryelgois/utils] `Utils::arrayBlacklist()` when
+  `AUTO_INCREMENT` is null
+
+
 ## [3.1.0] - 2018-02-09
 
 ### Added
@@ -150,7 +157,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.1.0...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.1.1...develop
+[3.1.1]: https://github.com/aryelgois/Medools/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/aryelgois/Medools/compare/v3.0...v3.1.0
 [3.0]: https://github.com/aryelgois/Medools/compare/v3.0-alpha...v3.0
 [3.0-alpha]: https://github.com/aryelgois/Medools/compare/v2.1...v3.0-alpha

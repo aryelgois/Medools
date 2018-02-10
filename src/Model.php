@@ -724,10 +724,10 @@ abstract class Model implements \JsonSerializable
     protected static function dataCleanup($data)
     {
         $whitelist = static::COLUMNS;
-        $blacklist = array_merge(
+        $blacklist = array_filter(array_merge(
             [static::AUTO_INCREMENT],
             static::getAutoStampColumns()
-        );
+        ));
 
         $data = Utils::arrayWhitelist($data, $whitelist);
         $data = Utils::arrayBlacklist($data, $blacklist);
