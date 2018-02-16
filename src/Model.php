@@ -600,6 +600,18 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Shortcut for ModelIterator
+     *
+     * @param mixed $where @see ModelIterator::__construct()
+     *
+     * @return ModelIterator of this Model
+     */
+    final public static function getIterator($where)
+    {
+        return new ModelIterator(static::class, $where);
+    }
+
+    /**
      * Returns model's Primary Key
      *
      * NOTE:
