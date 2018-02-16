@@ -183,6 +183,8 @@ Useful methods that are available:
 - `isFresh()`: Tells if the object is a new Model
 - `jsonSerialize()`: You can [json_encode] models!
 - `reload()`: Use to re fetch the row with model's Primary Key
+- `undo()`: Removes changes. Pass a column name to only remove that column,
+  otherwise it removes all changes
 
 You can also add custom methods in your models, to automatically get some data
 in a format, or for doing a specific task.

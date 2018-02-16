@@ -722,6 +722,28 @@ abstract class Model implements \JsonSerializable
         return $this->update($column);
     }
 
+    /**
+     * Removes changes
+     *
+     * Pass a column name to only remove that column, otherwise it removes all
+     * changes
+     *
+     * @param string $column Which column to undo
+     *
+     * @throws UnknownColumnException
+     */
+    public function undo(string $column = null)
+    {
+        if ($column === null) {
+            $this->changes = [];
+        } else {
+            if (!in_array($column, static::COLUMNS)) {
+                throw new UnknownColumnException();
+            }
+            unset($this->changes[$column]);
+        }
+    }
+
     /*
      * Internal methods
      * =========================================================================
