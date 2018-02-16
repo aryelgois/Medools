@@ -593,10 +593,7 @@ abstract class Model implements \JsonSerializable
      */
     final public static function getInstance($where)
     {
-        return ModelManager::getInstance(
-            static::class,
-            $where
-        );
+        return ModelManager::getInstance(static::class, $where);
     }
 
     /**
