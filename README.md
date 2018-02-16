@@ -147,9 +147,8 @@ And change data with:
 A [ModelIterator] is provided to access multiple rows, but it provides only one
 at time.
 
-Give it a model instance you want to iterate over, it can be a fresh one, and
-some [filter][where_clause] array. Then it will `load()` each matched row, one
-by one.
+Give it a model class you want to iterate over, and some [filter][where_clause]
+array. Then it will `load()` each matched row, one by one.
 
 A shortcut is calling `getIterator()` directly from the model class, which just
 asks for `$where`.
