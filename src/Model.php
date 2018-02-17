@@ -950,16 +950,16 @@ abstract class Model implements \JsonSerializable
         if ($where === null) {
             throw new \InvalidArgumentException('Primary Key can not be null');
         }
-        $where = (array) $where;
-        if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine(static::PRIMARY_KEY, $where);
-            if ($where === false) {
+        $result = (array) $where;
+        if (!Utils::arrayIsAssoc($result)) {
+            $result = @array_combine(static::PRIMARY_KEY, $result);
+            if ($result === false) {
                 throw new \InvalidArgumentException(
                     'Could not solve Primary Key for ' . static::class
                 );
             }
         }
-        return $where;
+        return $result;
     }
 
     /**
