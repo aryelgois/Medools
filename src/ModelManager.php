@@ -61,7 +61,7 @@ abstract class ModelManager
      *
      * @throws \InvalidArgumentException @see Model::processWhere()
      */
-    public static function getInstance($model_class, $where)
+    public static function getInstance(string $model_class, $where)
     {
         $database = $model_class::getDatabase();
         $primary_key = $database->get(

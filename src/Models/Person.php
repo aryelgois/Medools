@@ -25,28 +25,48 @@ class Person extends Medools\Model
     const COLUMNS = ['id', 'name', 'document'];
 
     /**
-     * Validates Person's document as Brazilian CPF or CNPJ
+     * Validates a document as Brazilian CPF or CNPJ
+     *
+     * @param boolean $document Data to be validated
      *
      * @return mixed[] With keys 'type' and 'valid'
      * @return false   If document is invalid
-     * @return null    If a document row was not found
+     * @return null    If document is not set
      */
-    public function documentValidate()
+    public static function documentValidate($document)
     {
-        return Utils\Validation::document($this->document);
+        if (!isset($document)) {
+            return null;
+        }
+        return Utils\Validation::document($document);
     }
 
     /**
-     * Formats Person's Document
+     * Formats a document
      *
-     * @param boolean $prepend If should prepend the document name
+     * @param boolean $document Data to be formated
+     * @param boolean $prepend  If should prepend the document type
      *
      * @return string Formatted document
      * @return string Unformatted document if it is invalid
-     * @return null   If a document row was not found
+     * @return null   If document is not set
      */
-    public function documentFormat($prepend = false)
+    public static function documentFormat($document, $prepend = false)
     {
-        return Utils\Format::document($this->document, $prepend);
+        return Utils\Format::document($document, $prepend);
+    }
+
+    /**
+     * Called when a column is changed
+     *
+     * @return mixed New column value
+     */
+    protected function onColumnChange($column, $value)
+    {
+        if ($column == 'document') {
+            $value = static::documentValidate($value)['valid'] ?? $value;
+        }
+
+        return $value;
     }
 }

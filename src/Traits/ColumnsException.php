@@ -16,14 +16,13 @@ namespace aryelgois\Medools\Traits;
  */
 trait ColumnsException
 {
-    public function __construct($columns = [], Throwable $previous = null)
-    {
-        if (is_array($columns)) {
-            $columns = implode("', '", $columns);
-        }
-        $message = ($columns !== '')
-            ? "'" . $columns . "'"
-            : '';
+    public function __construct(
+        string $model,
+        $columns,
+        Throwable $previous = null
+    ) {
+        $columns = implode("', '", (array) $columns);
+        $message = "$model does not have '$columns'";
 
         parent::__construct($message, 0, $previous);
     }

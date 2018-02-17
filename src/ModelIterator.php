@@ -57,7 +57,7 @@ class ModelIterator implements \Iterator
      * @param string  $model A Fully Qualified Model Class to iterate
      * @param mixed[] $where \Medoo\Medoo where clause
      */
-    public function __construct($model_class, $where = [])
+    public function __construct(string $model_class, $where = [])
     {
         $this->model_class = $model_class;
         $this->list = $model_class::dump($where, $model_class::PRIMARY_KEY);

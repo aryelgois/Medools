@@ -173,14 +173,15 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed $where @see load(). If null, a fresh model is created
      *
+     * @throws \InvalidArgumentException  If could not load from Database
      * @throws \InvalidArgumentException  @see load()
      * @throws ForeignConstraintException @see load()
-     * @throws \InvalidArgumentException  If could not load from Database
      */
     public function __construct($where = null)
     {
         if ($where !== null && !$this->load($where)) {
-            throw new \InvalidArgumentException('Could not load from Database');
+            $message = 'Could not load ' . static::class . ' from Database';
+            throw new \InvalidArgumentException($message);
         }
     }
 
@@ -193,14 +194,12 @@ abstract class Model implements \JsonSerializable
      *
      * @return mixed
      *
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws ForeignConstraintException @see loadForeign()
      */
     public function __get($column)
     {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
+        static::checkUnknownColumn($column);
 
         if (array_key_exists($column, $this->changes)
             && $this->changes[$column] === null
@@ -238,26 +237,31 @@ abstract class Model implements \JsonSerializable
      *
      * NOTE:
      * - Changes need to be saved in the Database with save() or update($column)
+     * - You can not assign a foreign model that was not saved yet
      *
      * @param string $column A known column
      * @param mixed  $value  The new value
      *
-     * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
-     * @throws ForeignConstraintException @see loadForeign()
+     * @throws ReadOnlyModelException @see checkReadOnly()
+     * @throws UnknownColumnException @see checkUnknownColumn()
+     * @throws ForeignConstraintException
      */
     public function __set($column, $value)
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
+        static::checkReadOnly();
+        static::checkUnknownColumn($column);
+
+        $value = $this->onColumnChange($column, $value);
 
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
             $foreign_map = static::FOREIGN_KEYS[$column];
             if ($value instanceof $foreign_map[0]) {
+                if ($value->isFresh()) {
+                    throw new ForeignConstraintException(
+                        static::class,
+                        $column
+                    );
+                }
                 $this->foreign[$column] = $value;
                 $this->changes[$column] = $value->data[$foreign_map[1]];
                 return;
@@ -273,10 +277,10 @@ abstract class Model implements \JsonSerializable
      *
      * @see __set()
      *
-     * @param [type] $column A known column
+     * @param string $column A known column
      *
-     * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
+     * @throws ReadOnlyModelException @see __set()
+     * @throws UnknownColumnException @see __set()
      * @throws ForeignConstraintException
      */
     public function __unset($column)
@@ -304,18 +308,16 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      */
     public function save()
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
+        static::checkReadOnly();
 
-        $is_fresh = $this->data === null;
+        $is_fresh = $this->isFresh();
 
-        if (($is_fresh && !$this->onFirstSaveHook())
-            || !$this->onSaveHook()
+        if (($is_fresh && !$this->onFirstSave())
+            || !$this->onSave()
             || empty($this->changes)
         ) {
             return false;
@@ -405,16 +407,16 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If trying to update a fresh Model
      */
     public function update($columns)
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
-        if ($this->data === null) {
-            throw new \LogicException('Can not update a fresh Model');
+        static::checkReadOnly();
+
+        if ($this->isFresh()) {
+            $message = 'Can not update fresh Model: ' . static::class;
+            throw new \LogicException($message);
         }
 
         $this->updateStampColumns($columns);
@@ -448,14 +450,12 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If SOFT_DELETE_MODE is unknown
      */
     public function delete()
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
+        static::checkReadOnly();
 
         $database = self::getDatabase();
         $column = static::SOFT_DELETE;
@@ -474,18 +474,22 @@ abstract class Model implements \JsonSerializable
                     break;
 
                 default:
-                    throw new \LogicException(
-                        "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
-                    );
+                    throw new \LogicException(sprintf(
+                        "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                        static::class,
+                        static::SOFT_DELETE_MODE
+                    ));
                     break;
             }
+            if ($this->isFresh()) {
+                return true;
+            }
             return $this->update($column);
-        } else {
-            $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
-            ModelManager::remove($this);
-            $this->reset();
-            return ($stmt->rowCount() > 0);
         }
+        $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
+        ModelManager::remove($this);
+        $this->reset();
+        return ($stmt->rowCount() > 0);
     }
 
     /*
@@ -502,13 +506,14 @@ abstract class Model implements \JsonSerializable
      * @return array[]
      *
      * @throws UnknownColumnException If any item in $columns is invalid
+     *                                @see checkUnknownColumn()
      */
     public static function dump($where = [], $columns = [])
     {
         if (empty($columns)) {
             $columns = static::COLUMNS;
-        } elseif (!empty($invalid = array_diff($columns, static::COLUMNS))) {
-            throw new UnknownColumnException($invalid);
+        } else {
+            static::checkUnknownColumn($columns);
         }
 
         $database = self::getDatabase();
@@ -520,7 +525,11 @@ abstract class Model implements \JsonSerializable
      *
      * Very useful when chaining __construct()
      *
-     * @todo Replaces setMultiple()
+     * Example:
+     *
+     *    $model = (new My\Model)->fill([
+     *        'column' => 'value',
+     *    ]);
      *
      * @param mixed[] $data An array of known columns => value
      *
@@ -530,7 +539,9 @@ abstract class Model implements \JsonSerializable
      */
     public function fill(array $data)
     {
-        $this->setMultiple($data);
+        foreach ($data as $column => $value) {
+            $this->__set($column, $value);
+        }
         return $this;
     }
 
@@ -580,10 +591,19 @@ abstract class Model implements \JsonSerializable
      */
     final public static function getInstance($where)
     {
-        return ModelManager::getInstance(
-            static::class,
-            $where
-        );
+        return ModelManager::getInstance(static::class, $where);
+    }
+
+    /**
+     * Shortcut for ModelIterator
+     *
+     * @param mixed $where @see ModelIterator::__construct()
+     *
+     * @return ModelIterator of this Model
+     */
+    final public static function getIterator($where)
+    {
+        return new ModelIterator(static::class, $where);
     }
 
     /**
@@ -597,10 +617,20 @@ abstract class Model implements \JsonSerializable
      */
     public function getPrimaryKey()
     {
-        if ($this->data === null) {
+        if ($this->isFresh()) {
             return null;
         }
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
+    }
+
+    /**
+     * Tells if the object is a new Model
+     *
+     * @return boolean
+     */
+    final public function isFresh()
+    {
+        return $this->data === null;
     }
 
     /**
@@ -611,26 +641,6 @@ abstract class Model implements \JsonSerializable
     public function reload()
     {
         return $this->load($this->getPrimaryKey());
-    }
-
-    /**
-     * Changes the value in multiple columns
-     *
-     * @see __set()
-     *
-     * @deprecated Use fill() instead
-     *
-     * @param mixed[] $data An array of known columns => value
-     *
-     * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
-     * @throws ForeignConstraintException
-     */
-    public function setMultiple($data)
-    {
-        foreach ($data as $column => $value) {
-            $this->__set($column, $value);
-        }
     }
 
     /**
@@ -651,17 +661,17 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If the Model is not soft-deletable
      * @throws \LogicException        If SOFT_DELETE_MODE is unknown
      */
     public function undelete()
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
-        }
+        static::checkReadOnly();
+
         if (static::SOFT_DELETE === null) {
-            throw new \LogicException('Model is not soft-deletable');
+            $message = 'Model ' . static::class . ' is not soft-deletable';
+            throw new \LogicException($message);
         }
 
         $database = self::getDatabase();
@@ -681,19 +691,68 @@ abstract class Model implements \JsonSerializable
                 break;
 
             default:
-                throw new \LogicException(
-                    "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
-                );
+                throw new \LogicException(sprintf(
+                    "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                    static::class,
+                    static::SOFT_DELETE_MODE
+                ));
                 break;
         }
 
         return $this->update($column);
     }
 
+    /**
+     * Removes changes
+     *
+     * Pass a column name to only remove that column, otherwise it removes all
+     * changes
+     *
+     * @param string $column Which column to undo
+     *
+     * @throws UnknownColumnException @see checkUnknownColumn()
+     */
+    public function undo(string $column = null)
+    {
+        if ($column === null) {
+            $this->changes = [];
+        } else {
+            static::checkUnknownColumn($column);
+            unset($this->changes[$column]);
+        }
+    }
+
     /*
      * Internal methods
      * =========================================================================
      */
+
+    /**
+     * Tests if model is READ_ONLY
+     *
+     * @throws ReadOnlyModelException
+     */
+    final public static function checkReadOnly()
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException(static::class);
+        }
+    }
+
+    /**
+     * Tests if model has columns
+     *
+     * @param string|string[] $columns List of columns to test
+     *
+     * @throws UnknownColumnException
+     */
+    final public static function checkUnknownColumn($columns)
+    {
+        $unknown = array_diff((array) $columns, static::COLUMNS);
+        if (!empty($unknown)) {
+            throw new UnknownColumnException(static::class, $unknown);
+        }
+    }
 
     /**
      * Cleans data keys, removing unwanted columns
@@ -736,6 +795,24 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Returns required columns
+     *
+     * @return string[]
+     */
+    public static function getRequiredColumns()
+    {
+        return array_diff(
+            static::COLUMNS,
+            static::OPTIONAL_COLUMNS,
+            [ // implicit optional columns
+                static::AUTO_INCREMENT,
+                static::SOFT_DELETE,
+            ],
+            static::getAutoStampColumns()
+        );
+    }
+
+    /**
      * Returns the stored data in an array
      *
      * @return mixed[]
@@ -760,17 +837,16 @@ abstract class Model implements \JsonSerializable
      * @param string $column A column in FOREIGN_KEYS keys
      * @param mixed  $value  A value in the foreign table
      *
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws NotForeignColumnException
      * @throws ForeignConstraintException
      */
     protected function loadForeign($column, $value)
     {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
-        }
+        static::checkUnknownColumn($column);
+
         if (!array_key_exists($column, static::FOREIGN_KEYS)) {
-            throw new NotForeignColumnException();
+            throw new NotForeignColumnException(static::class, $column);
         }
 
         $foreign_map = static::FOREIGN_KEYS[$column];
@@ -855,7 +931,8 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
      *
-     * @return boolean For success or failure
+     * @return mixed For success
+     * @return false For failure
      *
      * @throws \InvalidArgumentException  If $where is null
      * @throws \InvalidArgumentException  If could not solve Primary Key:
@@ -867,16 +944,16 @@ abstract class Model implements \JsonSerializable
         if ($where === null) {
             throw new \InvalidArgumentException('Primary Key can not be null');
         }
-        $where = (array) $where;
-        if (!Utils::arrayIsAssoc($where)) {
-            $where = @array_combine(static::PRIMARY_KEY, $where);
-            if ($where === false) {
+        $result = (array) $where;
+        if (!Utils::arrayIsAssoc($result)) {
+            $result = @array_combine(static::PRIMARY_KEY, $result);
+            if ($result === false) {
                 throw new \InvalidArgumentException(
-                    'Could not solve Primary Key'
+                    'Could not solve Primary Key for ' . static::class
                 );
             }
         }
-        return $where;
+        return $result;
     }
 
     /**
@@ -929,7 +1006,12 @@ abstract class Model implements \JsonSerializable
                     break;
 
                 default:
-                    throw new \LogicException("Unknown mode '$mode'");
+                    throw new \LogicException(sprintf(
+                        "%s (`%s`) has invalid STAMP_COLUMNS mode: '%s'",
+                        static::class,
+                        $column,
+                        $mode
+                    ));
                     break;
             }
         }
@@ -947,7 +1029,7 @@ abstract class Model implements \JsonSerializable
      * @return mixed[] Valid data
      *
      * @throws MissingColumnException
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws \UnexpectedValueException If Invalid data is found
      */
     protected static function validate($data, $full)
@@ -958,35 +1040,21 @@ abstract class Model implements \JsonSerializable
          * Check missing columns
          */
         if ($full) {
-            $required = array_diff(
-                static::COLUMNS,
-                static::OPTIONAL_COLUMNS,
-                [ // implicit optional columns
-                    static::AUTO_INCREMENT,
-                    static::SOFT_DELETE,
-                ],
-                static::getAutoStampColumns()
-            );
-            $missing = array_diff($required, $columns);
+            $missing = array_diff(static::getRequiredColumns(), $columns);
             if (!empty($missing)) {
-                throw new MissingColumnException($missing);
+                throw new MissingColumnException(static::class, $missing);
             }
         }
 
-        /*
-         * Check unknown columns
-         */
-        $unknown = array_diff($columns, static::COLUMNS);
-        if (!empty($unknown)) {
-            throw new UnknownColumnException($unknown);
-        }
+        static::checkUnknownColumn($columns);
 
         /*
          * Expanded validation
          */
-        $result = static::validateHook($data, $full);
+        $result = static::onValidate($data);
         if ($result === false) {
-            throw new \UnexpectedValueException('Invalid data');
+            $message = static::class . ' has invalid data';
+            throw new \UnexpectedValueException($message);
         } elseif (is_array($result)) {
             $data = (empty(Utils::arrayUniqueDiffKey($data, $result)))
                 ? $result
@@ -997,16 +1065,28 @@ abstract class Model implements \JsonSerializable
     }
 
     /*
-     * Hook methods
+     * Events methods
      * =========================================================================
      */
+
+    /**
+     * Called when a column is changed
+     *
+     * Useful to filter data before storing in the model
+     *
+     * @return mixed New column value
+     */
+    protected function onColumnChange($column, $value)
+    {
+        return $value;
+    }
 
     /**
      * Called on the first time a model is saved
      *
      * @return boolean for success or failure
      */
-    protected function onFirstSaveHook()
+    protected function onFirstSave()
     {
         return true;
     }
@@ -1016,7 +1096,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean for success or failure
      */
-    protected function onSaveHook()
+    protected function onSave()
     {
         return true;
     }
@@ -1028,12 +1108,11 @@ abstract class Model implements \JsonSerializable
      * You may return an array of some $data keys with patched/validated data.
      *
      * @param mixed[] $data Data to be validated
-     * @param boolean $full @see validate()
      *
      * @return mixed[] For success with a validation patch to $data
      * @return boolean For success or failure
      */
-    protected static function validateHook($data, $full)
+    protected static function onValidate($data)
     {
         return true;
     }

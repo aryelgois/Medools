@@ -88,7 +88,7 @@ abstract class MedooConnection
             throw new \BadMethodCallException('Medools config was not loaded');
         }
         if (!array_key_exists($database, self::$config['databases'])) {
-            throw new \RuntimeException('Unknown database');
+            throw new \RuntimeException("Unknown database '$database'");
         }
 
         if ($anonymous || !array_key_exists($database, self::$instances)) {

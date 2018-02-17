@@ -15,4 +15,14 @@ namespace aryelgois\Medools\Exceptions;
  * @link https://www.github.com/aryelgois/Medools
  */
 class NotForeignColumnException extends \InvalidArgumentException
-{}
+{
+    public function __construct(
+        string $model,
+        string $column,
+        Throwable $previous = null
+    ) {
+        $message = "$model (`$column`) has no Foreign Key constraint";
+
+        parent::__construct($message, 0, $previous);
+    }
+}

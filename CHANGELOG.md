@@ -11,6 +11,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [4.0.0] - 2018-02-17
+
+### Added
+- Model `fill()` example
+- Model methods:
+  - `checkUnknownColumn()`
+  - `checkReadOnly()`
+  - `getIterator()`
+  - `getRequiredColumns()`
+  - `isFresh()`
+  - `onColumnChange()`
+  - `undo()`
+
+### Changed
+- Update [aryelgois/utils]
+- Forbid assigning a fresh foreign model
+- `validateHook()` only receives the data to be validated
+- Person methods
+- Rename Hook to Event
+- Improve exceptions
+
+### Removed
+- `setMultiple()`
+
+### Fixed
+- ModelIterator and ModelManager `__construct()`: Ensure a model class is used,
+  and not a model instance
+- Delete fresh soft model
+
+
 ## [3.1.1] - 2018-02-09
 
 ### Fixed
@@ -142,7 +172,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v3.1.1...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v4.0.0...develop
+[4.0.0]: https://github.com/aryelgois/Medools/compare/v3.1.0...v4.0.0
 [3.1.1]: https://github.com/aryelgois/Medools/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/aryelgois/Medools/compare/v3.0...v3.1.0
 [3.0]: https://github.com/aryelgois/Medools/compare/v3.0-alpha...v3.0
