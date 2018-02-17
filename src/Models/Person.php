@@ -57,6 +57,31 @@ class Person extends Medools\Model
     }
 
     /**
+     * Returns Person's document formated
+     *
+     * @param boolean $prepend @see documentFormat()
+     *
+     * @return integer Document type
+     * @return false   If document is invalid or not set
+     */
+    public function getDocumentType()
+    {
+        return static::documentValidate($this->document)['type'] ?? false;
+    }
+
+    /**
+     * Returns Person's document formated
+     *
+     * @param boolean $prepend @see documentFormat()
+     *
+     * @return ... same as documentFormat()
+     */
+    public function getFormatedDocument($prepend = false)
+    {
+        return static::documentFormat($this->document, $prepend);
+    }
+
+    /**
      * Called when a column is changed
      *
      * @return mixed New column value
