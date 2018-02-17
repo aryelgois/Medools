@@ -938,7 +938,8 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed $where Value for Primary Key or \Medoo\Medoo where clause
      *
-     * @return boolean For success or failure
+     * @return mixed For success
+     * @return false For failure
      *
      * @throws \InvalidArgumentException  If $where is null
      * @throws \InvalidArgumentException  If could not solve Primary Key:
