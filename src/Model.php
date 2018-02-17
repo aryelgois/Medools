@@ -492,6 +492,9 @@ abstract class Model implements \JsonSerializable
                     ));
                     break;
             }
+            if ($this->isFresh()) {
+                return true;
+            }
             return $this->update($column);
         } else {
             $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());

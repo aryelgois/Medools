@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - ModelIterator and ModelManager `__construct()`: Ensure a model class is used,
   and not a model instance
+- Delete fresh soft model
 
 ### Security
 
