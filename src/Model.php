@@ -256,6 +256,8 @@ abstract class Model implements \JsonSerializable
             throw new UnknownColumnException();
         }
 
+        $value = $this->onColumnChangeHook($column, $value);
+
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
             $foreign_map = static::FOREIGN_KEYS[$column];
             if ($value instanceof $foreign_map[0]) {
@@ -1063,6 +1065,18 @@ abstract class Model implements \JsonSerializable
      * Hook methods
      * =========================================================================
      */
+
+    /**
+     * Called when a column is changed
+     *
+     * Useful to filter data before storing in the model
+     *
+     * @return mixed New column value
+     */
+    protected function onColumnChangeHook($column, $value)
+    {
+        return $value;
+    }
 
     /**
      * Called on the first time a model is saved
