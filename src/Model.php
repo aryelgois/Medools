@@ -790,6 +790,24 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Returns required columns
+     *
+     * @return string[]
+     */
+    public static function getRequiredColumns()
+    {
+        return array_diff(
+            static::COLUMNS,
+            static::OPTIONAL_COLUMNS,
+            [ // implicit optional columns
+                static::AUTO_INCREMENT,
+                static::SOFT_DELETE,
+            ],
+            static::getAutoStampColumns()
+        );
+    }
+
+    /**
      * Returns the stored data in an array
      *
      * @return mixed[]
@@ -1012,16 +1030,7 @@ abstract class Model implements \JsonSerializable
          * Check missing columns
          */
         if ($full) {
-            $required = array_diff(
-                static::COLUMNS,
-                static::OPTIONAL_COLUMNS,
-                [ // implicit optional columns
-                    static::AUTO_INCREMENT,
-                    static::SOFT_DELETE,
-                ],
-                static::getAutoStampColumns()
-            );
-            $missing = array_diff($required, $columns);
+            $missing = array_diff(static::getRequiredColumns(), $columns);
             if (!empty($missing)) {
                 throw new MissingColumnException($missing);
             }
