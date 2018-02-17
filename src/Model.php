@@ -173,9 +173,9 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed $where @see load(). If null, a fresh model is created
      *
+     * @throws \InvalidArgumentException  If could not load from Database
      * @throws \InvalidArgumentException  @see load()
      * @throws ForeignConstraintException @see load()
-     * @throws \InvalidArgumentException  If could not load from Database
      */
     public function __construct($where = null)
     {
@@ -282,7 +282,7 @@ abstract class Model implements \JsonSerializable
      *
      * @see __set()
      *
-     * @param [type] $column A known column
+     * @param string $column A known column
      *
      * @throws ReadOnlyModelException
      * @throws UnknownColumnException
