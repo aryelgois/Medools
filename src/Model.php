@@ -1047,7 +1047,7 @@ abstract class Model implements \JsonSerializable
         /*
          * Expanded validation
          */
-        $result = static::validateHook($data, $full);
+        $result = static::validateHook($data);
         if ($result === false) {
             throw new \UnexpectedValueException('Invalid data');
         } elseif (is_array($result)) {
@@ -1091,12 +1091,11 @@ abstract class Model implements \JsonSerializable
      * You may return an array of some $data keys with patched/validated data.
      *
      * @param mixed[] $data Data to be validated
-     * @param boolean $full @see validate()
      *
      * @return mixed[] For success with a validation patch to $data
      * @return boolean For success or failure
      */
-    protected static function validateHook($data, $full)
+    protected static function validateHook($data)
     {
         return true;
     }
