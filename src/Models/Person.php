@@ -55,4 +55,18 @@ class Person extends Medools\Model
     {
         return Utils\Format::document($document, $prepend);
     }
+
+    /**
+     * Called when a column is changed
+     *
+     * @return mixed New column value
+     */
+    protected function onColumnChangeHook($column, $value)
+    {
+        if ($column == 'document') {
+            $value = static::documentValidate($value)['valid'] ?? $value;
+        }
+
+        return $value;
+    }
 }
