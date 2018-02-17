@@ -180,7 +180,8 @@ abstract class Model implements \JsonSerializable
     public function __construct($where = null)
     {
         if ($where !== null && !$this->load($where)) {
-            throw new \InvalidArgumentException('Could not load from Database');
+            $message = 'Could not load ' . static::class . ' from Database';
+            throw new \InvalidArgumentException($message);
         }
     }
 
@@ -199,7 +200,7 @@ abstract class Model implements \JsonSerializable
     public function __get($column)
     {
         if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
+            throw new UnknownColumnException(static::class, $column);
         }
 
         if (array_key_exists($column, $this->changes)
@@ -250,10 +251,10 @@ abstract class Model implements \JsonSerializable
     public function __set($column, $value)
     {
         if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
+            throw new ReadOnlyModelException(static::class);
         }
         if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
+            throw new UnknownColumnException(static::class, $column);
         }
 
         $value = $this->onColumnChange($column, $value);
@@ -318,7 +319,7 @@ abstract class Model implements \JsonSerializable
     public function save()
     {
         if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
+            throw new ReadOnlyModelException(static::class);
         }
 
         $is_fresh = $this->isFresh();
@@ -420,10 +421,11 @@ abstract class Model implements \JsonSerializable
     public function update($columns)
     {
         if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
+            throw new ReadOnlyModelException(static::class);
         }
         if ($this->isFresh()) {
-            throw new \LogicException('Can not update a fresh Model');
+            $message = 'Can not update fresh Model: ' . static::class;
+            throw new \LogicException($message);
         }
 
         $this->updateStampColumns($columns);
@@ -463,7 +465,7 @@ abstract class Model implements \JsonSerializable
     public function delete()
     {
         if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
+            throw new ReadOnlyModelException(static::class);
         }
 
         $database = self::getDatabase();
@@ -483,9 +485,11 @@ abstract class Model implements \JsonSerializable
                     break;
 
                 default:
-                    throw new \LogicException(
-                        "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
-                    );
+                    throw new \LogicException(sprintf(
+                        "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                        static::class,
+                        static::SOFT_DELETE_MODE
+                    ));
                     break;
             }
             return $this->update($column);
@@ -517,7 +521,7 @@ abstract class Model implements \JsonSerializable
         if (empty($columns)) {
             $columns = static::COLUMNS;
         } elseif (!empty($invalid = array_diff($columns, static::COLUMNS))) {
-            throw new UnknownColumnException($invalid);
+            throw new UnknownColumnException(static::class, $invalid);
         }
 
         $database = self::getDatabase();
@@ -692,10 +696,11 @@ abstract class Model implements \JsonSerializable
     public function undelete()
     {
         if (static::READ_ONLY) {
-            throw new ReadOnlyModelException();
+            throw new ReadOnlyModelException(static::class);
         }
         if (static::SOFT_DELETE === null) {
-            throw new \LogicException('Model is not soft-deletable');
+            $message = 'Model ' . static::class . ' is not soft-deletable';
+            throw new \LogicException($message);
         }
 
         $database = self::getDatabase();
@@ -715,9 +720,11 @@ abstract class Model implements \JsonSerializable
                 break;
 
             default:
-                throw new \LogicException(
-                    "Unknown mode '" . static::SOFT_DELETE_MODE . "'"
-                );
+                throw new \LogicException(sprintf(
+                    "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                    static::class,
+                    static::SOFT_DELETE_MODE
+                ));
                 break;
         }
 
@@ -740,7 +747,7 @@ abstract class Model implements \JsonSerializable
             $this->changes = [];
         } else {
             if (!in_array($column, static::COLUMNS)) {
-                throw new UnknownColumnException();
+                throw new UnknownColumnException(static::class, $column);
             }
             unset($this->changes[$column]);
         }
@@ -841,10 +848,10 @@ abstract class Model implements \JsonSerializable
     protected function loadForeign($column, $value)
     {
         if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException();
+            throw new UnknownColumnException(static::class, $column);
         }
         if (!array_key_exists($column, static::FOREIGN_KEYS)) {
-            throw new NotForeignColumnException();
+            throw new NotForeignColumnException(static::class, $column);
         }
 
         $foreign_map = static::FOREIGN_KEYS[$column];
@@ -946,7 +953,7 @@ abstract class Model implements \JsonSerializable
             $where = @array_combine(static::PRIMARY_KEY, $where);
             if ($where === false) {
                 throw new \InvalidArgumentException(
-                    'Could not solve Primary Key'
+                    'Could not solve Primary Key for ' . static::class
                 );
             }
         }
@@ -1003,7 +1010,12 @@ abstract class Model implements \JsonSerializable
                     break;
 
                 default:
-                    throw new \LogicException("Unknown mode '$mode'");
+                    throw new \LogicException(sprintf(
+                        "%s (`%s`) has invalid STAMP_COLUMNS mode: '%s'",
+                        static::class,
+                        $column,
+                        $mode
+                    ));
                     break;
             }
         }
@@ -1034,7 +1046,7 @@ abstract class Model implements \JsonSerializable
         if ($full) {
             $missing = array_diff(static::getRequiredColumns(), $columns);
             if (!empty($missing)) {
-                throw new MissingColumnException($missing);
+                throw new MissingColumnException(static::class, $missing);
             }
         }
 
@@ -1043,7 +1055,7 @@ abstract class Model implements \JsonSerializable
          */
         $unknown = array_diff($columns, static::COLUMNS);
         if (!empty($unknown)) {
-            throw new UnknownColumnException($unknown);
+            throw new UnknownColumnException(static::class, $unknown);
         }
 
         /*
@@ -1051,7 +1063,8 @@ abstract class Model implements \JsonSerializable
          */
         $result = static::onValidate($data);
         if ($result === false) {
-            throw new \UnexpectedValueException('Invalid data');
+            $message = static::class . ' has invalid data';
+            throw new \UnexpectedValueException($message);
         } elseif (is_array($result)) {
             $data = (empty(Utils::arrayUniqueDiffKey($data, $result)))
                 ? $result

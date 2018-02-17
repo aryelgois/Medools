@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `validateHook()` only receives the data to be validated
 - Person methods
 - Rename Hook to Event
+- Improve exceptions
 
 ### Deprecated
 
