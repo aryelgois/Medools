@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - `getIterator()`
   - `getRequiredColumns()`
   - `isFresh()`
-  - `onColumnChangeHook()`
+  - `onColumnChange()`
   - `undo()`
 
 ### Changed
@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Forbid assigning a fresh foreign model
 - `validateHook()` only receives the data to be validated
 - Person methods
+- Rename Hook to Event
 
 ### Deprecated
 

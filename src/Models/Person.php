@@ -61,7 +61,7 @@ class Person extends Medools\Model
      *
      * @return mixed New column value
      */
-    protected function onColumnChangeHook($column, $value)
+    protected function onColumnChange($column, $value)
     {
         if ($column == 'document') {
             $value = static::documentValidate($value)['valid'] ?? $value;

@@ -256,7 +256,7 @@ abstract class Model implements \JsonSerializable
             throw new UnknownColumnException();
         }
 
-        $value = $this->onColumnChangeHook($column, $value);
+        $value = $this->onColumnChange($column, $value);
 
         if (array_key_exists($column, static::FOREIGN_KEYS)) {
             $foreign_map = static::FOREIGN_KEYS[$column];
@@ -323,8 +323,8 @@ abstract class Model implements \JsonSerializable
 
         $is_fresh = $this->isFresh();
 
-        if (($is_fresh && !$this->onFirstSaveHook())
-            || !$this->onSaveHook()
+        if (($is_fresh && !$this->onFirstSave())
+            || !$this->onSave()
             || empty($this->changes)
         ) {
             return false;
@@ -1049,7 +1049,7 @@ abstract class Model implements \JsonSerializable
         /*
          * Expanded validation
          */
-        $result = static::validateHook($data);
+        $result = static::onValidate($data);
         if ($result === false) {
             throw new \UnexpectedValueException('Invalid data');
         } elseif (is_array($result)) {
@@ -1062,7 +1062,7 @@ abstract class Model implements \JsonSerializable
     }
 
     /*
-     * Hook methods
+     * Events methods
      * =========================================================================
      */
 
@@ -1073,7 +1073,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return mixed New column value
      */
-    protected function onColumnChangeHook($column, $value)
+    protected function onColumnChange($column, $value)
     {
         return $value;
     }
@@ -1083,7 +1083,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean for success or failure
      */
-    protected function onFirstSaveHook()
+    protected function onFirstSave()
     {
         return true;
     }
@@ -1093,7 +1093,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean for success or failure
      */
-    protected function onSaveHook()
+    protected function onSave()
     {
         return true;
     }
@@ -1109,7 +1109,7 @@ abstract class Model implements \JsonSerializable
      * @return mixed[] For success with a validation patch to $data
      * @return boolean For success or failure
      */
-    protected static function validateHook($data)
+    protected static function onValidate($data)
     {
         return true;
     }

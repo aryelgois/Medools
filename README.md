@@ -28,7 +28,7 @@ Index:
   - [SOFT_DELETE]
   - [SOFT_DELETE_MODE]
 - [Advanced]
-  - [Hooks]
+  - [Events]
   - [ModelManager]
 - [Changelog]
 
@@ -190,7 +190,7 @@ Useful methods that are available:
 You can also add custom methods in your models, to automatically get some data
 in a format, or for doing a specific task.
 
-> There are also [hook methods][hooks] that are automatically called by some
+> There are also [event methods][events] that are automatically called by some
 > base methods.
 
 
@@ -359,21 +359,19 @@ Possible value | When not deleted | When deleted
 
 # Advanced
 
-## Hooks
+## Events
 
-There is a Hook concept in this framework, where you can add specific methods
-which are automatically called by default methods. It makes easier to extend
-some functionalities.
+There are some methods that can be extended by overriding event methods. It
+makes easier to extend some functionalities.
 
-Currently, these hooks are available:
+Currently, these events are available:
 
-- `onColumnChangeHook()`: Called when a column is changed. Useful to filter data
+- `onColumnChange()`: Called when a column is changed. Useful to filter data
   before storing in the model
-- `onFirstSaveHook()`: Called on the first time a model is saved
-- `onSaveHook()`: Called every time a model is saved
-- `validateHook()`: Use it to validate the data before sending to the Database.
-  Make sure your code can validate some columns or all of them, depending on the
-  `$full` argument.
+- `onFirstSave()`: Called on the first time a model is saved
+- `onSave()`: Called every time a model is saved
+- `onValidate()`: Called when data needs to be validated, before storig in the
+  Database
 
 ## ModelManager
 
@@ -415,7 +413,7 @@ this class or in the model.
 [SOFT_DELETE]: #soft_delete
 [SOFT_DELETE_MODE]: #soft_delete_mode
 [Advanced]: #advanced
-[Hooks]: #hooks
+[Events]: #events
 [ModelManager]: #modelmanager
 
 [config_example]: config/example.php
