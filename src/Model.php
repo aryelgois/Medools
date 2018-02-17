@@ -194,14 +194,12 @@ abstract class Model implements \JsonSerializable
      *
      * @return mixed
      *
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws ForeignConstraintException @see loadForeign()
      */
     public function __get($column)
     {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException(static::class, $column);
-        }
+        static::checkUnknownColumn($column);
 
         if (array_key_exists($column, $this->changes)
             && $this->changes[$column] === null
@@ -245,7 +243,7 @@ abstract class Model implements \JsonSerializable
      * @param mixed  $value  The new value
      *
      * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws ForeignConstraintException
      */
     public function __set($column, $value)
@@ -253,9 +251,7 @@ abstract class Model implements \JsonSerializable
         if (static::READ_ONLY) {
             throw new ReadOnlyModelException(static::class);
         }
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException(static::class, $column);
-        }
+        static::checkUnknownColumn($column);
 
         $value = $this->onColumnChange($column, $value);
 
@@ -286,7 +282,7 @@ abstract class Model implements \JsonSerializable
      * @param string $column A known column
      *
      * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see __set()
      * @throws ForeignConstraintException
      */
     public function __unset($column)
@@ -517,13 +513,14 @@ abstract class Model implements \JsonSerializable
      * @return array[]
      *
      * @throws UnknownColumnException If any item in $columns is invalid
+     *                                @see checkUnknownColumn()
      */
     public static function dump($where = [], $columns = [])
     {
         if (empty($columns)) {
             $columns = static::COLUMNS;
-        } elseif (!empty($invalid = array_diff($columns, static::COLUMNS))) {
-            throw new UnknownColumnException(static::class, $invalid);
+        } else {
+            static::checkUnknownColumn($columns);
         }
 
         $database = self::getDatabase();
@@ -721,16 +718,14 @@ abstract class Model implements \JsonSerializable
      *
      * @param string $column Which column to undo
      *
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      */
     public function undo(string $column = null)
     {
         if ($column === null) {
             $this->changes = [];
         } else {
-            if (!in_array($column, static::COLUMNS)) {
-                throw new UnknownColumnException(static::class, $column);
-            }
+            static::checkUnknownColumn($column);
             unset($this->changes[$column]);
         }
     }
@@ -739,6 +734,21 @@ abstract class Model implements \JsonSerializable
      * Internal methods
      * =========================================================================
      */
+
+    /**
+     * Tests if model has columns
+     *
+     * @param string|string[] $columns List of columns to test
+     *
+     * @throws UnknownColumnException
+     */
+    final public static function checkUnknownColumn($columns)
+    {
+        $unknown = array_diff((array) $columns, static::COLUMNS);
+        if (!empty($unknown)) {
+            throw new UnknownColumnException(static::class, $unknown);
+        }
+    }
 
     /**
      * Cleans data keys, removing unwanted columns
@@ -823,15 +833,13 @@ abstract class Model implements \JsonSerializable
      * @param string $column A column in FOREIGN_KEYS keys
      * @param mixed  $value  A value in the foreign table
      *
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws NotForeignColumnException
      * @throws ForeignConstraintException
      */
     protected function loadForeign($column, $value)
     {
-        if (!in_array($column, static::COLUMNS)) {
-            throw new UnknownColumnException(static::class, $column);
-        }
+        static::checkUnknownColumn($column);
         if (!array_key_exists($column, static::FOREIGN_KEYS)) {
             throw new NotForeignColumnException(static::class, $column);
         }
@@ -1016,7 +1024,7 @@ abstract class Model implements \JsonSerializable
      * @return mixed[] Valid data
      *
      * @throws MissingColumnException
-     * @throws UnknownColumnException
+     * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws \UnexpectedValueException If Invalid data is found
      */
     protected static function validate($data, $full)
@@ -1033,13 +1041,7 @@ abstract class Model implements \JsonSerializable
             }
         }
 
-        /*
-         * Check unknown columns
-         */
-        $unknown = array_diff($columns, static::COLUMNS);
-        if (!empty($unknown)) {
-            throw new UnknownColumnException(static::class, $unknown);
-        }
+        static::checkUnknownColumn($columns);
 
         /*
          * Expanded validation
