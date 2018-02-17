@@ -541,8 +541,6 @@ abstract class Model implements \JsonSerializable
      *        'column' => 'value',
      *    ]);
      *
-     * @todo Replaces setMultiple()
-     *
      * @param mixed[] $data An array of known columns => value
      *
      * @return $this
@@ -551,7 +549,9 @@ abstract class Model implements \JsonSerializable
      */
     public function fill(array $data)
     {
-        $this->setMultiple($data);
+        foreach ($data as $column => $value) {
+            $this->__set($column, $value);
+        }
         return $this;
     }
 
@@ -651,26 +651,6 @@ abstract class Model implements \JsonSerializable
     public function reload()
     {
         return $this->load($this->getPrimaryKey());
-    }
-
-    /**
-     * Changes the value in multiple columns
-     *
-     * @see __set()
-     *
-     * @deprecated Use fill() instead
-     *
-     * @param mixed[] $data An array of known columns => value
-     *
-     * @throws ReadOnlyModelException
-     * @throws UnknownColumnException
-     * @throws ForeignConstraintException
-     */
-    public function setMultiple($data)
-    {
-        foreach ($data as $column => $value) {
-            $this->__set($column, $value);
-        }
     }
 
     /**
