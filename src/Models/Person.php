@@ -29,10 +29,13 @@ class Person extends Medools\Model
      *
      * @return mixed[] With keys 'type' and 'valid'
      * @return false   If document is invalid
-     * @return null    If a document row was not found
+     * @return null    If document is not set
      */
     public function documentValidate()
     {
+        if (!isset($this->document)) {
+            return null;
+        }
         return Utils\Validation::document($this->document);
     }
 
@@ -43,7 +46,7 @@ class Person extends Medools\Model
      *
      * @return string Formatted document
      * @return string Unformatted document if it is invalid
-     * @return null   If a document row was not found
+     * @return null   If document is not set
      */
     public function documentFormat($prepend = false)
     {
