@@ -496,12 +496,11 @@ abstract class Model implements \JsonSerializable
                 return true;
             }
             return $this->update($column);
-        } else {
-            $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
-            ModelManager::remove($this);
-            $this->reset();
-            return ($stmt->rowCount() > 0);
         }
+        $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
+        ModelManager::remove($this);
+        $this->reset();
+        return ($stmt->rowCount() > 0);
     }
 
     /*
