@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update [aryelgois/utils]
 - Forbid assigning a fresh foreign model
 - `validateHook()` only receives the data to be validated
+- Person methods
 
 ### Deprecated
 
