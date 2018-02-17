@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Model `fill()` example
 - Model methods:
   - `checkUnknownColumn()`
+  - `checkReadOnly()`
   - `getIterator()`
   - `getRequiredColumns()`
   - `isFresh()`

@@ -242,15 +242,13 @@ abstract class Model implements \JsonSerializable
      * @param string $column A known column
      * @param mixed  $value  The new value
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws UnknownColumnException @see checkUnknownColumn()
      * @throws ForeignConstraintException
      */
     public function __set($column, $value)
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException(static::class);
-        }
+        static::checkReadOnly();
         static::checkUnknownColumn($column);
 
         $value = $this->onColumnChange($column, $value);
@@ -281,7 +279,7 @@ abstract class Model implements \JsonSerializable
      *
      * @param string $column A known column
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see __set()
      * @throws UnknownColumnException @see __set()
      * @throws ForeignConstraintException
      */
@@ -310,13 +308,11 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      */
     public function save()
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException(static::class);
-        }
+        static::checkReadOnly();
 
         $is_fresh = $this->isFresh();
 
@@ -411,14 +407,12 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If trying to update a fresh Model
      */
     public function update($columns)
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException(static::class);
-        }
+        static::checkReadOnly();
         if ($this->isFresh()) {
             $message = 'Can not update fresh Model: ' . static::class;
             throw new \LogicException($message);
@@ -455,14 +449,12 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If SOFT_DELETE_MODE is unknown
      */
     public function delete()
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException(static::class);
-        }
+        static::checkReadOnly();
 
         $database = self::getDatabase();
         $column = static::SOFT_DELETE;
@@ -668,15 +660,13 @@ abstract class Model implements \JsonSerializable
      *
      * @return boolean For success or failure
      *
-     * @throws ReadOnlyModelException
+     * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If the Model is not soft-deletable
      * @throws \LogicException        If SOFT_DELETE_MODE is unknown
      */
     public function undelete()
     {
-        if (static::READ_ONLY) {
-            throw new ReadOnlyModelException(static::class);
-        }
+        static::checkReadOnly();
         if (static::SOFT_DELETE === null) {
             $message = 'Model ' . static::class . ' is not soft-deletable';
             throw new \LogicException($message);
@@ -734,6 +724,18 @@ abstract class Model implements \JsonSerializable
      * Internal methods
      * =========================================================================
      */
+
+    /**
+     * Tests if model is READ_ONLY
+     *
+     * @throws ReadOnlyModelException
+     */
+    final public static function checkReadOnly()
+    {
+        if (static::READ_ONLY) {
+            throw new ReadOnlyModelException(static::class);
+        }
+    }
 
     /**
      * Tests if model has columns
