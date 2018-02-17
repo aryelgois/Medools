@@ -413,6 +413,7 @@ abstract class Model implements \JsonSerializable
     public function update($columns)
     {
         static::checkReadOnly();
+
         if ($this->isFresh()) {
             $message = 'Can not update fresh Model: ' . static::class;
             throw new \LogicException($message);
@@ -667,6 +668,7 @@ abstract class Model implements \JsonSerializable
     public function undelete()
     {
         static::checkReadOnly();
+
         if (static::SOFT_DELETE === null) {
             $message = 'Model ' . static::class . ' is not soft-deletable';
             throw new \LogicException($message);
@@ -842,6 +844,7 @@ abstract class Model implements \JsonSerializable
     protected function loadForeign($column, $value)
     {
         static::checkUnknownColumn($column);
+
         if (!array_key_exists($column, static::FOREIGN_KEYS)) {
             throw new NotForeignColumnException(static::class, $column);
         }
