@@ -183,7 +183,7 @@ Useful methods that are available:
   ready to use. See [catfan/Medoo] for details
 - `getRequiredColumns()`: Gives a list of columns that must be set before saving
 - `isFresh()`: Tells if the object is a new Model
-- `jsonSerialize()`: You can [json_encode] models!
+- `jsonSerialize()`: You can [json_encode] models! It expands foreign models
 - `reload()`: Use to re fetch the row with model's Primary Key
 - `undo()`: Removes changes. Pass a column name to only remove that column,
   otherwise it removes all changes

@@ -823,9 +823,13 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Returns the stored data in an array
+     * Returns the stored data
+     *
+     * NOTE:
+     * - Expands foreign models
      *
      * @return mixed[]
+     * @return null    If no columns are filled
      */
     public function jsonSerialize()
     {
