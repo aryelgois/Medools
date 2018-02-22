@@ -214,7 +214,7 @@ The new object will not contain changes made in the old one.
 The settings are constants in each model class. You can omit some to reuse from
 parent class.
 
-Only TABLE and COLUMNS are required to define a new model.
+Only [TABLE] and [COLUMNS] are required to define a new model.
 
 
 #### DATABASE
@@ -294,7 +294,7 @@ Here, `column_b` will use the default.
 List of optional columns
 
 > List all columns which have a default value (e.g. timestamp) or are nullable.
-  AUTO_INCREMENT is always optional and does not need to be here.
+  [AUTO_INCREMENT] is always optional and does not need to be here.
 
 - Type: `string[]`
 
@@ -336,7 +336,7 @@ If `delete()` actually removes the row or if it changes a column
 > It defines the column affected by the soft delete
 
 This column is **implicitly** optional, so you must define a default value in
-the database accordingly to SOFT_DELETE_MODE. *(see below)*
+the database accordingly to [SOFT_DELETE_MODE]. *(see below)*
 
 - Type: `string|null`
 - Default: `null`
@@ -346,7 +346,7 @@ the database accordingly to SOFT_DELETE_MODE. *(see below)*
 
 How the soft delete works.
 
-> Which value SOFT_DELETE should be setted to.
+> Which value [SOFT_DELETE] should be setted to.
 
 - Type: `string`
 - Default: `'deleted'`
