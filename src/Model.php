@@ -43,7 +43,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Database's Table the model represents
      *
-     * The recomended is to use a plural name for the table and it's singular in
+     * The recomended is to use a plural name for the table and its singular in
      * the model name
      *
      * @const string

@@ -229,7 +229,7 @@ Database key in the Medools config file
 
 Database's Table the model represents
 
-> The recomended is to use a plural name for the table and it's singular in the
+> The recomended is to use a plural name for the table and its singular in the
   model name
 
 - Type: `string`

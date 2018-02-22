@@ -22,7 +22,7 @@ abstract class ModelManager
      * Nested list of Models
      *
      * This list creates a path to the Model instance. This path is defined by
-     * the Model class name, and any amount of columns for it's PRIMARY_KEY.
+     * the Model class name, and any amount of columns for its PRIMARY_KEY.
      *
      * EXAMPLE:
      *     [
