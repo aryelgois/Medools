@@ -570,6 +570,16 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Returns currently stored data
+     *
+     * @return mixed[]
+     */
+    final public function getData()
+    {
+        return array_replace($this->data ?? [], $this->changes);
+    }
+
+    /**
      * Returns a database connection
      *
      * @return \Medoo\Medoo
@@ -819,7 +829,7 @@ abstract class Model implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        $data = array_replace($this->data ?? [], $this->changes);
+        $data = $this->getData();
         if (empty($data)) {
             return null;
         }

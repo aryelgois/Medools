@@ -178,6 +178,7 @@ Useful methods that are available:
 - `getChangedColumns()`: Lists changed columns
 - `getCurrentTimestamp()`: Selects the current timestamp from Database, useful
   to keep timezone consistent
+- `getData()`: Gives currently stored data
 - `getDatabase()`: Gives a direct access to the Database, already connected and
   ready to use. See [catfan/Medoo] for details
 - `getRequiredColumns()`: Gives a list of columns that must be set before saving
