@@ -92,7 +92,7 @@ to the Database.
 
 ## Loading from Database
 
-Instantiate the model with a value for its `PRIMARY_KEY`, or specify an
+Instantiate the model with a value for its [PRIMARY_KEY], or specify an
 associative array with which columns you would like to [filter][where_clause].
 Only one row is loaded.
 
@@ -112,7 +112,7 @@ some validation process or Database defaults.
 
 Simply use `delete()`.
 
-If the model has `SOFT_DELETE` configured, it will just update that column. So
+If the model has [SOFT_DELETE] configured, it will just update that column. So
 you are able to `undelete()` later.
 
 Otherwise, it will completely delete the row from the Database, and `reset()`
