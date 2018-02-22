@@ -23,6 +23,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 
 
+## [4.1.1] - 2018-02-22
+
+### Changed
+- Rename `getFormatedDocument()` to `getFormattedDocument()`
+
+### Fixed
+- Rename `formated` to `formatted`
+
+
 ## [4.1.0] - 2018-02-17
 
 ### Added
@@ -192,7 +201,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v4.1.0...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v4.1.1...develop
+[4.1.1]: https://github.com/aryelgois/Medools/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/aryelgois/Medools/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/aryelgois/Medools/compare/v3.1.0...v4.0.0
 [3.1.1]: https://github.com/aryelgois/Medools/compare/v3.1.0...v3.1.1

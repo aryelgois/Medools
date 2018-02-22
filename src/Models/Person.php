@@ -44,7 +44,7 @@ class Person extends Medools\Model
     /**
      * Formats a document
      *
-     * @param boolean $document Data to be formated
+     * @param boolean $document Data to be formatted
      * @param boolean $prepend  If should prepend the document type
      *
      * @return string Formatted document
@@ -57,7 +57,7 @@ class Person extends Medools\Model
     }
 
     /**
-     * Returns Person's document formated
+     * Returns Person's document formatted
      *
      * @param boolean $prepend @see documentFormat()
      *
@@ -70,13 +70,13 @@ class Person extends Medools\Model
     }
 
     /**
-     * Returns Person's document formated
+     * Returns Person's document formatted
      *
      * @param boolean $prepend @see documentFormat()
      *
      * @return ... same as documentFormat()
      */
-    public function getFormatedDocument($prepend = false)
+    public function getFormattedDocument($prepend = false)
     {
         return static::documentFormat($this->document, $prepend);
     }
