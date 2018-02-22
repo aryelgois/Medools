@@ -34,7 +34,7 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
-     * Database name key in the Medools config file
+     * Database key in the Medools config file
      *
      * @const string
      */

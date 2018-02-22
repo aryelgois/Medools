@@ -218,7 +218,7 @@ Only TABLE and COLUMNS are required to define a new model.
 
 #### DATABASE
 
-Database name key in the Medools config file
+Database key in the Medools config file
 
 - Type: `string`
 - Default: `'default'`
