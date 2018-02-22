@@ -76,7 +76,7 @@ class Person extends Medools\Model
      *
      * @return ... same as documentFormat()
      */
-    public function getFormatedDocument($prepend = false)
+    public function getFormattedDocument($prepend = false)
     {
         return static::documentFormat($this->document, $prepend);
     }
