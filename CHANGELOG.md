@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [4.2.0] - 2018-02-25
+
 ### Added
 - Links in README
 - Model methods:
@@ -18,14 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update [aryelgois/utils]
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 - `jsonSerialize()` DocBlock and description
-
-### Security
 
 
 ## [4.1.1] - 2018-02-22
@@ -206,7 +203,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v4.1.1...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v4.2.0...develop
+[4.2.0]: https://github.com/aryelgois/Medools/compare/v4.1.1...v4.2.0
 [4.1.1]: https://github.com/aryelgois/Medools/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/aryelgois/Medools/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/aryelgois/Medools/compare/v3.1.0...v4.0.0
