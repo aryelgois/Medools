@@ -34,7 +34,7 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
-     * Database name key in the Medools config file
+     * Database key in the Medools config file
      *
      * @const string
      */
@@ -43,7 +43,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Database's Table the model represents
      *
-     * The recomended is to use a plural name for the table and it's singular in
+     * The recomended is to use a plural name for the table and its singular in
      * the model name
      *
      * @const string
@@ -570,6 +570,16 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Returns currently stored data
+     *
+     * @return mixed[]
+     */
+    final public function getData()
+    {
+        return array_replace($this->data ?? [], $this->changes);
+    }
+
+    /**
      * Returns a database connection
      *
      * @return \Medoo\Medoo
@@ -813,13 +823,17 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Returns the stored data in an array
+     * Returns the stored data
+     *
+     * NOTE:
+     * - Expands foreign models
      *
      * @return mixed[]
+     * @return null    If no columns are filled
      */
     public function jsonSerialize()
     {
-        $data = array_replace($this->data ?? [], $this->changes);
+        $data = $this->getData();
         if (empty($data)) {
             return null;
         }

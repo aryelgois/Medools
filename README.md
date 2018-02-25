@@ -92,7 +92,7 @@ to the Database.
 
 ## Loading from Database
 
-Instantiate the model with a value for its `PRIMARY_KEY`, or specify an
+Instantiate the model with a value for its [PRIMARY_KEY], or specify an
 associative array with which columns you would like to [filter][where_clause].
 Only one row is loaded.
 
@@ -112,7 +112,7 @@ some validation process or Database defaults.
 
 Simply use `delete()`.
 
-If the model has `SOFT_DELETE` configured, it will just update that column. So
+If the model has [SOFT_DELETE] configured, it will just update that column. So
 you are able to `undelete()` later.
 
 Otherwise, it will completely delete the row from the Database, and `reset()`
@@ -123,7 +123,7 @@ the model object.
 
 Just like in any object:
 
-- `$model->column` will return the stored data, or a foreign model *
+- `$model->column` will return the stored data, or a foreign model \*
 - `$model->column = value` will set a new data
 
 > \* It means that you can chain the models:  
@@ -178,11 +178,12 @@ Useful methods that are available:
 - `getChangedColumns()`: Lists changed columns
 - `getCurrentTimestamp()`: Selects the current timestamp from Database, useful
   to keep timezone consistent
+- `getData()`: Gives currently stored data
 - `getDatabase()`: Gives a direct access to the Database, already connected and
   ready to use. See [catfan/Medoo] for details
 - `getRequiredColumns()`: Gives a list of columns that must be set before saving
 - `isFresh()`: Tells if the object is a new Model
-- `jsonSerialize()`: You can [json_encode] models!
+- `jsonSerialize()`: You can [json_encode] models! It expands foreign models
 - `reload()`: Use to re fetch the row with model's Primary Key
 - `undo()`: Removes changes. Pass a column name to only remove that column,
   otherwise it removes all changes
@@ -213,12 +214,12 @@ The new object will not contain changes made in the old one.
 The settings are constants in each model class. You can omit some to reuse from
 parent class.
 
-Only TABLE and COLUMNS are required to define a new model.
+Only [TABLE] and [COLUMNS] are required to define a new model.
 
 
 #### DATABASE
 
-Database name key in the Medools config file
+Database key in the Medools config file
 
 - Type: `string`
 - Default: `'default'`
@@ -228,7 +229,7 @@ Database name key in the Medools config file
 
 Database's Table the model represents
 
-> The recomended is to use a plural name for the table and it's singular in the
+> The recomended is to use a plural name for the table and its singular in the
   model name
 
 - Type: `string`
@@ -293,7 +294,7 @@ Here, `column_b` will use the default.
 List of optional columns
 
 > List all columns which have a default value (e.g. timestamp) or are nullable.
-  AUTO_INCREMENT is always optional and does not need to be here.
+  [AUTO_INCREMENT] is always optional and does not need to be here.
 
 - Type: `string[]`
 
@@ -334,18 +335,18 @@ If `delete()` actually removes the row or if it changes a column
 
 > It defines the column affected by the soft delete
 
-This column is **implicitly** optional, so you must define a default value in
-the database accordingly to SOFT_DELETE_MODE. *(see below)*
-
 - Type: `string|null`
 - Default: `null`
+
+This column is **implicitly** optional, so you must define a default value in
+the database accordingly to [SOFT_DELETE_MODE].
 
 
 #### SOFT_DELETE_MODE
 
-How the soft delete works.
+How the soft delete works
 
-> Which value SOFT_DELETE should be setted to.
+> Which value [SOFT_DELETE] should be setted to.
 
 - Type: `string`
 - Default: `'deleted'`
