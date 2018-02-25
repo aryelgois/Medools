@@ -123,7 +123,7 @@ the model object.
 
 Just like in any object:
 
-- `$model->column` will return the stored data, or a foreign model *
+- `$model->column` will return the stored data, or a foreign model \*
 - `$model->column = value` will set a new data
 
 > \* It means that you can chain the models:  
@@ -344,7 +344,7 @@ the database accordingly to [SOFT_DELETE_MODE].
 
 #### SOFT_DELETE_MODE
 
-How the soft delete works.
+How the soft delete works
 
 > Which value [SOFT_DELETE] should be setted to.
 
