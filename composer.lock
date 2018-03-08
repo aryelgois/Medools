@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "1f8c5e498784946a54059e92e667cf7f",
+    "content-hash": "e809c73fc6e52e32230109724a1bd8fc",
     "packages": [
         {
             "name": "aryelgois/utils",
-            "version": "v0.4.0",
+            "version": "v0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aryelgois/utils.git",
-                "reference": "a201edab2ea3c5c7fa02724941fa9b462d9f712e"
+                "reference": "8861a54a7c919335193c48dced137d6ddb67c156"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aryelgois/utils/zipball/a201edab2ea3c5c7fa02724941fa9b462d9f712e",
-                "reference": "a201edab2ea3c5c7fa02724941fa9b462d9f712e",
+                "url": "https://api.github.com/repos/aryelgois/utils/zipball/8861a54a7c919335193c48dced137d6ddb67c156",
+                "reference": "8861a54a7c919335193c48dced137d6ddb67c156",
                 "shasum": ""
             },
             "require": {
@@ -43,20 +43,20 @@
             "keywords": [
                 "utils"
             ],
-            "time": "2018-02-25T14:05:50+00:00"
+            "time": "2018-03-08T02:48:13+00:00"
         },
         {
             "name": "catfan/medoo",
-            "version": "v1.5.4",
+            "version": "v1.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/catfan/Medoo.git",
-                "reference": "a6b7b05b18fa7c8f955e259d491344b1db9a51bf"
+                "reference": "4e51f7483b01ed1195565bb64e85ea8bd17b63cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/catfan/Medoo/zipball/a6b7b05b18fa7c8f955e259d491344b1db9a51bf",
-                "reference": "a6b7b05b18fa7c8f955e259d491344b1db9a51bf",
+                "url": "https://api.github.com/repos/catfan/Medoo/zipball/4e51f7483b01ed1195565bb64e85ea8bd17b63cb",
+                "reference": "4e51f7483b01ed1195565bb64e85ea8bd17b63cb",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
                 "sql",
                 "sqlite"
             ],
-            "time": "2018-01-08T20:01:12+00:00"
+            "time": "2018-03-07T09:42:23+00:00"
         }
     ],
     "packages-dev": [],

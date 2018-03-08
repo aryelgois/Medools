@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^7.0",
-        "aryelgois/utils": "^0.4",
+        "aryelgois/utils": "^0.5",
         "catfan/medoo": "^1.5"
     },
     "autoload": {
