@@ -7,6 +7,8 @@
 
 namespace aryelgois\Medools\Exceptions;
 
+use aryelgois\Utils;
+
 /**
  * A model is configured as read-only, but tries to change its data
  *
@@ -14,5 +16,5 @@ namespace aryelgois\Medools\Exceptions;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-class ReadOnlyModelException extends \LogicException
+class ReadOnlyModelException extends Utils\Exceptions\ReadOnlyException
 {}
