@@ -328,7 +328,6 @@ abstract class Model implements \JsonSerializable
         $data = $this->changes;
         $data = static::validate($data, $is_fresh);
 
-        $old_primary_key = $this->getPrimaryKey();
         $update_manager = !$is_fresh && !empty(array_intersect(
             array_keys($data),
             static::PRIMARY_KEY
@@ -337,32 +336,26 @@ abstract class Model implements \JsonSerializable
         $database = self::getDatabase();
         $stmt = ($is_fresh)
             ? $database->insert(static::TABLE, static::dataCleanup($data))
-            : $database->update(static::TABLE, $data, $old_primary_key);
+            : $database->update(static::TABLE, $data, $this->getPrimaryKey());
 
         if ($stmt->errorCode() == '00000') {
+            /*
+             * It is prefered to load back because the Database may apply
+             * default values or alter some columns. Also, it forces updating
+             * foreign models.
+             *
+             * - If it was a fresh model with AUTO_INCREMENT, get the new value
+             * - Extract the PRIMARY_KEY
+             * - Load from Database
+            */
             if ($is_fresh) {
-                /*
-                 * It is prefered to load back because the Database may apply
-                 * default values or alter some columns. Also, it updates
-                 * foreign models.
-                 *
-                 * First, get the AUTO_INCREMENT
-                 * Then, extract the PRIMARY_KEY
-                 * Finally, load from Database
-                 */
                 $column = static::AUTO_INCREMENT;
                 if ($column !== null) {
                     $data[$column] = $database->id();
                 }
-                $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
-                return $this->load($where);
             }
-            $this->changes = [];
-            $this->data = array_replace($this->data, $data);
-            if ($update_manager) {
-                $this->managerUpdate($old_primary_key);
-            }
-            return true;
+            $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
+            return $this->load($where);
         }
         return false;
     }
