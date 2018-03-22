@@ -328,11 +328,6 @@ abstract class Model implements \JsonSerializable
         $data = $this->changes;
         $data = static::validate($data, $is_fresh);
 
-        $update_manager = !$is_fresh && !empty(array_intersect(
-            array_keys($data),
-            static::PRIMARY_KEY
-        ));
-
         $database = self::getDatabase();
         $stmt = ($is_fresh)
             ? $database->insert(static::TABLE, static::dataCleanup($data))
@@ -419,10 +414,6 @@ abstract class Model implements \JsonSerializable
         $data = static::validate($data, false);
 
         $old_primary_key = $this->getPrimaryKey();
-        $update_manager = !empty(array_intersect(
-            $columns,
-            static::PRIMARY_KEY
-        ));
 
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $old_primary_key);
