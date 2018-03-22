@@ -669,37 +669,34 @@ abstract class Model implements \JsonSerializable
     {
         static::checkReadOnly();
 
-        if (static::SOFT_DELETE === null) {
-            $message = 'Model ' . static::class . ' is not soft-deletable';
-            throw new \LogicException($message);
-        }
-
-        $database = self::getDatabase();
         $column = static::SOFT_DELETE;
+        if ($column) {
+            switch (static::SOFT_DELETE_MODE) {
+                case 'deleted':
+                    $this->__set($column, 0);
+                    break;
 
-        switch (static::SOFT_DELETE_MODE) {
-            case 'deleted':
-                $this->__set($column, 0);
-                break;
+                case 'active':
+                    $this->__set($column, 1);
+                    break;
 
-            case 'active':
-                $this->__set($column, 1);
-                break;
+                case 'stamp':
+                    $this->__set($column, null);
+                    break;
 
-            case 'stamp':
-                $this->__set($column, null);
-                break;
-
-            default:
-                throw new \LogicException(sprintf(
-                    "%s has invalid SOFT_DELETE_MODE mode: '%s'",
-                    static::class,
-                    static::SOFT_DELETE_MODE
-                ));
-                break;
+                default:
+                    throw new \LogicException(sprintf(
+                        "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                        static::class,
+                        static::SOFT_DELETE_MODE
+                    ));
+                    break;
+            }
+            return $this->update($column);
         }
 
-        return $this->update($column);
+        $message = 'Model ' . static::class . ' is not soft-deletable';
+        throw new \LogicException($message);
     }
 
     /**
