@@ -960,13 +960,11 @@ abstract class Model implements \JsonSerializable
         if ($subset !== null) {
             $columns = Utils::arrayWhitelist($columns, (array) $subset);
         }
+        $columns = Utils::arrayBlacklist($columns, array_keys($this->changes));
 
         $stamp = explode(' ', static::getCurrentTimestamp());
 
         foreach ($columns as $column => $mode) {
-            if (array_key_exists($column, $this->changes)) {
-                continue;
-            }
             switch ($mode) {
                 case 'auto':
                     break;
