@@ -778,11 +778,12 @@ abstract class Model implements \JsonSerializable
         return array_diff(
             static::COLUMNS,
             static::OPTIONAL_COLUMNS,
-            [ // implicit optional columns
+            // implicit optional columns:
+            [
                 static::AUTO_INCREMENT,
                 static::SOFT_DELETE,
             ],
-            static::getAutoStampColumns()
+            array_keys(self::normalizeColumnList(static::STAMP_COLUMNS))
         );
     }
 
