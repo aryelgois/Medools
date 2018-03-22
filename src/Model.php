@@ -958,7 +958,7 @@ abstract class Model implements \JsonSerializable
     {
         $columns = self::normalizeColumnList(static::STAMP_COLUMNS, 'datetime');
         if ($subset !== null) {
-            $columns = array_intersect_key($columns, (array) $subset);
+            $columns = Utils::arrayWhitelist($columns, (array) $subset);
         }
 
         $stamp = explode(' ', static::getCurrentTimestamp());
