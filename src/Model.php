@@ -442,7 +442,6 @@ abstract class Model implements \JsonSerializable
     {
         static::checkReadOnly();
 
-        $database = self::getDatabase();
         $column = static::SOFT_DELETE;
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
@@ -471,10 +470,16 @@ abstract class Model implements \JsonSerializable
             }
             return $this->update($column);
         }
+
+        $database = self::getDatabase();
         $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
-        ModelManager::remove($this);
-        $this->reset();
-        return ($stmt->rowCount() > 0);
+        if ($stmt->rowCount() > 0) {
+            ModelManager::remove($this);
+            $this->reset();
+            return true;
+        }
+
+        return false;
     }
 
     /*
