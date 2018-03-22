@@ -330,7 +330,7 @@ abstract class Model implements \JsonSerializable
 
         $database = self::getDatabase();
         $stmt = ($is_fresh)
-            ? $database->insert(static::TABLE, static::dataCleanup($data))
+            ? $database->insert(static::TABLE, $data)
             : $database->update(static::TABLE, $data, $this->getPrimaryKey());
 
         if ($stmt->errorCode() == '00000') {
@@ -747,29 +747,6 @@ abstract class Model implements \JsonSerializable
         if (!empty($unknown)) {
             throw new UnknownColumnException(static::class, $unknown);
         }
-    }
-
-    /**
-     * Cleans data keys, removing unwanted columns
-     *
-     * @todo Option to tell custom ignored columns
-     *
-     * @param string[] $data Data to be cleaned
-     * @param string   $data Which method will use the result
-     *
-     * @return string[]
-     */
-    protected static function dataCleanup($data)
-    {
-        $whitelist = static::COLUMNS;
-        $blacklist = array_filter(array_merge(
-            [static::AUTO_INCREMENT],
-            static::getAutoStampColumns()
-        ));
-
-        $data = Utils::arrayWhitelist($data, $whitelist);
-        $data = Utils::arrayBlacklist($data, $blacklist);
-        return $data;
     }
 
     /**
