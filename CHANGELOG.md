@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- `getStampColumns()`
 
 ### Changed
 - `save()` and `update()` always reload from Database to ensure data integrity

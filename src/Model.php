@@ -784,8 +784,18 @@ abstract class Model implements \JsonSerializable
                 static::AUTO_INCREMENT,
                 static::SOFT_DELETE,
             ],
-            array_keys(self::normalizeColumnList(static::STAMP_COLUMNS))
+            static::getStampColumns()
         );
+    }
+
+    /**
+     * Returns normalized keys for STAMP_COLUMNS
+     *
+     * @return string[]
+     */
+    public static function getStampColumns()
+    {
+        return array_keys(self::normalizeColumnList(static::STAMP_COLUMNS));
     }
 
     /**

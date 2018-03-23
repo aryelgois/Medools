@@ -182,6 +182,8 @@ Useful methods that are available:
 - `getDatabase()`: Gives a direct access to the Database, already connected and
   ready to use. See [catfan/Medoo] for details
 - `getRequiredColumns()`: Gives a list of columns that must be set before saving
+- `getStampColumns()`: Gives a list of columns that receives a timestamp
+  automatically
 - `isFresh()`: Tells if the object is a new Model
 - `jsonSerialize()`: You can [json_encode] models! It expands foreign models
 - `reload()`: Use to re fetch the row with model's Primary Key
