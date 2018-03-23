@@ -291,10 +291,10 @@ Here, `column_b` will use the default.
 
 #### OPTIONAL_COLUMNS
 
-List of optional columns
+List of columns which have a default value or are nullable
 
-> List all columns which have a default value (e.g. timestamp) or are nullable.
-  [AUTO_INCREMENT] is always optional and does not need to be here.
+You don't need to include implict optional columns, like AUTO_INCREMENT,
+STAMP_COLUMNS and SOFT_DELETE.
 
 - Type: `string[]`
 

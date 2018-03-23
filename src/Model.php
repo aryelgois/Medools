@@ -86,8 +86,9 @@ abstract class Model implements \JsonSerializable
     /**
      * List of optional columns
      *
-     * List here all columns which have a default value (e.g. timestamp) or are
-     * nullable. You don't need to include implict optional columns.
+     * List here all columns which have a default value or are nullable. You
+     * don't need to include implict optional columns, like AUTO_INCREMENT,
+     * STAMP_COLUMNS and SOFT_DELETE.
      *
      * @const string[]
      */
