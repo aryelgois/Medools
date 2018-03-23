@@ -271,8 +271,9 @@ The columns are automatically updated with the current timestamp on `save()` and
 `update()`. This constant allows multiple timestamp columns. If the column was
 manually changed, it will not be overwritten.
 
-- **NOTE**: Columns with timestamp controlled by the Database must be listed
-  with `'auto'`
+These columns are **implicitly** optional, because they are changed before
+saving/updating the model. The exception is `auto` columns, which must be
+controlled by the Database _(MySQL only allows one `timestamp`)_.
 
 The following structure is valid:
 
@@ -339,7 +340,7 @@ If `delete()` actually removes the row or if it changes a column
 - Default: `null`
 
 This column is **implicitly** optional, so you must define a default value in
-the database accordingly to [SOFT_DELETE_MODE].
+the database schema accordingly to [SOFT_DELETE_MODE].
 
 
 #### SOFT_DELETE_MODE
