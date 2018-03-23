@@ -317,14 +317,14 @@ abstract class Model implements \JsonSerializable
 
         $is_fresh = $this->isFresh();
 
+        $this->updateStampColumns();
+
         if (($is_fresh && !$this->onFirstSave())
             || !$this->onSave()
             || empty($this->changes)
         ) {
             return false;
         }
-
-        $this->updateStampColumns();
 
         $data = $this->changes;
         $data = static::validate($data, $is_fresh);
