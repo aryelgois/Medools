@@ -72,8 +72,8 @@ composer's autoload (prior to the line above), and is always required by your
 scripts.
 
 [MedooConnection] works as a factory that reuses Database connections. The
-reason for the config file being `.php` is that it contains passwords, and if
-this file is accessible in the public directory of your app, loading it will
+reason for the config file being `.php` is that it contains sensitive data, and
+if this file is accessible in the public directory of your app, loading it will
 show nothing.
 
 
