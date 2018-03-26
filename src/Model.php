@@ -344,6 +344,7 @@ abstract class Model implements \JsonSerializable
              * - Extract the PRIMARY_KEY
              * - Load from Database
              */
+            $data = $this->getData();
             if ($is_fresh) {
                 $column = static::AUTO_INCREMENT;
                 if ($column !== null) {
