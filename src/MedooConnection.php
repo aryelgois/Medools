@@ -12,7 +12,7 @@ use Medoo\Medoo;
 /**
  * A Factory of \Medoo\Medoo objects
  *
- * It avoids re-instancing a Medoo object for the same database, while
+ * It avoids reinstancing a Medoo object for the same database, while
  * implements an abstraction for the Medoo configuration
  *
  * NOTE:
