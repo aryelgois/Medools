@@ -415,13 +415,11 @@ abstract class Model implements \JsonSerializable
         $data = Utils::arrayWhitelist($this->changes, $columns);
         $data = static::validate($data, false);
 
-        $old_primary_key = $this->getPrimaryKey();
-
         $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $old_primary_key);
+        $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
         if ($stmt->errorCode() == '00000') {
             $changes = Utils::arrayBlacklist($this->changes, $columns);
-            $data = array_replace($old_primary_key, $data);
+            $data = $this->getData();
             $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
             if ($this->load($where)) {
                 $this->changes = $changes;
