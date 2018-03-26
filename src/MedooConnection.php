@@ -124,7 +124,8 @@ abstract class MedooConnection
      * Loads the Medools config file from a php file
      *
      * NOTE:
-     * - You must call this method before using getInstance()
+     * - You must call this method before using getDatabaseConfig() and
+     *   getInstance()
      *
      * @see config/example.php
      *
