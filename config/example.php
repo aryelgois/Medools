@@ -1,6 +1,8 @@
 <?php
 /**
  * Example of Configuration for MedooConnection
+ *
+ * @see README.md#setup for details
  */
 
 return [
