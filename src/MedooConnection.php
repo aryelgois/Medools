@@ -139,5 +139,6 @@ abstract class MedooConnection
     public static function loadConfig($config_path)
     {
         self::$config = require $config_path;
+        self::$cache = self::$instances = [];
     }
 }
