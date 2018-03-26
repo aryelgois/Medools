@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update dependencies
 - Rewrite MedooConnection
-- Update config file
+- Update config file example
 - `save()` and `update()` always reload from Database to ensure data integrity
 - `delete()` only resets the model and removes it from from ModelManager if
   successful
