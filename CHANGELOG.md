@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `getStampColumns()`
 
 ### Changed
+- Update dependencies
 - Rewrite MedooConnection
 - Update config file
 - `save()` and `update()` always reload from Database to ensure data integrity

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aryelgois/utils",
-            "version": "v0.5.0",
+            "version": "v0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aryelgois/utils.git",
-                "reference": "8861a54a7c919335193c48dced137d6ddb67c156"
+                "reference": "683a4685de166592aadd0fe7ebec828b99f0cbdc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aryelgois/utils/zipball/8861a54a7c919335193c48dced137d6ddb67c156",
-                "reference": "8861a54a7c919335193c48dced137d6ddb67c156",
+                "url": "https://api.github.com/repos/aryelgois/utils/zipball/683a4685de166592aadd0fe7ebec828b99f0cbdc",
+                "reference": "683a4685de166592aadd0fe7ebec828b99f0cbdc",
                 "shasum": ""
             },
             "require": {
@@ -43,20 +43,20 @@
             "keywords": [
                 "utils"
             ],
-            "time": "2018-03-08T02:48:13+00:00"
+            "time": "2018-03-10T13:03:12+00:00"
         },
         {
             "name": "catfan/medoo",
-            "version": "v1.5.5",
+            "version": "v1.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/catfan/Medoo.git",
-                "reference": "4e51f7483b01ed1195565bb64e85ea8bd17b63cb"
+                "reference": "f77a93f72864e892c99d1033b8733e5da8fb0b3b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/catfan/Medoo/zipball/4e51f7483b01ed1195565bb64e85ea8bd17b63cb",
-                "reference": "4e51f7483b01ed1195565bb64e85ea8bd17b63cb",
+                "url": "https://api.github.com/repos/catfan/Medoo/zipball/f77a93f72864e892c99d1033b8733e5da8fb0b3b",
+                "reference": "f77a93f72864e892c99d1033b8733e5da8fb0b3b",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
                 "sql",
                 "sqlite"
             ],
-            "time": "2018-03-07T09:42:23+00:00"
+            "time": "2018-03-26T17:54:24+00:00"
         }
     ],
     "packages-dev": [],
