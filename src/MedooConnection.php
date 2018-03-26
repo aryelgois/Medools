@@ -91,7 +91,6 @@ abstract class MedooConnection
 
         $server = $data['server'] ?? 'default';
         $servers = self::$config['servers'] ?? [];
-
         if (array_key_exists($server, $servers)) {
             unset($data['server']);
             $data = array_merge($servers[$server], $data);
