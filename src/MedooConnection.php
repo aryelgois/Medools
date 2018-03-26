@@ -86,10 +86,11 @@ abstract class MedooConnection
 
         $data = self::$config['databases'][$database];
         $server = $data['server'] ?? 'default';
+        $servers = self::$config['servers'] ?? [];
 
-        if (array_key_exists($server, self::$config['servers'])) {
+        if (array_key_exists($server, $servers)) {
             unset($data['server']);
-            $data = array_merge(self::$config['servers'][$server], $data);
+            $data = array_merge($servers[$server], $data);
         }
 
         self::$cache[$database] = $data;
