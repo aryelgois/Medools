@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `getStampColumns()`
 
 ### Changed
+- Rewrite MedooConnection
 - `save()` and `update()` always reload from Database to ensure data integrity
 - `delete()` only resets the model and removes it from from ModelManager if
   successful
