@@ -85,6 +85,10 @@ abstract class MedooConnection
         }
 
         $data = self::$config['databases'][$database];
+        if (is_string($data)) {
+            $data = ['database_name' => $data];
+        }
+
         $server = $data['server'] ?? 'default';
         $servers = self::$config['servers'] ?? [];
 

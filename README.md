@@ -79,6 +79,9 @@ This file returns an array with the following keys:
   - `server` Server key from the previous list. If omitted, `default` is used
   - `database_name`
 
+  A shortcut to only defining `database_name` is setting the database directly
+  as string
+
 There are other configurations that can be used, see the [guide][new medoo] for
 more. You can add them where it is reasonable. When connecting to a database,
 its array is merged on top of the server's. It means that a database can
