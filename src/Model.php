@@ -397,7 +397,9 @@ abstract class Model implements \JsonSerializable
      *
      * @param string|string[] $columns Specify which columns to update
      *
-     * @return boolean For success or failure
+     * @return true   On success
+     * @return false  On post-update failure
+     * @return string On Database failure @see http://php.net/pdo.errorcode
      *
      * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If trying to update a fresh Model
@@ -419,7 +421,9 @@ abstract class Model implements \JsonSerializable
 
         $database = self::getDatabase();
         $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
-        if ($stmt->errorCode() == '00000') {
+
+        $error_code = $stmt->errorCode();
+        if ($error_code == '00000') {
             $changes = Utils::arrayBlacklist($this->changes, $columns);
             $data = $this->getData();
             $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
@@ -427,9 +431,9 @@ abstract class Model implements \JsonSerializable
                 $this->changes = $changes;
                 return true;
             }
+            return false;
         }
-
-        return false;
+        return $error_code;
     }
 
     /**
