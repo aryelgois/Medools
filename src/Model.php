@@ -452,15 +452,15 @@ abstract class Model implements \JsonSerializable
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->__set($column, 1);
+                    $value = 1;
                     break;
 
                 case 'active':
-                    $this->__set($column, 0);
+                    $value = 0;
                     break;
 
                 case 'stamp':
-                    $this->__set($column, static::getCurrentTimestamp());
+                    $value = static::getCurrentTimestamp();
                     break;
 
                 default:
@@ -471,6 +471,7 @@ abstract class Model implements \JsonSerializable
                     ));
                     break;
             }
+            $this->__set($column, $value);
             if ($this->isFresh()) {
                 return true;
             }
