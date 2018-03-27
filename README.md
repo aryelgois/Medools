@@ -151,6 +151,9 @@ you are able to `undelete()` later.
 Otherwise, it will completely delete the row from the Database, and `reset()`
 the model object.
 
+You can use `isDeleted()` to check if the model was deleted. It is useful when
+SOFT_DELETE is configured.
+
 
 ## Accessing and manipulating data
 

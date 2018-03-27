@@ -631,6 +631,46 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Tells if Model is deleted
+     *
+     * It is useful when the Model has a SOFT_DELETE column
+     *
+     * @return boolean
+     *
+     * @throws \LogicException If SOFT_DELETE_MODE is unknown
+     */
+    final public function isDeleted()
+    {
+        $column = static::SOFT_DELETE;
+        if ($column) {
+            $value = $this->__get($column);
+            switch (static::SOFT_DELETE_MODE) {
+                case 'deleted':
+                    $result = (int) $value === 1;
+                    break;
+
+                case 'active':
+                    $result = (int) $value === 0;
+                    break;
+
+                case 'stamp':
+                    $result = $value !== null;
+                    break;
+
+                default:
+                    throw new \LogicException(sprintf(
+                        "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                        static::class,
+                        static::SOFT_DELETE_MODE
+                    ));
+                    break;
+            }
+            return $result;
+        }
+        return false;
+    }
+
+    /**
      * Tells if the object is a new Model
      *
      * @return boolean
