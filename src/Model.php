@@ -680,15 +680,15 @@ abstract class Model implements \JsonSerializable
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->__set($column, 0);
+                    $value = 0;
                     break;
 
                 case 'active':
-                    $this->__set($column, 1);
+                    $value = 1;
                     break;
 
                 case 'stamp':
-                    $this->__set($column, null);
+                    $value = null;
                     break;
 
                 default:
@@ -698,6 +698,10 @@ abstract class Model implements \JsonSerializable
                         static::SOFT_DELETE_MODE
                     ));
                     break;
+            }
+            $this->__set($column, $value);
+            if ($this->isFresh()) {
+                return true;
             }
             return $this->update($column);
         }
