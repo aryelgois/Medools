@@ -305,7 +305,10 @@ abstract class Model implements \JsonSerializable
      *
      * @see validate() Throws
      *
-     * @return boolean For success or failure
+     * @return true   On success
+     * @return null   On pre-save failure
+     * @return false  On post-save failure
+     * @return string On Database failure @see http://php.net/pdo.errorcode
      *
      * @throws ReadOnlyModelException @see checkReadOnly()
      */
@@ -321,7 +324,7 @@ abstract class Model implements \JsonSerializable
             || !$this->onSave()
             || empty($this->changes)
         ) {
-            return false;
+            return;
         }
 
         $data = $this->changes;
@@ -332,7 +335,8 @@ abstract class Model implements \JsonSerializable
             ? $database->insert(static::TABLE, $data)
             : $database->update(static::TABLE, $data, $this->getPrimaryKey());
 
-        if ($stmt->errorCode() == '00000') {
+        $error_code = $stmt->errorCode();
+        if ($error_code == '00000') {
             /*
              * It is prefered to load back because the Database may apply
              * default values or alter some columns. Also, it forces updating
@@ -352,7 +356,7 @@ abstract class Model implements \JsonSerializable
             $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
             return $this->load($where);
         }
-        return false;
+        return $error_code;
     }
 
     /**
