@@ -23,7 +23,7 @@ class ForeignConstraintException extends \RuntimeException
     ) {
         $foreign_map = $model::FOREIGN_KEYS[$column] ?? null;
         $message = "Foreign Key constraint fails: "
-                 . "$model (`$column`) -> $foreign_map[0] (`$foreign_map[1]`)";
+            . "$model (`$column`) -> $foreign_map[0] (`$foreign_map[1]`)";
 
         parent::__construct($message, 0, $previous);
     }

@@ -56,8 +56,44 @@ Open a terminal in your project directory and run:
 # Setup
 
 Before using this framework, you need a config file somewhere in your
-application. This file setups some data for [catfan/Medoo]. Follow this
-[example][config_example].
+application. It defines Servers and Databases that are accessed by the models.
+
+The reason for the config file being `.php` is that it contains sensitive data,
+and if a client could request it, nothing would be returned.
+
+Basically, it contains data to instantiate [catfan/Medoo] objects. See details
+in its [guide][new medoo]. You can also follow the [config example].
+
+This file returns an array with the following keys:
+
+- `servers`: Lists database Servers that can be connected and their credentials.
+  Each item is an array with the following keys:
+  - `server`
+  - `port` _(optional)_
+  - `username`
+  - `password`
+  - `database_type` It needs the corresponding PHP_PDO extension
+
+- `databases`: Lists Databases referenced in the models classes. Each item is
+  an array that contains:
+  - `server` Server key from the previous list. If omitted, `default` is used
+  - `database_name`
+
+  A shortcut to only defining `database_name` is setting the database directly
+  as string
+
+There are other configurations that can be used, see the [guide][new medoo] for
+more. You can add them where it is reasonable. When connecting to a database,
+its array is merged on top of the server's. It means that a database can
+overwrite a server configuration.
+
+If the database server is not a `servers` key, it is used as it is. So the
+servers array is totally optional, as long as the database contains all required
+data to connect to the Database.
+
+> The whole point of this config file is that you can define multiple databases
+> in the same Server without repeating its configurations, as well define
+> databases in different servers.
 
 Also, you need to include this line in the beginning of your code:
 
@@ -67,14 +103,11 @@ Also, you need to include this line in the beginning of your code:
 aryelgois\Medools\MedooConnection::loadConfig('path/to/config/medools.php');
 ```
 
-It's a good idea to put in something like `bootstrap.php`, which also requires
+It's a good idea to put in something like a `bootstrap.php`, which also requires
 composer's autoload (prior to the line above), and is always required by your
 scripts.
 
-[MedooConnection] works as a factory that reuses Database connections. The
-reason for the config file being `.php` is that it contains passwords, and if
-this file is accessible in the public directory of your app, loading it will
-show nothing.
+> [MedooConnection] works like a Medoo factory, but reuses its instances.
 
 
 # Using a Model
@@ -117,6 +150,9 @@ you are able to `undelete()` later.
 
 Otherwise, it will completely delete the row from the Database, and `reset()`
 the model object.
+
+You can use `isDeleted()` to check if the model was deleted. It is useful when
+SOFT_DELETE is configured.
 
 
 ## Accessing and manipulating data
@@ -182,6 +218,8 @@ Useful methods that are available:
 - `getDatabase()`: Gives a direct access to the Database, already connected and
   ready to use. See [catfan/Medoo] for details
 - `getRequiredColumns()`: Gives a list of columns that must be set before saving
+- `getStampColumns()`: Gives a list of columns that receives a timestamp
+  automatically
 - `isFresh()`: Tells if the object is a new Model
 - `jsonSerialize()`: You can [json_encode] models! It expands foreign models
 - `reload()`: Use to re fetch the row with model's Primary Key
@@ -271,8 +309,9 @@ The columns are automatically updated with the current timestamp on `save()` and
 `update()`. This constant allows multiple timestamp columns. If the column was
 manually changed, it will not be overwritten.
 
-- **NOTE**: Columns with timestamp controlled by the Database must be listed
-  with `'auto'`
+These columns are **implicitly** optional, because they are changed before
+saving/updating the model. The exception is `auto` columns, which must be
+controlled by the Database _(MySQL only allows one `timestamp`)_.
 
 The following structure is valid:
 
@@ -291,10 +330,10 @@ Here, `column_b` will use the default.
 
 #### OPTIONAL_COLUMNS
 
-List of optional columns
+List of columns which have a default value or are nullable
 
-> List all columns which have a default value (e.g. timestamp) or are nullable.
-  [AUTO_INCREMENT] is always optional and does not need to be here.
+You don't need to include implict optional columns, like AUTO_INCREMENT,
+STAMP_COLUMNS and SOFT_DELETE.
 
 - Type: `string[]`
 
@@ -339,7 +378,7 @@ If `delete()` actually removes the row or if it changes a column
 - Default: `null`
 
 This column is **implicitly** optional, so you must define a default value in
-the database accordingly to [SOFT_DELETE_MODE].
+the database schema accordingly to [SOFT_DELETE_MODE].
 
 
 #### SOFT_DELETE_MODE
@@ -417,7 +456,7 @@ this class or in the model.
 [Events]: #events
 [ModelManager]: #modelmanager
 
-[config_example]: config/example.php
+[config example]: config/example.php
 [MedooConnection]: src/MedooConnection.php
 [Model]: src/Model.php
 [ModelIterator]: src/ModelIterator.php
@@ -427,6 +466,7 @@ this class or in the model.
 [catfan/Medoo]: https://github.com/catfan/Medoo
 
 [where_clause]: https://medoo.in/api/where
+[new medoo]: https://medoo.in/api/new
 
 [isset]: http://php.net/manual/en/function.isset.php
 [json_encode]: http://php.net/manual/en/function.json-encode.php

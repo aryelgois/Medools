@@ -86,8 +86,9 @@ abstract class Model implements \JsonSerializable
     /**
      * List of optional columns
      *
-     * List here all columns which have a default value (e.g. timestamp) or are
-     * nullable. You don't need to include implict optional columns.
+     * List here all columns which have a default value or are nullable. You
+     * don't need to include implict optional columns, like AUTO_INCREMENT,
+     * STAMP_COLUMNS and SOFT_DELETE.
      *
      * @const string[]
      */
@@ -173,9 +174,7 @@ abstract class Model implements \JsonSerializable
      *
      * @param mixed $where @see load(). If null, a fresh model is created
      *
-     * @throws \InvalidArgumentException  If could not load from Database
-     * @throws \InvalidArgumentException  @see load()
-     * @throws ForeignConstraintException @see load()
+     * @throws \InvalidArgumentException If could not load from Database
      */
     public function __construct($where = null)
     {
@@ -306,7 +305,10 @@ abstract class Model implements \JsonSerializable
      *
      * @see validate() Throws
      *
-     * @return boolean For success or failure
+     * @return true   On success
+     * @return null   On pre-save failure
+     * @return false  On post-save failure
+     * @return string On Database failure @see http://php.net/pdo.errorcode
      *
      * @throws ReadOnlyModelException @see checkReadOnly()
      */
@@ -316,55 +318,45 @@ abstract class Model implements \JsonSerializable
 
         $is_fresh = $this->isFresh();
 
+        $this->updateStampColumns();
+
         if (($is_fresh && !$this->onFirstSave())
             || !$this->onSave()
             || empty($this->changes)
         ) {
-            return false;
+            return;
         }
-
-        $this->updateStampColumns();
 
         $data = $this->changes;
         $data = static::validate($data, $is_fresh);
 
-        $old_primary_key = $this->getPrimaryKey();
-        $update_manager = !$is_fresh && !empty(array_intersect(
-            array_keys($data),
-            static::PRIMARY_KEY
-        ));
-
         $database = self::getDatabase();
         $stmt = ($is_fresh)
-            ? $database->insert(static::TABLE, static::dataCleanup($data))
-            : $database->update(static::TABLE, $data, $old_primary_key);
+            ? $database->insert(static::TABLE, $data)
+            : $database->update(static::TABLE, $data, $this->getPrimaryKey());
 
-        if ($stmt->errorCode() == '00000') {
+        $error_code = $stmt->errorCode();
+        if ($error_code == '00000') {
+            /*
+             * It is prefered to load back because the Database may apply
+             * default values or alter some columns. Also, it forces updating
+             * foreign models.
+             *
+             * - If it was a fresh model with AUTO_INCREMENT, get the new value
+             * - Extract the PRIMARY_KEY
+             * - Load from Database
+             */
+            $data = $this->getData();
             if ($is_fresh) {
-                /*
-                 * It is prefered to load back because the Database may apply
-                 * default values or alter some columns. Also, it updates
-                 * foreign models.
-                 *
-                 * First, get the AUTO_INCREMENT
-                 * Then, extract the PRIMARY_KEY
-                 * Finally, load from Database
-                 */
                 $column = static::AUTO_INCREMENT;
                 if ($column !== null) {
                     $data[$column] = $database->id();
                 }
-                $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
-                return $this->load($where);
             }
-            $this->changes = [];
-            $this->data = array_replace($this->data, $data);
-            if ($update_manager) {
-                $this->managerUpdate($old_primary_key);
-            }
-            return true;
+            $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
+            return $this->load($where);
         }
-        return false;
+        return $error_code;
     }
 
     /**
@@ -405,7 +397,9 @@ abstract class Model implements \JsonSerializable
      *
      * @param string|string[] $columns Specify which columns to update
      *
-     * @return boolean For success or failure
+     * @return true   On success
+     * @return false  On post-update failure
+     * @return string On Database failure @see http://php.net/pdo.errorcode
      *
      * @throws ReadOnlyModelException @see checkReadOnly()
      * @throws \LogicException        If trying to update a fresh Model
@@ -425,24 +419,21 @@ abstract class Model implements \JsonSerializable
         $data = Utils::arrayWhitelist($this->changes, $columns);
         $data = static::validate($data, false);
 
-        $old_primary_key = $this->getPrimaryKey();
-        $update_manager = !empty(array_intersect(
-            $columns,
-            static::PRIMARY_KEY
-        ));
-
         $database = self::getDatabase();
-        $stmt = $database->update(static::TABLE, $data, $old_primary_key);
-        if ($stmt->errorCode() == '00000') {
-            $this->changes = Utils::arrayBlacklist($this->changes, $columns);
-            $this->data = array_replace($this->data, $data);
-            if ($update_manager) {
-                $this->managerUpdate($old_primary_key);
-            }
-            return true;
-        }
+        $stmt = $database->update(static::TABLE, $data, $this->getPrimaryKey());
 
-        return false;
+        $error_code = $stmt->errorCode();
+        if ($error_code == '00000') {
+            $changes = Utils::arrayBlacklist($this->changes, $columns);
+            $data = $this->getData();
+            $where = Utils::arrayWhitelist($data, static::PRIMARY_KEY);
+            if ($this->load($where)) {
+                $this->changes = $changes;
+                return true;
+            }
+            return false;
+        }
+        return $error_code;
     }
 
     /**
@@ -457,20 +448,19 @@ abstract class Model implements \JsonSerializable
     {
         static::checkReadOnly();
 
-        $database = self::getDatabase();
         $column = static::SOFT_DELETE;
         if ($column) {
             switch (static::SOFT_DELETE_MODE) {
                 case 'deleted':
-                    $this->__set($column, 1);
+                    $value = 1;
                     break;
 
                 case 'active':
-                    $this->__set($column, 0);
+                    $value = 0;
                     break;
 
                 case 'stamp':
-                    $this->__set($column, static::getCurrentTimestamp());
+                    $value = static::getCurrentTimestamp();
                     break;
 
                 default:
@@ -481,15 +471,22 @@ abstract class Model implements \JsonSerializable
                     ));
                     break;
             }
+            $this->__set($column, $value);
             if ($this->isFresh()) {
                 return true;
             }
             return $this->update($column);
         }
+
+        $database = self::getDatabase();
         $stmt = $database->delete(static::TABLE, $this->getPrimaryKey());
-        ModelManager::remove($this);
-        $this->reset();
-        return ($stmt->rowCount() > 0);
+        if ($stmt->rowCount() > 0) {
+            ModelManager::remove($this);
+            $this->reset();
+            return true;
+        }
+
+        return false;
     }
 
     /*
@@ -634,6 +631,46 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
+     * Tells if Model is deleted
+     *
+     * It is useful when the Model has a SOFT_DELETE column
+     *
+     * @return boolean
+     *
+     * @throws \LogicException If SOFT_DELETE_MODE is unknown
+     */
+    final public function isDeleted()
+    {
+        $column = static::SOFT_DELETE;
+        if ($column) {
+            $value = $this->__get($column);
+            switch (static::SOFT_DELETE_MODE) {
+                case 'deleted':
+                    $result = (int) $value === 1;
+                    break;
+
+                case 'active':
+                    $result = (int) $value === 0;
+                    break;
+
+                case 'stamp':
+                    $result = $value !== null;
+                    break;
+
+                default:
+                    throw new \LogicException(sprintf(
+                        "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                        static::class,
+                        static::SOFT_DELETE_MODE
+                    ));
+                    break;
+            }
+            return $result;
+        }
+        return false;
+    }
+
+    /**
      * Tells if the object is a new Model
      *
      * @return boolean
@@ -679,37 +716,38 @@ abstract class Model implements \JsonSerializable
     {
         static::checkReadOnly();
 
-        if (static::SOFT_DELETE === null) {
-            $message = 'Model ' . static::class . ' is not soft-deletable';
-            throw new \LogicException($message);
-        }
-
-        $database = self::getDatabase();
         $column = static::SOFT_DELETE;
+        if ($column) {
+            switch (static::SOFT_DELETE_MODE) {
+                case 'deleted':
+                    $value = 0;
+                    break;
 
-        switch (static::SOFT_DELETE_MODE) {
-            case 'deleted':
-                $this->__set($column, 0);
-                break;
+                case 'active':
+                    $value = 1;
+                    break;
 
-            case 'active':
-                $this->__set($column, 1);
-                break;
+                case 'stamp':
+                    $value = null;
+                    break;
 
-            case 'stamp':
-                $this->__set($column, null);
-                break;
-
-            default:
-                throw new \LogicException(sprintf(
-                    "%s has invalid SOFT_DELETE_MODE mode: '%s'",
-                    static::class,
-                    static::SOFT_DELETE_MODE
-                ));
-                break;
+                default:
+                    throw new \LogicException(sprintf(
+                        "%s has invalid SOFT_DELETE_MODE mode: '%s'",
+                        static::class,
+                        static::SOFT_DELETE_MODE
+                    ));
+                    break;
+            }
+            $this->__set($column, $value);
+            if ($this->isFresh()) {
+                return true;
+            }
+            return $this->update($column);
         }
 
-        return $this->update($column);
+        $message = 'Model ' . static::class . ' is not soft-deletable';
+        throw new \LogicException($message);
     }
 
     /**
@@ -765,29 +803,6 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Cleans data keys, removing unwanted columns
-     *
-     * @todo Option to tell custom ignored columns
-     *
-     * @param string[] $data Data to be cleaned
-     * @param string   $data Which method will use the result
-     *
-     * @return string[]
-     */
-    protected static function dataCleanup($data)
-    {
-        $whitelist = static::COLUMNS;
-        $blacklist = array_filter(array_merge(
-            [static::AUTO_INCREMENT],
-            static::getAutoStampColumns()
-        ));
-
-        $data = Utils::arrayWhitelist($data, $whitelist);
-        $data = Utils::arrayBlacklist($data, $blacklist);
-        return $data;
-    }
-
-    /**
      * Returns STAMP_COLUMNS with 'auto' mode
      *
      * @return string[]
@@ -814,12 +829,23 @@ abstract class Model implements \JsonSerializable
         return array_diff(
             static::COLUMNS,
             static::OPTIONAL_COLUMNS,
-            [ // implicit optional columns
+            // implicit optional columns:
+            [
                 static::AUTO_INCREMENT,
                 static::SOFT_DELETE,
             ],
-            static::getAutoStampColumns()
+            static::getStampColumns()
         );
+    }
+
+    /**
+     * Returns normalized keys for STAMP_COLUMNS
+     *
+     * @return string[]
+     */
+    public static function getStampColumns()
+    {
+        return array_keys(self::normalizeColumnList(static::STAMP_COLUMNS));
     }
 
     /**
@@ -994,15 +1020,13 @@ abstract class Model implements \JsonSerializable
     {
         $columns = self::normalizeColumnList(static::STAMP_COLUMNS, 'datetime');
         if ($subset !== null) {
-            $columns = array_intersect_key($columns, (array) $subset);
+            $columns = Utils::arrayWhitelist($columns, (array) $subset);
         }
+        $columns = Utils::arrayBlacklist($columns, array_keys($this->changes));
 
         $stamp = explode(' ', static::getCurrentTimestamp());
 
         foreach ($columns as $column => $mode) {
-            if (array_key_exists($column, $this->changes)) {
-                continue;
-            }
             switch ($mode) {
                 case 'auto':
                     break;

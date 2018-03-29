@@ -12,8 +12,8 @@ use Medoo\Medoo;
 /**
  * A Factory of \Medoo\Medoo objects
  *
- * It avoids recreate a Medoo for the same database, while implements an
- * abstraction for the Medoo configuration
+ * It avoids reinstancing a Medoo object for the same database, while
+ * implements an abstraction for the Medoo configuration
  *
  * NOTE:
  * - The reason for storing in a static property is to be accessible in the
@@ -27,6 +27,13 @@ use Medoo\Medoo;
  */
 abstract class MedooConnection
 {
+    /**
+     * MedooConnection's databases cache
+     *
+     * @var array[]
+     */
+    private static $cache;
+
     /**
      * Store the configurations for a new instance
      *
@@ -54,10 +61,75 @@ abstract class MedooConnection
     {}
 
     /**
-     * Loads the Medools config file in a spefic file
+     * Returns data for Medoo connect to a Database
+     *
+     * @param string $database Key for a database in the config
+     *
+     * @return array
+     *
+     * @throws \BadMethodCallException If called before loadConfig()
+     * @throws \LogicException         If database is not in config
+     */
+    public static function getDatabaseConfig($database)
+    {
+        $cached = self::$cache[$database] ?? null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        if (self::$config === null) {
+            throw new \BadMethodCallException('Config was not loaded');
+        }
+        if (!array_key_exists($database, self::$config['databases'])) {
+            throw new \LogicException("Unknown database '$database'");
+        }
+
+        $data = self::$config['databases'][$database];
+        if (is_string($data)) {
+            $data = ['database_name' => $data];
+        }
+
+        $server = $data['server'] ?? 'default';
+        $servers = self::$config['servers'] ?? [];
+        if (array_key_exists($server, $servers)) {
+            unset($data['server']);
+            $data = array_merge($servers[$server], $data);
+        }
+
+        self::$cache[$database] = $data;
+        return $data;
+    }
+
+    /**
+     * Returns a Medoo instance connected to a specific database
+     *
+     * You can use the anonymous mode to get a fresh instance for advanced Medoo
+     * commands, already connected to one of your Databases
+     *
+     * @param string  $database  Key for a database in the config
+     * @param boolean $anonymous If an anonymous instance should be created
+     *
+     * @return Medoo
+     */
+    public static function getInstance($database, $anonymous = false)
+    {
+        if ($anonymous || !array_key_exists($database, self::$instances)) {
+            $instance = new Medoo(self::getDatabaseConfig($database));
+            if ($anonymous) {
+                return $instance;
+            }
+            self::$instances[$database] = $instance;
+        }
+
+        return self::$instances[$database];
+    }
+
+    /**
+     * Loads the Medools config file from a php file
      *
      * NOTE:
-     * - You must call this method before using getInstance()
+     * - You must call this method before using getDatabaseConfig() and
+     *   getInstance()
      *
      * @see config/example.php
      *
@@ -66,42 +138,6 @@ abstract class MedooConnection
     public static function loadConfig($config_path)
     {
         self::$config = require $config_path;
-    }
-
-    /**
-     * Returns an instance of \Medoo\Medoo connected to a specific database
-     *
-     * You can use the anonymous mode to get a fresh instance for advanced Medoo
-     * commands, already connected to one of your Databases
-     *
-     * @param string  $database  Key for a database_name in the config file
-     * @param boolean $anonymous If an anonymous instance should be created
-     *
-     * @return \Medoo\Medoo
-     *
-     * @throws \BadMethodCallException If called before loadConfig()
-     * @throws \RuntimeException       If database is not in config file
-     */
-    public static function getInstance($database, $anonymous = false)
-    {
-        if (self::$config === null) {
-            throw new \BadMethodCallException('Medools config was not loaded');
-        }
-        if (!array_key_exists($database, self::$config['databases'])) {
-            throw new \RuntimeException("Unknown database '$database'");
-        }
-
-        if ($anonymous || !array_key_exists($database, self::$instances)) {
-            $options = self::$config['options'];
-            $options['database_name'] = self::$config['databases'][$database];
-            $instance = new Medoo($options);
-            if ($anonymous) {
-                return $instance;
-            } else {
-                self::$instances[$database] = $instance;
-            }
-        }
-
-        return self::$instances[$database];
+        self::$cache = self::$instances = [];
     }
 }
