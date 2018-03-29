@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [5.0.0] - 2018-03-29
+
 ### Added
 - `getStampColumns()`
 - `isDeleted()`
@@ -24,8 +27,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   successful
 - All `STAMP_COLUMNS` are implicitly optional
 
-### Deprecated
-
 ### Removed
 - `dataCleanup()`
 
@@ -33,8 +34,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Indentation
 - `updateStampColumns()` subset filtering
 - `save()`
-
-### Security
 
 
 ## [4.3.0] - 2018-03-08
@@ -238,7 +237,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v4.3.0...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v5.0.0...develop
+[5.0.0]: https://github.com/aryelgois/Medools/compare/v4.3.0...v5.0.0
 [4.3.0]: https://github.com/aryelgois/Medools/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/aryelgois/Medools/compare/v4.1.1...v4.2.0
 [4.1.1]: https://github.com/aryelgois/Medools/compare/v4.1.0...v4.1.1
