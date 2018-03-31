@@ -199,7 +199,7 @@ referenced in your model.
 They are loaded on demand, so you don't need to worry about loading lots of
 foreigns just because you want a single column from the model.
 
-> :warning: Warning: Be careful not to configure a circular foreign constrain.
+> :warning: Warning: Be careful not to configure a circular foreign constraint.
 > When serializing a model, it can fail because of recursion.
 
 
