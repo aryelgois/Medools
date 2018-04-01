@@ -826,7 +826,7 @@ abstract class Model implements \JsonSerializable
      */
     public static function getRequiredColumns()
     {
-        return array_diff(
+        return array_values(array_diff(
             static::COLUMNS,
             static::OPTIONAL_COLUMNS,
             // implicit optional columns:
@@ -835,7 +835,7 @@ abstract class Model implements \JsonSerializable
                 static::SOFT_DELETE,
             ],
             static::getStampColumns()
-        );
+        ));
     }
 
     /**
