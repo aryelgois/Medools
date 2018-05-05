@@ -361,6 +361,8 @@ const FOREIGN_KEYS = [
 ];
 ```
 
+If the foreign class is in the same namespace, you can use `ClassName::class`.
+
 
 #### READ_ONLY
 
