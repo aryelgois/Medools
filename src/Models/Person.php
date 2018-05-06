@@ -88,7 +88,7 @@ class Person extends Medools\Model
      */
     protected function onColumnChange($column, $value)
     {
-        if ($column == 'document') {
+        if ($column === 'document') {
             $value = static::documentValidate($value)['valid'] ?? $value;
         }
 
