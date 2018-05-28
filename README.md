@@ -76,7 +76,7 @@ This file returns an array with the following keys:
   - `password`
   - `database_type` It needs the corresponding PHP_PDO extension
 
-- `databases`: Lists Databases referenced in the models classes. Each item is
+- `databases`: List of Databases referenced in the models classes. Each item is
   an array that contains:
   - `server` Server key from the previous list. If omitted, `default` is used
   - `database_name`
