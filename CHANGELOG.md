@@ -13,8 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Repository title
 - Note about foreign classes
+- `getColumns()`
+- `getTypedColumns()`
+- `addColumnTypeKeys()`
 
 ### Changed
+- `COLUMNS` may define prefered data type
 
 ### Deprecated
 

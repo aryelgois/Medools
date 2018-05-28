@@ -118,8 +118,8 @@ scripts.
 
 You can instantiate a new Model, without any parameters, to create a fresh model
 object. Then add data into its columns, like in any other object. Your code
-should known which columns are available, but you can look at `$model::COLUMNS`
-for a complete list from that model.
+should known which columns are available, but you can call `getColumns()` for a
+complete list from that model.
 
 Your changes are stored in that object, so you need to `save()` in order to send
 to the Database.
@@ -281,6 +281,34 @@ Columns the model expects to exist
 
 - Type: `string[]`
 - Default: `['id']`
+
+The column may be followed by a prefered data type. If not specified, defaults
+to `string`:
+
+```php
+<?php
+
+const COLUMNS = [
+    'id [Int]',
+    'name',
+    'data [JSON]',
+];
+```
+
+Possible types are those supported by Medoo:
+- `Bool`
+- `Int`
+- `JSON`
+- `Number`
+- `Object`
+- `String`
+
+These types are used when accessing the column in the database, but since Medoo
+has a type auto-detection, only `Object` and `JSON` are required to
+automatically unserialize/decode arrays and objects. You can still use the
+others for an explicit type casting.
+
+Note that nullable/optional columns can have a `null` value.
 
 
 #### PRIMARY_KEY
