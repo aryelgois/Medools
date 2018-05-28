@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [5.1.0] - 2018-05-28
+
+### Added
+- Repository title
+- Note about foreign classes
+- `getColumns()`
+- `getTypedColumns()`
+- `addColumnTypeKeys()`
+
+### Changed
+- `COLUMNS` may define prefered data type
+
+### Fixed
+- `getRequiredColumns()` was returning a non sequential index
+- Comparison operator
+- Typos
+
+
 ## [5.0.0] - 2018-03-29
 
 ### Added
@@ -237,7 +255,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v5.0.0...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v5.1.0...develop
+[5.1.0]: https://github.com/aryelgois/Medools/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/aryelgois/Medools/compare/v4.3.0...v5.0.0
 [4.3.0]: https://github.com/aryelgois/Medools/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/aryelgois/Medools/compare/v4.1.1...v4.2.0

@@ -53,6 +53,17 @@ abstract class Model implements \JsonSerializable
     /**
      * Columns the model expects to exist
      *
+     * The column may be followed by a prefered data type. If not specified,
+     * defaults to string:
+     *     [
+     *         'id [Int]',
+     *         'name',
+     *         'data [JSON]',
+     *     ];
+     *
+     * @see \Medoo\Medoo::dataMap() For possible types
+     * @see getColumns()            To get a columns list without types
+     *
      * @const string[]
      */
     const COLUMNS = ['id'];
@@ -503,15 +514,13 @@ abstract class Model implements \JsonSerializable
      * @return array[]
      *
      * @throws UnknownColumnException If any item in $columns is invalid
-     *                                @see checkUnknownColumn()
+     *                                @see getTypedColumns()
      */
     public static function dump($where = [], $columns = [])
     {
-        if (empty($columns)) {
-            $columns = static::COLUMNS;
-        } else {
-            static::checkUnknownColumn($columns);
-        }
+        $columns = (empty($columns))
+            ? static::COLUMNS
+            : self::getTypedColumns($columns);
 
         $database = self::getDatabase();
         return $database->select(static::TABLE, $columns, $where);
@@ -550,6 +559,20 @@ abstract class Model implements \JsonSerializable
     public function getChangedColumns()
     {
         return array_keys($this->changes);
+    }
+
+    /**
+     * Returns columns list without data type
+     *
+     * @return string[]
+     */
+    final public static function getColumns()
+    {
+        $result = [];
+        foreach (static::COLUMNS as $column) {
+            $result[] = trim(explode('[', $column, 2)[0]);
+        }
+        return $result;
     }
 
     /**
@@ -628,6 +651,30 @@ abstract class Model implements \JsonSerializable
             return null;
         }
         return Utils::arrayWhitelist($this->data, static::PRIMARY_KEY);
+    }
+
+    /**
+     * Returns columns with their data types (when defined)
+     *
+     * @param string|string[] $columns Columns to receive its type
+     *
+     * @return string|string[]
+     *
+     * @throws UnknownColumnException If any item in $columns is invalid
+     *                                @see checkUnknownColumn()
+     */
+    final public static function getTypedColumns($columns)
+    {
+        static::checkUnknownColumn($columns);
+
+        $result = array_values(Utils::arrayWhitelist(
+            array_combine(self::getColumns(), static::COLUMNS),
+            (array) $columns
+        ));
+
+        return (is_string($columns))
+            ? $result[0]
+            : $result;
     }
 
     /**
@@ -776,6 +823,21 @@ abstract class Model implements \JsonSerializable
      */
 
     /**
+     * Adds column types in array's keys
+     *
+     * @param mixed[] $data With keys as column names
+     *
+     * @return mixed[] With keys including the column type
+     */
+    final public static function addColumnTypeKeys(array $data)
+    {
+        return array_combine(
+            self::getTypedColumns(array_keys($data)),
+            $data
+        );
+    }
+
+    /**
      * Tests if model is READ_ONLY
      *
      * @throws ReadOnlyModelException
@@ -796,7 +858,7 @@ abstract class Model implements \JsonSerializable
      */
     final public static function checkUnknownColumn($columns)
     {
-        $unknown = array_diff((array) $columns, static::COLUMNS);
+        $unknown = array_diff((array) $columns, self::getColumns());
         if (!empty($unknown)) {
             throw new UnknownColumnException(static::class, $unknown);
         }
@@ -826,8 +888,8 @@ abstract class Model implements \JsonSerializable
      */
     public static function getRequiredColumns()
     {
-        return array_diff(
-            static::COLUMNS,
+        return array_values(array_diff(
+            self::getColumns(),
             static::OPTIONAL_COLUMNS,
             // implicit optional columns:
             [
@@ -835,7 +897,7 @@ abstract class Model implements \JsonSerializable
                 static::SOFT_DELETE,
             ],
             static::getStampColumns()
-        );
+        ));
     }
 
     /**
@@ -1058,7 +1120,8 @@ abstract class Model implements \JsonSerializable
     /**
      * Tells if the model has valid data
      *
-     * It may change the data to remove unwanted content
+     * It may change the data to remove unwanted content, and adds the column
+     * data types
      *
      * @param mixed[] $data Data to be validated
      * @param boolean $full If $data is supposed to contain all columns
@@ -1099,7 +1162,7 @@ abstract class Model implements \JsonSerializable
                 : array_replace($data, $result);
         }
 
-        return $data;
+        return static::addColumnTypeKeys($data);
     }
 
     /*

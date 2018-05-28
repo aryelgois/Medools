@@ -1,3 +1,5 @@
+# Medools
+
 > “We can solve any problem by introducing an extra level of [indirection].”
 
 Index:
@@ -74,7 +76,7 @@ This file returns an array with the following keys:
   - `password`
   - `database_type` It needs the corresponding PHP_PDO extension
 
-- `databases`: Lists Databases referenced in the models classes. Each item is
+- `databases`: List of Databases referenced in the models classes. Each item is
   an array that contains:
   - `server` Server key from the previous list. If omitted, `default` is used
   - `database_name`
@@ -116,8 +118,8 @@ scripts.
 
 You can instantiate a new Model, without any parameters, to create a fresh model
 object. Then add data into its columns, like in any other object. Your code
-should known which columns are available, but you can look at `$model::COLUMNS`
-for a complete list from that model.
+should known which columns are available, but you can call `getColumns()` for a
+complete list from that model.
 
 Your changes are stored in that object, so you need to `save()` in order to send
 to the Database.
@@ -199,7 +201,7 @@ referenced in your model.
 They are loaded on demand, so you don't need to worry about loading lots of
 foreigns just because you want a single column from the model.
 
-> :warning: Warning: Be careful not to configure a circular foreign constrain.
+> :warning: Warning: Be careful not to configure a circular foreign constraint.
 > When serializing a model, it can fail because of recursion.
 
 
@@ -280,6 +282,34 @@ Columns the model expects to exist
 - Type: `string[]`
 - Default: `['id']`
 
+The column may be followed by a prefered data type. If not specified, defaults
+to `string`:
+
+```php
+<?php
+
+const COLUMNS = [
+    'id [Int]',
+    'name',
+    'data [JSON]',
+];
+```
+
+Possible types are those supported by Medoo:
+- `Bool`
+- `Int`
+- `JSON`
+- `Number`
+- `Object`
+- `String`
+
+These types are used when accessing the column in the database, but since Medoo
+has a type auto-detection, only `Object` and `JSON` are required to
+automatically unserialize/decode arrays and objects. You can still use the
+others for an explicit type casting.
+
+Note that nullable/optional columns can have a `null` value.
+
 
 #### PRIMARY_KEY
 
@@ -358,6 +388,8 @@ const FOREIGN_KEYS = [
     ],
 ];
 ```
+
+If the foreign class is in the same namespace, you can use `ClassName::class`.
 
 
 #### READ_ONLY
