@@ -21,6 +21,7 @@
     },
     "suggest": {
         "aryelgois/yasql-php": "For creating database schemas",
-        "aryelgois/databases": "For some databases and models already created"
+        "aryelgois/databases": "For some databases and models already created",
+        "aryelgois/medools-router": "For a Router framework to bootstrap RESTful APIs"
     }
 }

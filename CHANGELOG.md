@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Suggest [aryelgois/medools-router]
 
 ### Changed
 
@@ -284,6 +285,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.0]: https://github.com/aryelgois/Medools/compare/2816a9e56507e333744aaedb2e7898bd423e4211...v1.0
 
 [aryelgois/databases]: https://github.com/aryelgois/databases
+[aryelgois/medools-router]: https://github.com/aryelgois/medools-router
 [aryelgois/utils]: https://github.com/aryelgois/utils
 [catfan/Medoo]: https://github.com/catfan/Medoo
 
