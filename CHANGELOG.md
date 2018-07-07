@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - When adding changes in a different order from `COLUMNS`, data was being saved
   in wrong columns in the database
+- Column types are only used when fetching data, and must be avoided when
+  sending data to the database
 
 
 ## [5.1.0] - 2018-05-28

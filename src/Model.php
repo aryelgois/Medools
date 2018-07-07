@@ -1118,8 +1118,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Tells if the model has valid data
      *
-     * It may change the data to remove unwanted content, and adds the column
-     * data types
+     * It may change the data to remove unwanted content
      *
      * @param mixed[] $data Data to be validated
      * @param boolean $full If $data is supposed to contain all columns
@@ -1160,7 +1159,7 @@ abstract class Model implements \JsonSerializable
                 : array_replace($data, $result);
         }
 
-        return static::addColumnTypeKeys($data);
+        return $data;
     }
 
     /*
