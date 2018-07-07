@@ -24,6 +24,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 
 
+## [5.1.1] - 2018-07-07
+
+### Changed
+- `getTypedColumns()` returns an associative array
+
+### Fixed
+- When adding changes in a different order from `COLUMNS`, data was being saved
+  in wrong columns in the database
+- Column types are only used when fetching data, and must be avoided when
+  sending data to the database
+
+
 ## [5.1.0] - 2018-05-28
 
 ### Added
@@ -268,7 +280,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DatabaseObject.php
 
 
-[Unreleased]: https://github.com/aryelgois/Medools/compare/v5.1.0...develop
+[Unreleased]: https://github.com/aryelgois/Medools/compare/v5.1.1...develop
+[5.1.1]: https://github.com/aryelgois/Medools/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/aryelgois/Medools/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/aryelgois/Medools/compare/v4.3.0...v5.0.0
 [4.3.0]: https://github.com/aryelgois/Medools/compare/v4.2.0...v4.3.0

@@ -520,7 +520,7 @@ abstract class Model implements \JsonSerializable
     {
         $columns = (empty($columns))
             ? static::COLUMNS
-            : self::getTypedColumns($columns);
+            : array_values(self::getTypedColumns($columns));
 
         $database = self::getDatabase();
         return $database->select(static::TABLE, $columns, $where);
@@ -667,13 +667,13 @@ abstract class Model implements \JsonSerializable
     {
         static::checkUnknownColumn($columns);
 
-        $result = array_values(Utils::arrayWhitelist(
+        $result = Utils::arrayWhitelist(
             array_combine(self::getColumns(), static::COLUMNS),
             (array) $columns
-        ));
+        );
 
         return (is_string($columns))
-            ? $result[0]
+            ? array_values($result)[0]
             : $result;
     }
 
@@ -831,10 +831,8 @@ abstract class Model implements \JsonSerializable
      */
     final public static function addColumnTypeKeys(array $data)
     {
-        return array_combine(
-            self::getTypedColumns(array_keys($data)),
-            $data
-        );
+        $columns = self::getTypedColumns(array_keys($data));
+        return array_combine($columns, array_merge($columns, $data));
     }
 
     /**
@@ -1120,8 +1118,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Tells if the model has valid data
      *
-     * It may change the data to remove unwanted content, and adds the column
-     * data types
+     * It may change the data to remove unwanted content
      *
      * @param mixed[] $data Data to be validated
      * @param boolean $full If $data is supposed to contain all columns
@@ -1162,7 +1159,7 @@ abstract class Model implements \JsonSerializable
                 : array_replace($data, $result);
         }
 
-        return static::addColumnTypeKeys($data);
+        return $data;
     }
 
     /*
