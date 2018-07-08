@@ -16,7 +16,7 @@ use aryelgois\Utils;
  * @license MIT
  * @link https://www.github.com/aryelgois/Medools
  */
-class ModelIterator implements \Iterator
+class ModelIterator implements \Iterator, \Countable
 {
     /**
      * List PRIMARY KEYS for $model_class
@@ -61,6 +61,16 @@ class ModelIterator implements \Iterator
     {
         $this->model_class = $model_class;
         $this->list = $model_class::dump($where, $model_class::PRIMARY_KEY);
+    }
+
+    /**
+     * Counts how many Models are in this Iterator
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->list);
     }
 
     /**
